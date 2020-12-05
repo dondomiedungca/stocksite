@@ -7,5 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductTypes extends Model
 {
-    use HasFactory;
+    protected $table = 'product_types';
+
+    protected $fillable = [
+        'product_name',
+        'user_id'
+    ];
+
+    public function product_attributes() {
+        return $this->hasMany('App\Models\ProductAttributes', 'product_type_id');
+    }
+
+    public function user() {
+        return $this->belongsTo('App\Models\User', 'user_id');
+    }
 }

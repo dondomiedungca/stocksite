@@ -35,6 +35,7 @@ Route::group(['middleware' => 'adminRoute'], function () {
 
     Route::prefix('admin/products')->group(function () {
         Route::get('/', [ProductsController::class, 'index']);
+        Route::get('/add-product-type', [ProductsController::class, 'productTypes']);
     });
 
     Route::post('/admin/logout', function() {
@@ -48,4 +49,14 @@ Route::group(['middleware' => 'adminRoute'], function () {
 
 Route::prefix('admin')->group(function () {
     Route::post('/signin', [LoginController::class, 'authenticate']);
+});
+
+Route::group(['middleware' => 'adminRoute'], function () {
+
+    Route::prefix('admin/products')->group(function () {
+        Route::post('/add-product-type', [ProductsController::class, 'addProductTypes']);
+        Route::get('/get-product-types', [ProductsController::class, 'getProductTypes']);
+        Route::get('/remove-product-type/{id}', [ProductsController::class, 'removeProductTypes']);
+    });
+
 });

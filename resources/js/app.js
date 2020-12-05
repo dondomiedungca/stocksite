@@ -7,6 +7,9 @@
 require("./bootstrap")
 
 window.Vue = require("vue")
+import Vuelidate from "vuelidate"
+
+Vue.use(Vuelidate)
 
 /**
  * The following block of code may be used to automatically register your
@@ -21,8 +24,11 @@ window.Vue = require("vue")
 
 // ADMIN
 Vue.component("dashboard-index", require("./components/Admin/dashboard/Index.vue").default)
+
 Vue.component("purchasing-index", require("./components/Admin/purchasing/Index.vue").default)
+
 Vue.component("products-index", require("./components/Admin/products/Index.vue").default)
+Vue.component("product-types", require("./components/Admin/products/addProductType.vue").default)
 
 // REUSABLE
 Vue.component("modal", require("./components/Reusable/Modal.vue").default)
@@ -31,6 +37,9 @@ Vue.component("modal", require("./components/Reusable/Modal.vue").default)
 Vue.component("add-supplier", require("./components/Admin/supplier/addSupplier.vue").default)
 
 // CUSTOMER
+
+// MODULES
+Vue.component("columns-managing", require("./components/Admin/products/ManageColumns.vue").default)
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

@@ -22,7 +22,7 @@
         placeholder="Search"
         aria-label="Search"
       />
-      <div class="dropdown mr-5">
+      <div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <span data-feather="user"></span> Account | {{ Auth::user()->first_name }}
         </button>

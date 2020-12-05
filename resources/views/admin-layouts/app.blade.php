@@ -10,7 +10,7 @@
     <script>
         var session = <?= json_encode(Auth::user()); ?>
     </script>
-
+    
     @if (Route::currentRouteName() != 'signin')
         <link rel="stylesheet" href="{{ url('assets/css/dashboard/dashboard.css') }}">
     @else

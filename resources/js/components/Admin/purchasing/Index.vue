@@ -7,7 +7,7 @@
                     <button type="button" @click="showSupplier" class="btn btn-sm btn-outline-secondary">
                         Add Supplier
                     </button>
-                    <modal ref="modal" :title="'Add Supplier'" @met="saveSupplier">
+                    <modal ref="modal" :title="'Add Supplier'" :show_submit="true" :icon="'fa fa-check'" :submit_name="'Add Supplier'" @met="saveSupplier">
                         <add-supplier></add-supplier>
                     </modal>
                 </div>

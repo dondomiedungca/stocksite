@@ -15,12 +15,14 @@ class CreateProductAttributesTable extends Migration
     {
         Schema::create('product_attributes', function (Blueprint $table) {
             $table->id();
-            $table->integer('product_type_id');
+            $table->unsignedBigInteger('product_type_id');
             $table->string('product_column_name');
             $table->integer('product_column_is_required');
             $table->integer('product_column_manual_fillable');
             $table->enum('product_column_data_type', ['STRING', 'INTEGER', 'DATE']);
             $table->timestamps();
+
+            $table->foreign('product_type_id')->references('id')->on('product_types')->onDelete('cascade');
         });
     }
 
