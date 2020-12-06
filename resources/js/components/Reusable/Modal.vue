@@ -1,7 +1,7 @@
 <template>
     <div>
-        <div class="modal modal-md fade" id="exampleModal" tabindex="-1" data-backdrop="static" data-keyboard="false" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
+        <div class="modal fade" :ref="keyId" id="exampleModal" tabindex="-1" data-backdrop="static" data-keyboard="false" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">{{ title }}</h5>
@@ -24,10 +24,10 @@
 
 <script>
 export default {
-    props: ["title", "submit_name", "show_submit", "icon"],
+    props: ["title", "submit_name", "show_submit", "icon", "keyId"],
     methods: {
         trigger: function() {
-            $("#exampleModal").modal("show")
+            $(this.$refs[this.keyId]).modal("show")
         },
         saveNow: function() {
             this.$emit("met")

@@ -41,7 +41,12 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(column, i) in columns" v-bind:key="i">
+                                <tr v-if="!columns.length">
+                                    <td colspan="7">
+                                        <center>No column(s) created</center>
+                                    </td>
+                                </tr>
+                                <tr v-else v-for="(column, i) in columns" v-bind:key="i">
                                     <td>
                                         <center>
                                             <button @click="removeColumn(i)" class="btn btn-sm btn-danger">
@@ -59,7 +64,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <modal ref="modal" :title="'Product Type - ' + product_type_name" :show_submit="true" :icon="'fa fa-trash'" :submit_name="'Reset'" @met="reset">
+                    <modal ref="modal" :keyId="'column'" :title="'Product Type - ' + product_type_name" :show_submit="true" :icon="'fa fa-trash'" :submit_name="'Reset'" @met="reset">
                         <columns-managing ref="columns" @addColumn="insertColumn"></columns-managing>
                     </modal>
                 </div>
@@ -102,22 +107,20 @@
                                         </tr>
                                         <tr v-for="(product_type, i) in product_types.data" v-bind:key="i">
                                             <td>
-                                                <center>
-                                                    <button @click="deleteProductType(product_type.id)" class="btn btn-sm btn-danger">
-                                                        <i class="fa fa-trash"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-success">
-                                                        <i class="fa fa-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-primary">
-                                                        <i class="fa fa-info"></i>
-                                                    </button>
-                                                </center>
+                                                <button @click="deleteProductType(i)" class="btn btn-sm btn-danger">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                                <button @click="editProductType(`edit${i}`)" class="btn btn-sm btn-success">
+                                                    <i class="fa fa-pencil"></i>
+                                                </button>
+                                                <modal :ref="'edit' + i" :keyId="`edit${i}`" :title="'Edit Product Type - ' + product_type.product_name" :show_submit="true" :icon="'fa fa-check'" :submit_name="'Save Changes'" @met="reset">
+                                                    <edit-product-type :data="product_type"></edit-product-type>
+                                                </modal>
                                             </td>
-                                            <td>{{ product_type.product_name }}</td>
-                                            <td>{{ product_type.product_attributes.length }}</td>
-                                            <td>{{ date_format(product_type.created_at) }}</td>
-                                            <td>{{ product_type.user.first_name }} {{ product_type.user.last_name }}</td>
+                                            <td align="center">{{ product_type.product_name }}</td>
+                                            <td align="center">{{ product_type.product_attributes.length }}</td>
+                                            <td align="center">{{ date_format(product_type.created_at) }}</td>
+                                            <td align="center">{{ product_type.user.first_name }} {{ product_type.user.last_name }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -139,7 +142,8 @@ export default {
         return {
             product_type_name: "",
             columns: [],
-            product_types: {}
+            product_types: {},
+            toEdit: {}
         }
     },
     created() {
@@ -235,6 +239,9 @@ export default {
                     }
                 }
             ])
+        },
+        editProductType: function(ref) {
+            this.$refs[ref][0].trigger()
         }
     },
     validations: {

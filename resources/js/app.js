@@ -40,6 +40,7 @@ Vue.component("add-supplier", require("./components/Admin/supplier/addSupplier.v
 
 // MODULES
 Vue.component("columns-managing", require("./components/Admin/products/ManageColumns.vue").default)
+Vue.component("edit-product-type", require("./components/Admin/products/EditProductTypes.vue").default)
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

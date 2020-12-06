@@ -17,6 +17,12 @@
         </a>
         </li>
         <li class="nav-item">
+        <a class="nav-link {{ (request()->is('admin/transaction*')) ? 'active' : '' }}" href="/admin/transaction">
+            <span data-feather="list"></span>
+            Sales Transaction
+        </a>
+        </li>
+        <li class="nav-item">
         <a class="nav-link {{ (request()->is('admin/products*')) ? 'active' : '' }}" href="/admin/products">
             <span data-feather="shopping-cart"></span>
             Products
