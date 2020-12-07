@@ -12,4 +12,8 @@ class Manufacturer extends Model
     protected $fillable = [
         'manufacturer_type_name'
     ];
+
+    public function manufacturer() {
+        return $this->hasMany('App\Models\Suppliers', 'manufacturer_id');
+    }
 }

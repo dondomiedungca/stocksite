@@ -16,4 +16,12 @@ class Suppliers extends Model
         'supplier_email',
         'supplier_phone_number'
     ];
+
+    public function address() {
+        return $this->belongsTo('App\Models\Addresses', 'address_id');
+    }
+
+    public function manufacturer() {
+        return $this->belongsTo('App\Models\Manufacturer', 'manufacturer_id');
+    }
 }

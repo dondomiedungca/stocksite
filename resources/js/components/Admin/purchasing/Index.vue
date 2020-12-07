@@ -7,8 +7,8 @@
                     <button type="button" @click="showSupplier" class="btn btn-sm btn-outline-secondary">
                         Add Supplier
                     </button>
-                    <modal ref="modal" :title="'Add Supplier'" :show_submit="true" :icon="'fa fa-check'" :submit_name="'Add Supplier'" @met="saveSupplier">
-                        <add-supplier></add-supplier>
+                    <modal ref="addsupplier" :keyId="'addSupplier'" :title="'Add Supplier'" :show_submit="true" :icon="'fa fa-check'" :submit_name="'Add Supplier'" @met="saveSupplier">
+                        <add-supplier ref="addsupplierpage"></add-supplier>
                     </modal>
                 </div>
                 <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
@@ -60,9 +60,11 @@ export default {
             window.location.href = url
         },
         showSupplier: function() {
-            this.$refs.modal.trigger()
+            this.$refs.addsupplier.trigger()
         },
-        saveSupplier: function(data) {}
+        saveSupplier: function(data) {
+            this.$refs.addsupplierpage.createSupplier()
+        }
     }
 }
 </script>

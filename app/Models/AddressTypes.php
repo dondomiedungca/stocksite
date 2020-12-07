@@ -7,5 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class AddressTypes extends Model
 {
-    use HasFactory;
+    protected $table = 'address_types';
+
+    protected $fillable = [
+        'address_type_name'
+    ];
+
+    public function address() {
+        return $this->hasMany('App\Models\Addresses', 'address_type_id');
+    }
 }

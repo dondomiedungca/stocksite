@@ -24,5 +24,6 @@ class DatabaseSeeder extends Seeder
         $this->call(taxes_seeder_table::class);
         $this->call(transaction_statuses_seeder_table::class);
         $this->call(transaction_types_seeder_table::class);
+        $this->call(address_types_seeder_table::class);
     }
 }

@@ -16,8 +16,8 @@ class CreateCustomersCompanyInfoTable extends Migration
         Schema::create('customers_company_info', function (Blueprint $table) {
             $table->id();
             $table->string('company_name');
-            $table->string('company_phone_number');
-            $table->string('company_email');
+            $table->string('company_phone_number')->nullable();
+            $table->string('company_email')->nullable();
             $table->integer('address_id');
             $table->timestamps();
         });

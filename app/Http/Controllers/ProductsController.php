@@ -60,6 +60,15 @@ class ProductsController extends Controller
         return response()->json($product_types);
     }
 
+    public function getAllProductTypes() {
+        $product_types = ProductTypes::with('user', 'product_attributes', 'product_attributes.column_selections')
+                                        ->orderBy("created_at", "DESC")
+                                        ->get();
+        $data['product_types'] = $product_types;
+        
+        return response()->json($data);
+    }
+
     public function removeProductTypes($id = NULL) {
         ProductTypes::find($id)->delete();
 

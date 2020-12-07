@@ -26,12 +26,14 @@ Vue.use(Vuelidate)
 Vue.component("dashboard-index", require("./components/Admin/dashboard/Index.vue").default)
 
 Vue.component("purchasing-index", require("./components/Admin/purchasing/Index.vue").default)
+Vue.component("purchasing-order", require("./components/Admin/purchasing/Purchasing.vue").default)
 
 Vue.component("products-index", require("./components/Admin/products/Index.vue").default)
 Vue.component("product-types", require("./components/Admin/products/addProductType.vue").default)
 
 // REUSABLE
 Vue.component("modal", require("./components/Reusable/Modal.vue").default)
+Vue.component("address-form", require("./components/Reusable/AddressForm.vue").default)
 
 // SUPPLIER
 Vue.component("add-supplier", require("./components/Admin/supplier/addSupplier.vue").default)
@@ -41,6 +43,7 @@ Vue.component("add-supplier", require("./components/Admin/supplier/addSupplier.v
 // MODULES
 Vue.component("columns-managing", require("./components/Admin/products/ManageColumns.vue").default)
 Vue.component("edit-product-type", require("./components/Admin/products/EditProductTypes.vue").default)
+Vue.component("add-receiver", require("./components/Admin/purchasing/AddReceiver.vue").default)
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
