@@ -21,7 +21,7 @@ class CreateAddressesTable extends Migration
             $table->string('address_city');
             $table->string('address_state');
             $table->string('address_country');
-            $table->integer('address_post_code');
+            $table->string('address_post_code');
             $table->timestamps();
         });
     }

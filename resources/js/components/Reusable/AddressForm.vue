@@ -331,8 +331,7 @@ export default {
             required
         },
         post_code: {
-            required,
-            numeric
+            required
         }
     },
     created() {

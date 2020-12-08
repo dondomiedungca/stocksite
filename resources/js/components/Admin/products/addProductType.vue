@@ -137,6 +137,8 @@
 import { required, alpha } from "vuelidate/lib/validators"
 import moment from "moment"
 
+const isProductType = value => /^[a-zA-Z_\s]*$/im.test(value)
+
 export default {
     data() {
         return {
@@ -247,7 +249,7 @@ export default {
     validations: {
         product_type_name: {
             required,
-            alpha
+            productTypeValid: isProductType
         }
     }
 }

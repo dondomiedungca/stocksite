@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Receiver extends Model
 {
+    use HasFactory;
+    
     protected $table = 'receiver';
 
     protected $fillable = [
