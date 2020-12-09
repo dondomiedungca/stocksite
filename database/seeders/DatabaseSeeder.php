@@ -28,5 +28,7 @@ class DatabaseSeeder extends Seeder
         $this->call(supplier_seeder_table::class);
         $this->call(receiver_seeder_table::class);
         $this->call(product_type_seeder_table::class);
+        $this->call(currency_seeder_table::class);
+        $this->call(company_seeder_table::class);
     }
 }

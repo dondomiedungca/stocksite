@@ -40,6 +40,12 @@
             Reports
         </a>
         </li>
+        <li class="nav-item">
+        <a class="nav-link {{ (request()->is('admin/settings*')) ? 'active' : '' }}" href="/admin/settings">
+            <span data-feather="settings"></span>
+            Settings
+        </a>
+        </li>
     </ul>
 
     <h6

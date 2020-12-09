@@ -8,6 +8,7 @@ use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\AddressTypesController;
 use App\Http\Controllers\ManufacturerController;
 use App\Http\Controllers\ReceiverController;
+use App\Http\Controllers\CurrencyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,6 +82,10 @@ Route::group(['middleware' => 'adminRoute'], function () {
     Route::prefix('admin/receiver')->group(function () {
         Route::post('/add-receiver', [ReceiverController::class, 'addReceiver']);
         Route::get('/get-receivers', [ReceiverController::class, 'getReceivers']);
+    });
+
+    Route::prefix('admin/currency')->group(function () {
+        Route::get('/get-currency', [CurrencyController::class, 'getCurrency']);
     });
 
 });
