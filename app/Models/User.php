@@ -44,4 +44,8 @@ class User extends Authenticatable
     public function product_types() {
         return $this->hasMany('App\Models\ProductTypes', 'user_id');
     }
+
+    public function purchase_orders() {
+        return $this->hasMany('App\Models\PurchaseOrders', 'user_id');
+    }
 }

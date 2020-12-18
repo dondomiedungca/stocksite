@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\Receiver;
+use App\Models\Receivers;
 use App\Models\AddressTypes;
 use App\Models\Addresses;
 
@@ -23,7 +23,7 @@ class ReceiverController extends Controller
         $address->address_type()->associate($address_type);
         $address->save();
 
-        $receiver = new Receiver();
+        $receiver = new Receivers();
         $receiver->receiver_first_name = $request['receiver_first_name'];
         $receiver->receiver_middle_name = $request['receiver_middle_name'];
         $receiver->receiver_last_name = $request['receiver_last_name'];
@@ -40,7 +40,7 @@ class ReceiverController extends Controller
     }
 
     public function getReceivers() {
-        $receivers = Receiver::with('address', 'address.address_type')->orderBy('receiver_last_name', 'ASC')->get();
+        $receivers = Receivers::with('address', 'address.address_type')->orderBy('receiver_last_name', 'ASC')->get();
 
         $data['receivers'] = $receivers;
 

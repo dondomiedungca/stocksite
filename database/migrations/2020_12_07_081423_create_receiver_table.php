@@ -13,7 +13,7 @@ class CreateReceiverTable extends Migration
      */
     public function up()
     {
-        Schema::create('receiver', function (Blueprint $table) {
+        Schema::create('receivers', function (Blueprint $table) {
             $table->id();
             $table->string('receiver_first_name');
             $table->string('receiver_middle_name')->nullable();
@@ -32,6 +32,6 @@ class CreateReceiverTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('receiver');
+        Schema::dropIfExists('receivers');
     }
 }

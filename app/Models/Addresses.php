@@ -34,6 +34,6 @@ class Addresses extends Model
     }
 
     public function company() {
-        return $this->hasOne('App\Models\Receiver', 'address_id');
+        return $this->hasOne('App\Models\Company', 'address_id');
     }
 }

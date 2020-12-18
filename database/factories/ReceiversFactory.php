@@ -2,18 +2,18 @@
 
 namespace Database\Factories;
 
-use App\Models\Receiver;
+use App\Models\Receivers;
 use App\Models\Addresses;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ReceiverFactory extends Factory
+class ReceiversFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = Receiver::class;
+    protected $model = Receivers::class;
 
     /**
      * Define the model's default state.

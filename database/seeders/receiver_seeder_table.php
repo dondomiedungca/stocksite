@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-use App\Models\Receiver;
+use App\Models\Receivers;
 
 class receiver_seeder_table extends Seeder
 {
@@ -15,6 +15,6 @@ class receiver_seeder_table extends Seeder
      */
     public function run()
     {
-        $suppliers = Receiver::factory(10)->create();
+        $suppliers = Receivers::factory(10)->create();
     }
 }

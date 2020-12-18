@@ -88,4 +88,8 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::get('/get-currency', [CurrencyController::class, 'getCurrency']);
     });
 
+    Route::prefix('admin/purchasing')->group(function () {
+        Route::post('/create', [PurchasingController::class, 'store']);
+    });
+
 });

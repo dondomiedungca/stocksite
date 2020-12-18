@@ -27,4 +27,8 @@ class Transactions extends Model
         'credit',
         'cheque'
     ];
+
+    public function purchase_orders() {
+        return $this->hasOne('App\Models\PurchaseOrders', 'transaction_id');
+    }
 }

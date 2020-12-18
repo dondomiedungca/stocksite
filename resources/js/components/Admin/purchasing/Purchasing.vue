@@ -32,7 +32,7 @@
                     <div class="card-body">
                         <div class="form-group col-6">
                             <label for="formGroupExampleInput2">Select Supplier</label>
-                            <select :class="{ 'is-invalid': $v.selected_supplier.$error }" name v-model="$v.selected_supplier.$model" @change="selected_supplier = $event.target.value" class="custom-select custom-select-sm">
+                            <select :class="{ 'is-invalid': $v.selected_supplier.$error }" v-model="selected_supplier" class="custom-select custom-select-sm">
                                 <option v-for="(supplier, i) in suppliers" :value="supplier" v-bind:key="i">{{ supplier.supplier_name }}</option>
                             </select>
                             <div class="invalid-feedback" v-if="$v.selected_supplier.$error">This field is required</div>
@@ -95,7 +95,7 @@
                     <div class="card-body">
                         <div class="form-group col-6">
                             <label for="formGroupExampleInput2">Select Receiver</label>
-                            <select :class="{ 'is-invalid': $v.selected_receiver.$error }" name v-model="$v.selected_receiver.$model" @change="selected_receiver = $event.target.value" class="custom-select custom-select-sm">
+                            <select :class="{ 'is-invalid': $v.selected_receiver.$error }" v-model="selected_receiver" class="custom-select custom-select-sm">
                                 <option v-for="(receiver, i) in receivers" :value="receiver" v-bind:key="i">{{ receiver.receiver_last_name }}, {{ receiver.receiver_first_name }}</option>
                             </select>
                             <div class="invalid-feedback" v-if="$v.selected_receiver.$error">This field is required</div>
@@ -151,16 +151,21 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
+                                    <th>Remove</th>
                                     <th>Inventory Type</th>
                                     <th>Inventory Description</th>
                                     <th>Item(s) Quantity</th>
                                     <th>Unit Amount</th>
                                     <th>Total Price</th>
-                                    <th>Remove</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="(inventory, i) in inventories" v-bind:key="i">
+                                    <td align="center">
+                                        <button @click="removeInventory(i)" class="btn btn-danger btn-sm">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
                                     <td>
                                         <select class="custom-select custom-select-sm" :class="{ 'is-invalid': $v.inventories.$each[i.toString()].inventory_type.$error }" name v-model="$v.inventories.$each[i.toString()].inventory_type.$model" @change="inventory.inventory_type = $event.target.value">
                                             <option disabled selected value="">-- Select Inventory Type --</option>
@@ -174,19 +179,39 @@
                                     </td>
                                     <td>
                                         <input type="number" :class="{ 'is-invalid': $v.inventories.$each[i.toString()].inventory_quantity.$error }" name v-model="$v.inventories.$each[i.toString()].inventory_quantity.$model" @change="inventory.inventory_quantity = $event.target.value" class="form-control form-control-sm" />
-                                        <div class="invalid-feedback" v-if="$v.inventories.$each[i.toString()].inventory_quantity.$error">This field is required</div>
+                                        <div class="invalid-feedback" v-if="$v.inventories.$each[i.toString()].inventory_quantity.$error">This field is required and make it greater that 0</div>
                                     </td>
                                     <td>
                                         <input type="number" :class="{ 'is-invalid': $v.inventories.$each[i.toString()].inventory_unit_amount.$error }" name v-model="$v.inventories.$each[i.toString()].inventory_unit_amount.$model" @change="inventory.inventory_unit_amount = $event.target.value" class="form-control form-control-sm" />
-                                        <div class="invalid-feedback" v-if="$v.inventories.$each[i.toString()].inventory_unit_amount.$error">This field is required</div>
+                                        <div class="invalid-feedback" v-if="$v.inventories.$each[i.toString()].inventory_unit_amount.$error">This field is required and make it greater that 0</div>
                                     </td>
                                     <td>
-                                        <center><span v-html="currency.symbol"></span> {{ subtotal_price[i] }}</center>
+                                        <center><span v-html="currency.symbol"></span> {{ numberWithCommas(subtotal_price[i]) }}</center>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="right" colspan="5">
+                                        Sub Total
                                     </td>
                                     <td>
-                                        <button @click="removeInventory(i)" class="btn btn-danger btn-sm">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
+                                        <center><span v-html="currency.symbol"></span> {{ numberWithCommas(subTotal) }}</center>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="right" colspan="3">
+                                        Additional Cost
+                                    </td>
+                                    <td>
+                                        <input type="number" :class="{ 'is-invalid': $v.additional_cost.$error }" name v-model="$v.additional_cost.$model" @change="additional_cost = $event.target.value" class="form-control form-control-sm" />
+                                        <div class="invalid-feedback" v-if="$v.additional_cost.$error">Only digit is allowed</div>
+                                    </td>
+                                    <td align="right">
+                                        <b>Total</b>
+                                    </td>
+                                    <td>
+                                        <center>
+                                            <span v-html="currency.symbol"></span> <b>{{ numberWithCommas(total) }}</b>
+                                        </center>
                                     </td>
                                 </tr>
                             </tbody>
@@ -200,7 +225,9 @@
 </template>
 
 <script>
-import { required } from "vuelidate/lib/validators"
+import { required, decimal } from "vuelidate/lib/validators"
+
+const greater = value => value > 0
 
 export default {
     data() {
@@ -211,12 +238,13 @@ export default {
             receivers: [],
             selected_receiver: {},
             product_types: [],
+            additional_cost: 0,
             inventories: [
                 {
                     inventory_type: "",
                     inventory_description: "",
-                    inventory_quantity: "",
-                    inventory_unit_amount: "",
+                    inventory_quantity: 0,
+                    inventory_unit_amount: 0,
                     inventory_total_price: ""
                 }
             ]
@@ -232,15 +260,43 @@ export default {
         subtotal_price: function() {
             var inventories = this.inventories
             var subTotals = []
-            inventories.map(inventory => {
+            inventories.map((inventory, i) => {
                 var total = (Number(inventory.inventory_quantity) * Number(inventory.inventory_unit_amount)).toFixed(2)
+                this.inventories[i].inventory_total_price = total
                 subTotals.push(total)
             })
 
             return subTotals
+        },
+        subTotal: function() {
+            var inventories = this.inventories
+            var subTotals = 0
+            inventories.map(inventory => {
+                var total = Number(inventory.inventory_quantity) * Number(inventory.inventory_unit_amount)
+                subTotals += total
+            })
+
+            return subTotals.toFixed(2)
+        },
+        total: function() {
+            var inventories = this.inventories
+            var subTotals = 0
+            inventories.map(inventory => {
+                var total = Number(inventory.inventory_quantity) * Number(inventory.inventory_unit_amount)
+                subTotals += total
+            })
+            var grand_total = Number(this.additional_cost) + Number(subTotals)
+            return grand_total.toFixed(2)
         }
     },
     methods: {
+        numberWithCommas: function(x) {
+            if (x == "" || x == null) {
+                return 0
+            } else {
+                return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            }
+        },
         showSupplier: function() {
             this.$refs.addsupplier.trigger()
         },
@@ -274,8 +330,8 @@ export default {
                 {
                     inventory_type: "",
                     inventory_description: "",
-                    inventory_quantity: "",
-                    inventory_unit_amount: "",
+                    inventory_quantity: 0,
+                    inventory_unit_amount: 0,
                     inventory_total_price: ""
                 }
             ]
@@ -288,6 +344,43 @@ export default {
         createPurchaseOrder: function() {
             this.$v.$touch()
             if (!this.$v.$invalid) {
+                var params = {
+                    supplier: this.selected_supplier,
+                    receiver: this.selected_receiver,
+                    inventories: this.inventories,
+                    total: this.total,
+                    additional_cost: this.additional_cost
+                }
+                swal.queue([
+                    {
+                        title: "Create Transaction",
+                        text: "Are you sure? All details is correct?",
+                        icon: "info",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonColor: "#42d1f5",
+                        confirmButtonText: "Yes, create now",
+                        showLoaderOnConfirm: true,
+                        preConfirm: () => {
+                            return axios.post("/admin/purchasing/create", params).then(response => {
+                                swal.fire({
+                                    title: response.data.heading,
+                                    text: response.data.message,
+                                    icon: "success",
+                                    showCancelButton: true,
+                                    cancelButtonColor: "#03a1fc",
+                                    confirmButtonText: "View Transaction",
+                                    cancelButtonText: "Not now"
+                                }).then(view => {
+                                    if (view.isConfirmed) {
+                                        window.location.href = "/admin/purchasing/purchase-order/" + response.data.transaction_id
+                                    }
+                                })
+                            })
+                        }
+                    }
+                ])
             }
         },
         getCurrency: function() {
@@ -303,6 +396,9 @@ export default {
         selected_receiver: {
             required
         },
+        additional_cost: {
+            decimal
+        },
         inventories: {
             $each: {
                 inventory_type: {
@@ -312,13 +408,12 @@ export default {
                     required
                 },
                 inventory_quantity: {
-                    required
+                    required,
+                    greater
                 },
                 inventory_unit_amount: {
-                    required
-                },
-                inventory_total_price: {
-                    required
+                    required,
+                    greater
                 }
             }
         }

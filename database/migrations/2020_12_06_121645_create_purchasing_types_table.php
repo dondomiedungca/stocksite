@@ -19,9 +19,9 @@ class CreatePurchasingTypesTable extends Migration
             $table->unsignedBigInteger('product_type_id');
             $table->bigInteger('quantity');
             $table->float('inventory_total_price', 20, 2);
-            $table->bigInteger('total_received');
-            $table->bigInteger('total_items_to_receive');
-            $table->string('purchasing_name');
+            $table->bigInteger('total_received')->default(0);
+            $table->bigInteger('total_items_to_receive')->default(0);
+            $table->string('purchasing_description');
             $table->timestamps();
 
             $table->foreign('product_type_id')->references('id')->on('product_types');

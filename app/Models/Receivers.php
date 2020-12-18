@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Receiver extends Model
+class Receivers extends Model
 {
     use HasFactory;
     
-    protected $table = 'receiver';
+    protected $table = 'receivers';
 
     protected $fillable = [
         'receiver_first_name',

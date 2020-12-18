@@ -27,10 +27,10 @@
           <span data-feather="user"></span> Account | {{ Auth::user()->first_name }}
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <a class="dropdown-item" href="#">Account Settings</a>
+          <a class="dropdown-item" href="#"> Account Settings</a>
         <form action="{{ route('admin.logout') }}" method="POST">
           @csrf
-          <button class="dropdown-item" role="button" type="submit">Logout</button>
+          <button class="dropdown-item" role="button" type="submit"> Logout</button>
         </form>
         </div>
       </div>

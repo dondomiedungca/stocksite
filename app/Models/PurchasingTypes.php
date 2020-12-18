@@ -18,4 +18,12 @@ class PurchasingTypes extends Model
         'total_items_to_receive',
         'purchasing_name'
     ];
+
+    public function purchase_orders() {
+        return $this->belongsTo('App\Models\PurchaseOrders', 'purchase_order_id');
+    }
+
+    public function product_types() {
+        return $this->belongsTo('App\Models\ProductTypes', 'product_type_id');
+    }
 }
