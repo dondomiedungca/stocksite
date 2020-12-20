@@ -32,5 +32,7 @@ class DatabaseSeeder extends Seeder
         $this->call(company_seeder_table::class);
         $this->call(DeliveryStatusSeeder::class);
         $this->call(ItemStatusSeeder::class);
+        $this->call(InventoryStatusSeeder::class);
+        $this->call(InventoryCosmeticSeeder::class);
     }
 }

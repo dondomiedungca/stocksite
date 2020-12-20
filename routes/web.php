@@ -9,6 +9,7 @@ use App\Http\Controllers\AddressTypesController;
 use App\Http\Controllers\ManufacturerController;
 use App\Http\Controllers\ReceiverController;
 use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\InventoryController;
 
 /*
 |--------------------------------------------------------------------------

@@ -1,6 +1,13 @@
 <template>
     <div>
         <div class="form-group" v-show="!pass">
+            <small><b>NOTE*</b> These are the column that already exist on the server, meaning you should not use this column name(s)</small>
+            <br />
+            <small>price</small><br />
+            <small>cost</small><br />
+            <small>quantity</small><br />
+            <small>discount</small><br />
+            <br />
             <label for="exampleInputEmail1">Column Name</label>
             <input type="text" :class="{ 'is-invalid': $v.column_name.$error }" name v-model="$v.column_name.$model" @change="column_name = $event.target.value" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" />
             <div class="invalid-feedback" v-if="$v.column_name.$error">This field is required and only alpha is allowed</div>

@@ -100,7 +100,7 @@ class PurchasingController extends Controller
                                             'purchase_orders.receiver.address.address_type', 
                                             'purchase_orders.user', 
                                             'purchase_orders.purchase_order_types',
-                                            'purchase_orders.purchase_order_types.product_types'
+                                            'purchase_orders.purchase_order_types.product_types.product_attributes'
                                         )->first();
 
         return view('admin.purchasing.purchase_order_detail', ['purchase_order' => $purchaseOrder]);
