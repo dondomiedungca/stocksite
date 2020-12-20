@@ -26,4 +26,8 @@ class Suppliers extends Model
     public function manufacturer() {
         return $this->belongsTo('App\Models\Manufacturer', 'manufacturer_id');
     }
+
+    public function transactions() {
+        return $this->hasMany('App\Models\Transactions', 'supplier_id');
+    }
 }

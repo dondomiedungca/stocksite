@@ -37,6 +37,8 @@ Route::group(['middleware' => 'adminRoute'], function () {
     Route::prefix('admin/purchasing')->group(function () {
         Route::get('/', [PurchasingController::class, 'index']);
         Route::get('/purchasing-order', [PurchasingController::class, 'purchaseOrder']);
+        Route::get('/purchasing-list', [PurchasingController::class, 'getPurchaseOrders']);
+        Route::get('/purchase-order/{id}', [PurchasingController::class, 'getPurchaseOrder']);
     });
 
     Route::prefix('admin/products')->group(function () {
@@ -90,6 +92,7 @@ Route::group(['middleware' => 'adminRoute'], function () {
 
     Route::prefix('admin/purchasing')->group(function () {
         Route::post('/create', [PurchasingController::class, 'store']);
+        Route::get('/purchasing-all-list', [PurchasingController::class, 'getAllPurchaseOrders']);
     });
 
 });

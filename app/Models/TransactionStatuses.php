@@ -12,4 +12,8 @@ class TransactionStatuses extends Model
     protected $fillable = [
         'transaction_status_name'
     ];
+
+    public function transaction() {
+        return $this->hasMany('App\Models\Transactions', 'transaction_status_id');
+    }
 }

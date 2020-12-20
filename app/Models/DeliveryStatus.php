@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PaymentStatuses extends Model
+class DeliveryStatus extends Model
 {
-    protected $table = 'payment_statuses';
+    protected $table = 'delivery_statuses';
 
     protected $fillable = [
-        'payment_status_name'
+        'name'
     ];
 
     public function transaction() {
-        return $this->hasMany('App\Models\Transactions', 'payment_status_id');
+        return $this->hasMany('App\Models\Transactions', 'delivery_status_id');
     }
 }

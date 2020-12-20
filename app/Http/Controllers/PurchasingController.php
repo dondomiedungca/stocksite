@@ -21,6 +21,10 @@ class PurchasingController extends Controller
         return view('admin.purchasing.purchase_order');
     }
 
+    public function getPurchaseOrders() {
+        return view('admin.purchasing.purchase_order_list');
+    }
+
     public function store(Request $request) {
         $counter = Counter::find(1);
 		$counter->increment('counter');
@@ -60,5 +64,45 @@ class PurchasingController extends Controller
         $data['transaction_id'] = $transaction->id;
         
         return response()->json($data);
+    }
+
+    public function getAllPurchaseOrders($perPage = 10) {
+        $purchaseOrders = Transactions::where('transaction_type_id', 1)
+                                        ->with(
+                                            'transaction_status',
+                                            'delivery_status',
+                                            'item_status',
+                                            'supplier',
+                                            'payment_status',
+                                            'purchase_orders', 
+                                            'purchase_orders.receiver', 
+                                            'purchase_orders.user', 
+                                            'purchase_orders.purchase_order_types',
+                                            'purchase_orders.purchase_order_types.product_types'
+                                        )
+                                        ->latest()
+                                        ->paginate($perPage);
+
+        return response()->json($purchaseOrders);
+    }
+
+    public function getPurchaseOrder($id) {
+        $purchaseOrder = Transactions::where('transaction_type_id', 1)
+                                        ->whereId($id)
+                                        ->with(
+                                            'transaction_status',
+                                            'delivery_status',
+                                            'item_status',
+                                            'supplier',
+                                            'supplier.address.address_type',
+                                            'payment_status',
+                                            'purchase_orders', 
+                                            'purchase_orders.receiver.address.address_type', 
+                                            'purchase_orders.user', 
+                                            'purchase_orders.purchase_order_types',
+                                            'purchase_orders.purchase_order_types.product_types'
+                                        )->first();
+
+        return view('admin.purchasing.purchase_order_detail', ['purchase_order' => $purchaseOrder]);
     }
 }

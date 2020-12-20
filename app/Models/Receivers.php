@@ -23,4 +23,8 @@ class Receivers extends Model
     public function address() {
         return $this->belongsTo('App\Models\Addresses', 'address_id');
     }
+
+    public function purchase_order() {
+        return $this->hasMany('App\Models\PurchaseOrders', 'receiver_id');
+    }
 }

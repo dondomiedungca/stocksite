@@ -12,7 +12,7 @@ class PurchaseOrders extends Model
     protected $fillable = [
         'transaction_id',
         'user_id',
-        'receiver_id'
+        'receiver_id',
     ];
 
     public function user() {
@@ -24,10 +24,10 @@ class PurchaseOrders extends Model
     }
 
     public function receiver() {
-        return $this->belongsTo('App\Models\Receiver', 'receiver_id');
+        return $this->belongsTo('App\Models\Receivers', 'receiver_id');
     }
 
     public function purchase_order_types() {
-        return $this->hasMany('App\Models\PurchasingTypes', 'product_type_id');
+        return $this->hasMany('App\Models\PurchasingTypes', 'purchase_order_id');
     }
 }

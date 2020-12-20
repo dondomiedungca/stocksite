@@ -27,6 +27,8 @@ Vue.component("dashboard-index", require("./components/Admin/dashboard/Index.vue
 
 Vue.component("purchasing-index", require("./components/Admin/purchasing/Index.vue").default)
 Vue.component("purchasing-order", require("./components/Admin/purchasing/Purchasing.vue").default)
+Vue.component("purchasing-list", require("./components/Admin/purchasing/PurchasingList.vue").default)
+Vue.component("purchasing-details", require("./components/Admin/purchasing/PurchasingDetails.vue").default)
 
 Vue.component("products-index", require("./components/Admin/products/Index.vue").default)
 Vue.component("product-types", require("./components/Admin/products/addProductType.vue").default)
@@ -34,6 +36,7 @@ Vue.component("product-types", require("./components/Admin/products/addProductTy
 // REUSABLE
 Vue.component("modal", require("./components/Reusable/Modal.vue").default)
 Vue.component("address-form", require("./components/Reusable/AddressForm.vue").default)
+Vue.component("pagination", require("./components/Reusable/Pagination.vue").default)
 
 // SUPPLIER
 Vue.component("add-supplier", require("./components/Admin/supplier/addSupplier.vue").default)
