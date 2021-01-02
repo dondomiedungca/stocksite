@@ -25,7 +25,11 @@ use App\Http\Controllers\InventoryController;
 // VIEWS
 
 Route::get('/admin/signin', function () {
-    return view('admin.signin');
+    if(!Auth::check()) {
+        return view('admin.signin');
+    } else {
+        return redirect('/admin/dashboard');
+    }
 })->name('signin');
 
 Route::group(['middleware' => 'adminRoute'], function () {
@@ -40,6 +44,7 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::get('/purchasing-order', [PurchasingController::class, 'purchaseOrder']);
         Route::get('/purchasing-list', [PurchasingController::class, 'getPurchaseOrders']);
         Route::get('/purchase-order/{id}', [PurchasingController::class, 'getPurchaseOrder']);
+        Route::get('/purchase-order-data/{id}', [PurchasingController::class, 'getPurchaseOrderData']);
     });
 
     Route::prefix('admin/products')->group(function () {
@@ -67,6 +72,11 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::get('/get-product-types', [ProductsController::class, 'getProductTypes']);
         Route::get('/get-all-product-types', [ProductsController::class, 'getAllProductTypes']);
         Route::get('/remove-product-type/{id}', [ProductsController::class, 'removeProductTypes']);
+        Route::get('/get-stock-number', [ProductsController::class, 'getStockNumber']);
+        Route::get('/get-cosmetics', [ProductsController::class, 'getCosmetics']);
+        Route::get('/get-item-statuses', [ProductsController::class, 'getItemStatuses']);
+        Route::post('/save-manual-item', [ProductsController::class, 'saveManualItem']);
+        Route::post('/save-file', [ProductsController::class, 'saveFile']);
     });
 
     Route::prefix('admin/supplier')->group(function () {

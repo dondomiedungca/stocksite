@@ -20,6 +20,9 @@ class InventoryStatusSeeder extends Seeder
                 'name' => 'Available',
             ],
             [
+                'name' => 'For Monitoring Only',
+            ],
+            [
                 'name' => 'Sold',
             ],
             [

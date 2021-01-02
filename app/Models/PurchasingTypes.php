@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Inventory;
+
 class PurchasingTypes extends Model
 {
     protected $table = 'purchasing_types';
@@ -25,5 +27,10 @@ class PurchasingTypes extends Model
 
     public function product_types() {
         return $this->belongsTo('App\Models\ProductTypes', 'product_type_id');
+    }
+
+    public function inventories()
+    {
+        return $this->morphToMany(Inventory::class, 'transaction_item');
     }
 }

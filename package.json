@@ -25,6 +25,7 @@
     "dependencies": {
         "moment": "^2.29.1",
         "sweetalert2": "^10.11.1",
+        "vue-fragment": "^1.5.1",
         "vuelidate": "^0.7.6"
     }
 }

@@ -24,6 +24,10 @@ class counter_seeder_table extends Seeder
             'counter' => 0
         ]);
         Counter::create([
+            'prefix' => "IN - ",
+            'counter' => 0
+        ]);
+        Counter::create([
             'prefix' => "DR - ",
             'counter' => 0
         ]);

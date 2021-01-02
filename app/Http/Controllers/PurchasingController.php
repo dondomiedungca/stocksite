@@ -100,9 +100,30 @@ class PurchasingController extends Controller
                                             'purchase_orders.receiver.address.address_type', 
                                             'purchase_orders.user', 
                                             'purchase_orders.purchase_order_types',
-                                            'purchase_orders.purchase_order_types.product_types.product_attributes'
+                                            'purchase_orders.purchase_order_types.product_types.product_attributes.column_selections'
                                         )->first();
 
         return view('admin.purchasing.purchase_order_detail', ['purchase_order' => $purchaseOrder]);
+    }
+
+    public function getPurchaseOrderData($id) {
+        $purchaseOrder = Transactions::where('transaction_type_id', 1)
+                                        ->whereId($id)
+                                        ->with(
+                                            'transaction_status',
+                                            'delivery_status',
+                                            'item_status',
+                                            'supplier',
+                                            'supplier.address.address_type',
+                                            'payment_status',
+                                            'purchase_orders', 
+                                            'purchase_orders.receiver.address.address_type', 
+                                            'purchase_orders.user', 
+                                            'purchase_orders.purchase_order_types',
+                                            'purchase_orders.purchase_order_types.product_types.product_attributes.column_selections'
+                                        )->first();
+        $data['purchase_order'] = $purchaseOrder;
+
+        return response()->json($data);
     }
 }

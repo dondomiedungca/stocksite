@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\PurchasingTypes;
+
 class Inventory extends Model
 {
     protected $table = 'inventories';
@@ -23,5 +25,10 @@ class Inventory extends Model
 
     protected $casts = [
          'details' => 'json',
-     ];
+    ];
+
+    public function purchasing_type()
+    {
+        return $this->morphedByMany(PurchasingTypes::class, 'transaction_item');
+    }
 }

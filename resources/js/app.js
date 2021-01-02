@@ -7,6 +7,7 @@
 require("./bootstrap")
 
 window.Vue = require("vue")
+
 import Vuelidate from "vuelidate"
 
 Vue.use(Vuelidate)
@@ -32,6 +33,8 @@ Vue.component("purchasing-details", require("./components/Admin/purchasing/Purch
 
 Vue.component("products-index", require("./components/Admin/products/Index.vue").default)
 Vue.component("product-types", require("./components/Admin/products/addProductType.vue").default)
+Vue.component("import-manual", require("./components/Admin/products/ImportManual.vue").default)
+Vue.component("import-file", require("./components/Admin/products/ImportFile.vue").default)
 
 // REUSABLE
 Vue.component("modal", require("./components/Reusable/Modal.vue").default)

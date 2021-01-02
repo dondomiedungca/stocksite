@@ -34,7 +34,7 @@ class CreateTransactionsTable extends Migration
             $table->timestamps();
 
             $table->foreign('transaction_type_id')->references('id')->on('transaction_types');
-            $table->foreign('previous_transaction_status_id')->references('id')->on('transaction_types');
+            $table->foreign('previous_transaction_status_id')->references('id')->on('transaction_statuses');
             $table->foreign('transaction_status_id')->references('id')->on('transaction_statuses');
             $table->foreign('payment_status_id')->references('id')->on('payment_statuses');
             $table->foreign('customer_id')->references('id')->on('customers');
