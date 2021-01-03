@@ -1,6 +1,19 @@
 <template>
     <div class="row">
         <div class="col-md-12">
+            <h5>Required Headers (base on your product type)</h5>
+            <small>Note: Please make sure that the header was exactly the same as your fields</small>
+            <br />
+            <br />
+        </div>
+        <div v-if="Object.keys(base_product_type).length" class="col-md-12">
+            <ul class="list-inline">
+                <li v-for="(field, i) in base_product_type.product_attributes" v-bind:key="i" class="list-inline-item">
+                    <b>{{ field.product_column_name }}</b>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-12">
             <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#exampleModal"><i class="fa fa-upload"></i> Upload File</button>
         </div>
         <div class="modal fade" id="exampleModal" tabindex="-1" data-backdrop="static" data-keyboard="false" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -41,15 +54,27 @@
 
 <script>
 export default {
+    props: ["basis", "product_type", "purchasing_type_id", "transaction_id"],
+    created() {
+        this.initialize()
+    },
     data() {
         return {
             saving: false,
             loaded: 0,
             file: "",
-            fileName: ""
+            fileName: "",
+            base_product_type: {}
         }
     },
     methods: {
+        initialize: function() {
+            if (this.basis == "purchasing") {
+                this.base_product_type = this.product_type
+            } else {
+                this.getProductTypes()
+            }
+        },
         parseFile: function() {
             let uploadFiles = document.getElementById("upload-file")
             let file_Name = uploadFiles.value.split("\\")
@@ -60,6 +85,7 @@ export default {
             let formData = new FormData()
             formData.append("file", this.file)
             formData.append("file_name", this.fileName)
+            formData.append("product_type_id", this.base_product_type.id)
 
             var vm = this
             this.saving = true

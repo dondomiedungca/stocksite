@@ -173,7 +173,8 @@ export default {
                                     inventory: self.item_data,
                                     purchasing_type_id: self.purchasing_type_id,
                                     basis: this.basis,
-                                    transaction_id: this.transaction_id
+                                    transaction_id: this.transaction_id,
+                                    product_type_id: this.base_product_type.id
                                 })
                                 .then(result => {
                                     swal.fire(result.data.heading, result.data.message, result.data.success ? "success" : "error")

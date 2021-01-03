@@ -4,18 +4,18 @@ namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Redis;
 
 use App\Models\Transactions;
 use App\Models\PurchasingTypes;
 use App\Models\Inventory;
 use App\Models\FileUploaded;
 
-class ImportItemFile implements ShouldQueue
+class ImportItemFile implements ShouldQueue, ShouldBeUnique, ShouldBeUniqueUntilProcessing
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -38,6 +38,11 @@ class ImportItemFile implements ShouldQueue
         $this->purchasing_type_id = $purchasing_type_id;
     }
 
+    public function uniqueId()
+    {
+        return $this->filename;
+    }
+
     /**
      * Execute the job.
      *
@@ -45,15 +50,6 @@ class ImportItemFile implements ShouldQueue
      */
     public function handle()
     {
-        Redis::throttle('import-file')->allow(2)->every(1)->then(function () {
-            
-        }, function () {
-            // Could not obtain lock; this job will be re-queued
-            return $this->release(2);
-        });
-
-        $purchasing_type = PurchasingTypes::find(1);
-        $purchasing_type->increment('quantity');
-        $purchasing_type->increment('total_items_to_received');
+        
     }
 }

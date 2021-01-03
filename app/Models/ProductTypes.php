@@ -25,4 +25,11 @@ class ProductTypes extends Model
     public function purchasing_types() {
         return $this->hasMany('App\Models\PurchasingTypes', 'product_type_id');
     }
+
+    public function show_columns() {
+        
+        return $this->product_attributes()->get()->map(function($field) {
+            return $field->product_column_name;
+        })->toArray();
+    }
 }

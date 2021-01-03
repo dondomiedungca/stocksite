@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 use App\Http\helpers\TransactionHelpers;
+use App\Http\helpers\FileUpload;
+
+use App\Jobs\ImportItemFile;
 
 use App\Models\ColumnSelection;
 use App\Models\ProductAttributes;
@@ -132,7 +135,7 @@ class ProductsController extends Controller
                 $purchase_order_type->increment('total_received');
                 $purchase_order_type->decrement('total_items_to_receive');
 
-                $inventory = $this->createInventory($request, $stock_number);
+                $inventory = $this->createInventory($request, $stock_number, $request['product_type_id']);
 
                 $purchase_order_type->inventories()->save($inventory);
 
@@ -141,7 +144,7 @@ class ProductsController extends Controller
         } else {
             $counter->increment('counter');
             $stock_number = $counter->prefix . str_pad($counter->counter, 6,'0',STR_PAD_LEFT);
-            $inventory = $this->createInventory($request, $stock_number);
+            $inventory = $this->createInventory($request, $stock_number, $request['product_type_id']);
         }
 
         $data['success'] = true;
@@ -151,9 +154,10 @@ class ProductsController extends Controller
         return $data;
     }
 
-    public function createInventory($request, $stock_number) {
+    public function createInventory($request, $stock_number, $product_type_id) {
         $inventory = new Inventory();
         $inventory->stock_number = $stock_number;
+        $inventory->product_type_id = $product_type_id;
         $inventory->inventory_status_id = $request['inventory']['item_status_id'];
         $inventory->inventory_cosmetic_Id = $request['inventory']['item_cosmetic_id'];
         $inventory->item_cosmetic_description = $request['inventory']['item_cosmetic_description'];
@@ -167,9 +171,39 @@ class ProductsController extends Controller
     }
 
     public function saveFile(Request $request) {
-        $data['success'] = true;
-        $data['heading'] = "File Upload Queued";
-        $data['message'] = "File has been added to system queue, we will notify you once the file has been processing";
+        $filename = $request['file_name'];
+        $file = $request['file'];
+        $extension = $file->getClientOriginalExtension();
+        $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+        $product_type = $this->getProductType($request['product_type_id']);
+        $check_header = FileUpload::isValidHeader($file, $extension, $product_type);
+        
+        if(!$check_header['isValid']) {
+            $data['heading'] = "Header(s) Incorrect";
+            $data['message'] = "The ff. headers are not found on your file </br></br> <b>".implode($check_header['difference'], ",")."</b>";
+            $data['success'] = false;
+
+            return $data;
+        }
+
+        // create directory
+        $directory = FileUpload::createFileDirectory($name);
+
+        // create chunk
+        $chunks = FileUpload::chunkFile($directory, $name, $file, 1000);
+
+        // dispatch(new ImportItemFile($filename, NULL, Auth::user()->id, NULL, NULL));
+
+        print_r($chunks);
+
+    }
+
+    public function getProductType($id) {
+        $product_type = ProductTypes::whereId($id)
+                                    ->with('product_attributes')
+                                    ->first();
+        $data['product_type'] = $product_type;
 
         return $data;
     }
