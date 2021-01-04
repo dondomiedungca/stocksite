@@ -46,13 +46,7 @@ class TransactionHelpers{
                         'previous_transaction_status_id' => $transaction->transaction_status_id
                     ]);
 
-        // return [
-        //     'isItemCompleted' => $isItemCompleted,
-        //     'deliveryStatus' => $deliveryStatus,
-        //     'itemStatus' => $itemStatus,
-        //     'transaction_status_id' => $transaction_status_id,
-        //     'payment_status_id' => $payment_status_id
-        // ];
+        return true;
     }
 
 }

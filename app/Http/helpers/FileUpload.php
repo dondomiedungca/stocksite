@@ -24,6 +24,7 @@ class FileUpload {
                 return [
                     'isValid' => true,
                     'difference' => $header_diff,
+                    'header' => $product_header
                 ];
             }
         }
@@ -33,6 +34,9 @@ class FileUpload {
         $path = "product/temp/$filename";
 
         if(!Storage::exists($path)) {
+            Storage::makeDirectory($path);
+        } else {
+            Storage::deleteDirectory($path);
             Storage::makeDirectory($path);
         }
 

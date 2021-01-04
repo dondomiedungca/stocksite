@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Bus\Batch;
+use Illuminate\Support\Facades\Bus;
+use Throwable;
 
 use App\Http\helpers\TransactionHelpers;
 use App\Http\helpers\FileUpload;
@@ -173,11 +176,15 @@ class ProductsController extends Controller
     public function saveFile(Request $request) {
         $filename = $request['file_name'];
         $file = $request['file'];
+        $basis = $request['basis'];
+        $transaction_id = $request['basis'] == 'purchasing' ? $request['transaction_id'] : NULL;
+        $purchasing_type_id = $request['basis'] == 'purchasing' ? $request['purchasing_type_id'] : NULL;
         $extension = $file->getClientOriginalExtension();
         $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
         $product_type = $this->getProductType($request['product_type_id']);
         $check_header = FileUpload::isValidHeader($file, $extension, $product_type);
+        $header = $check_header['header'];
         
         if(!$check_header['isValid']) {
             $data['heading'] = "Header(s) Incorrect";
@@ -193,9 +200,28 @@ class ProductsController extends Controller
         // create chunk
         $chunks = FileUpload::chunkFile($directory, $name, $file, 1000);
 
-        // dispatch(new ImportItemFile($filename, NULL, Auth::user()->id, NULL, NULL));
+        // run queue on every chunk of file
+        $chunk_files = glob(storage_path("app/$directory/*.csv"));
+        $jobs = [];
 
-        print_r($chunks);
+        foreach ($chunk_files as $key => $chunk_file) {
+            $jobs[] = new ImportItemFile($header, $name."-".time(), $chunk_file, $request['product_type_id'], Auth::user()->id, $transaction_id, $purchasing_type_id, $request['basis']);
+        }
+
+        $batch = Bus::batch($jobs)->then(function (Batch $batch) {
+            // All jobs completed successfully...
+        })->catch(function (Batch $batch, Throwable $e) {
+            // First batch job failure detected...
+        })->finally(function (Batch $batch) {
+            // The batch has finished executing...
+        })->name($name.' - Product File Uploading')->onQueue('product_imports')->dispatch();
+
+        $data['success'] = true;
+        $data['heading'] = "Added To Queue";
+        $data['message'] = "File upload process was added to system queue, we will notify you once it is done";
+        $data['uuid'] = $batch->id;
+
+        return $data;
 
     }
 

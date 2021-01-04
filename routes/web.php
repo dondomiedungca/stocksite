@@ -10,6 +10,7 @@ use App\Http\Controllers\ManufacturerController;
 use App\Http\Controllers\ReceiverController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\ReportsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,6 +51,11 @@ Route::group(['middleware' => 'adminRoute'], function () {
     Route::prefix('admin/products')->group(function () {
         Route::get('/', [ProductsController::class, 'index']);
         Route::get('/add-product-type', [ProductsController::class, 'productTypes']);
+    });
+
+    Route::prefix('admin/reports')->group(function () {
+        Route::get('/', [ReportsController::class, 'index']);
+        Route::get('/queue-management', [ReportsController::class, 'showQueues']);
     });
 
     Route::post('/admin/logout', function() {
@@ -104,6 +110,12 @@ Route::group(['middleware' => 'adminRoute'], function () {
     Route::prefix('admin/purchasing')->group(function () {
         Route::post('/create', [PurchasingController::class, 'store']);
         Route::get('/purchasing-all-list', [PurchasingController::class, 'getAllPurchaseOrders']);
+    });
+
+    Route::prefix('admin/reports')->group(function () {
+        Route::get('/get-queue-batches', [ReportsController::class, 'getBatches']);
+        Route::get('/get-queue-batches-failed', [ReportsController::class, 'getBatchesFailed']);
+        Route::get('/get-queue-batches-completed', [ReportsController::class, 'getBatchesCompleted']);
     });
 
 });

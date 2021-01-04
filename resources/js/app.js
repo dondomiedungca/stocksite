@@ -36,6 +36,9 @@ Vue.component("product-types", require("./components/Admin/products/addProductTy
 Vue.component("import-manual", require("./components/Admin/products/ImportManual.vue").default)
 Vue.component("import-file", require("./components/Admin/products/ImportFile.vue").default)
 
+Vue.component("reports-index", require("./components/Admin/reports/Index.vue").default)
+Vue.component("queue-monitoring-index", require("./components/Admin/reports/QueueMonitoring.vue").default)
+
 // REUSABLE
 Vue.component("modal", require("./components/Reusable/Modal.vue").default)
 Vue.component("address-form", require("./components/Reusable/AddressForm.vue").default)
