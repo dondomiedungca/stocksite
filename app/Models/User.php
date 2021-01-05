@@ -48,4 +48,8 @@ class User extends Authenticatable
     public function purchase_orders() {
         return $this->hasMany('App\Models\PurchaseOrders', 'user_id');
     }
+
+    public function user_type() {
+        return $this->belongsTo('App\Models\UserType', 'user_type');
+    }
 }

@@ -31,6 +31,8 @@ class ImportItemFile implements ShouldQueue, ShouldBeUnique, ShouldBeUniqueUntil
     public $transaction_id;
     public $purchasing_type_id;
     public $basis;
+
+    public $timeout = 3600;
     /**
      * Create a new job instance.
      *
@@ -60,6 +62,7 @@ class ImportItemFile implements ShouldQueue, ShouldBeUnique, ShouldBeUniqueUntil
      */
     public function handle()
     {
+        sleep(100);
         $csv_data = array_map('str_getcsv', file($this->chunk_directory));
 
         foreach ($csv_data as $key => $row) {

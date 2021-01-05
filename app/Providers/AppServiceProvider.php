@@ -8,6 +8,8 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Log;
 
+use App\Events\QueueProcessing;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -31,9 +33,10 @@ class AppServiceProvider extends ServiceProvider
             // $event->connectionName
             // $event->job
             // $event->job->payload()
-            Log::info("Processing...");
-            Log::info($event->job->payload());
-            Log::info("--------End--------");
+            $payload = $event->job->payload();
+            $myJob = unserialize($payload['data']['command']);
+
+            broadcast(new QueueProcessing("processing", $myJob));
         });
 
         Queue::after(function (JobProcessed $event) {

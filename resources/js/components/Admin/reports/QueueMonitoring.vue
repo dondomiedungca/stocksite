@@ -13,6 +13,7 @@
             <div class="running col-md-6 pt-2" align="center">
                 <h4><i class="lni lni-tag"></i> Queue List / Running Queues</h4>
                 <br />
+                Total running and for processing queue(s): <b>{{ onProcess.length }}</b>
                 <table class="table table-bordered table-sm mt-3">
                     <thead>
                         <th>Status</th>
@@ -20,11 +21,11 @@
                         <th>Date Queued</th>
                         <th>Actions</th>
                     </thead>
-                    <tbody v-if="Object.keys(onProcess).length">
-                        <tr v-if="!onProcess.data.length">
+                    <tbody v-if="onProcess.length">
+                        <tr v-if="!onProcess.length">
                             <td colspan="4" align="center">There is no queue running as of now</td>
                         </tr>
-                        <tr v-else v-for="(queue, i) in onProcess.data" v-bind:key="i">
+                        <tr v-else v-for="(queue, i) in onProcess" v-bind:key="i">
                             <td></td>
                             <td>{{ queue.name }}</td>
                             <td>{{ queue.created_date }}</td>
@@ -32,11 +33,11 @@
                         </tr>
                     </tbody>
                 </table>
-                <paginate :data="onProcess" :limit="3" v-on:pagination-change-page="getBatches"></paginate>
             </div>
             <div class="failed col-md-6 pt-2" align="center">
                 <h4><i class="lni lni-warning"></i> Failed Queues</h4>
                 <br />
+                Total failed queue(s): <b v-if="Object.keys(faileds).length">{{ faileds.total }}</b>
                 <table class="table table-bordered table-sm mt-3">
                     <thead>
                         <th>Queue Name</th>
@@ -69,6 +70,7 @@
             <div class="completed col-md-12 pt-2" align="center">
                 <h4><i class="lni lni-checkmark-circle"></i> Completed Queues</h4>
                 <br />
+                Total completed queue(s): <b v-if="Object.keys(completed).length">{{ completed.total }}</b>
                 <table class="table table-hover table-bordered table-sm mt-3">
                     <thead>
                         <th>#</th>
@@ -98,7 +100,7 @@ export default {
     },
     data() {
         return {
-            onProcess: {},
+            onProcess: [],
             faileds: {},
             completed: {}
         }
@@ -108,13 +110,15 @@ export default {
         this.getBatchesFailed()
         this.getBatchesCompleted()
     },
+    mounted() {
+        window.Echo.channel("queueprocess").listen(".queueprocess", e => {
+            console.log(e)
+        })
+    },
     methods: {
-        getBatches: function(page) {
-            if (typeof page === "undefined") {
-                page = 1
-            }
+        getBatches: function() {
             var url = "/admin/reports/get-queue-batches"
-            axios.get(url + "?page=" + page).then(res => {
+            axios.get(url).then(res => {
                 this.onProcess = res.data.forProcess
             })
         },
@@ -147,13 +151,14 @@ export default {
 }
 
 .failed {
-    background: #f0cece;
+    background: #f7dcdc;
     min-height: 465px;
 }
 
 .running {
     background: #f2f2f2;
     min-height: 465px;
+    max-height: 465px;
 }
 
 table.table-bordered {

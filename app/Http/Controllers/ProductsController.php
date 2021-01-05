@@ -10,8 +10,10 @@ use Throwable;
 
 use App\Http\helpers\TransactionHelpers;
 use App\Http\helpers\FileUpload;
+use App\Http\helpers\BatchHelpers;
 
 use App\Jobs\ImportItemFile;
+use App\Events\QueueProcessing;
 
 use App\Models\ColumnSelection;
 use App\Models\ProductAttributes;
@@ -215,6 +217,8 @@ class ProductsController extends Controller
         })->finally(function (Batch $batch) {
             // The batch has finished executing...
         })->name($name.' - Product File Uploading')->onQueue('product_imports')->dispatch();
+
+        broadcast(new QueueProcessing("create", BatchHelpers::getBatch($batch->id)));
 
         $data['success'] = true;
         $data['heading'] = "Added To Queue";

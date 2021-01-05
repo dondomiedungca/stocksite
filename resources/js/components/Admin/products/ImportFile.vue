@@ -86,6 +86,8 @@ export default {
             formData.append("file", this.file)
             formData.append("file_name", this.fileName)
             formData.append("product_type_id", this.base_product_type.id)
+            formData.append("basis", this.basis)
+            formData.append("purchasing_type_id", this.purchasing_type_id)
 
             var vm = this
             this.saving = true
