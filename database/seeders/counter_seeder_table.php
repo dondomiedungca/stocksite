@@ -39,5 +39,9 @@ class counter_seeder_table extends Seeder
             'prefix' => "RMA - ",
             'counter' => 0
         ]);
+        Counter::create([
+            'prefix' => "QN - ",
+            'counter' => 0
+        ]);
     }
 }

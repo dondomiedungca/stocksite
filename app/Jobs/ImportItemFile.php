@@ -15,11 +15,13 @@ use App\Models\Transactions;
 use App\Models\PurchasingTypes;
 use App\Models\Inventory;
 use App\Models\FileUploaded;
+use App\Events\QueueProcessing;
+use App\Http\helpers\BatchHelpers;
 
 use Illuminate\Support\Facades\Log;
 use Exception;
 
-class ImportItemFile implements ShouldQueue, ShouldBeUnique, ShouldBeUniqueUntilProcessing
+class ImportItemFile implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -50,10 +52,10 @@ class ImportItemFile implements ShouldQueue, ShouldBeUnique, ShouldBeUniqueUntil
         $this->basis = $basis;
     }
 
-    public function uniqueId()
-    {
-        return $this->filename_time;
-    }
+    // public function uniqueId()
+    // {
+    //     return $this->filename_time;
+    // }
 
     /**
      * Execute the job.
@@ -62,14 +64,17 @@ class ImportItemFile implements ShouldQueue, ShouldBeUnique, ShouldBeUniqueUntil
      */
     public function handle()
     {
-        sleep(100);
+        if ($this->batch()->cancelled()) {
+            return;
+        }
+        
         $csv_data = array_map('str_getcsv', file($this->chunk_directory));
-
         foreach ($csv_data as $key => $row) {
-            if(count($this->header) == count($row)) {
+            if(count($this->header) != count($row)) {
                 $data = array_combine($this->header, $row);
             } else {
-                throw new Exception("Your file doesn't match the number of headers like your product header");
+                $this->batch()->cancel();
+                throw new Exception("Your file doesn't match the number of headers like your product header. |");
             }
         }
 

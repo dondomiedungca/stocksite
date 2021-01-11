@@ -3,6 +3,10 @@
 namespace App\Http\helpers;
 
 use App\Models\BatchJobs;
+use App\Models\CurrentRunning;
+use App\Events\QueueProcessing;
+
+use Illuminate\Support\Facades\DB;
 
 class BatchHelpers {
 
@@ -17,6 +21,34 @@ class BatchHelpers {
         });
 
         return $batch[0];
+    }
+
+    public static function willBroadcastProcess($uuid) {
+        $current = CurrentRunning::where('uuid', $uuid)->get();
+
+        if(!$current->count()) {
+            broadcast(new QueueProcessing("processing", self::getBatch($uuid)));
+
+            CurrentRunning::create(
+                ['uuid' => $uuid]
+            );
+
+            return true;
+        }
+    }
+
+    public static function removeFromProcessing($uuid) {
+        CurrentRunning::where('uuid', $uuid)->delete();
+
+        return true;
+    }
+
+    public static function removeCancelledAt($uuid) {
+        BatchJobs::where('id', $uuid)->update([
+            'cancelled_at' => NULL
+        ]);
+
+        return true;
     }
 
 }

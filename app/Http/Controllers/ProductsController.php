@@ -186,7 +186,6 @@ class ProductsController extends Controller
 
         $product_type = $this->getProductType($request['product_type_id']);
         $check_header = FileUpload::isValidHeader($file, $extension, $product_type);
-        $header = $check_header['header'];
         
         if(!$check_header['isValid']) {
             $data['heading'] = "Header(s) Incorrect";
@@ -195,6 +194,7 @@ class ProductsController extends Controller
 
             return $data;
         }
+        $header = $check_header['header'];
 
         // create directory
         $directory = FileUpload::createFileDirectory($name);
@@ -210,19 +210,26 @@ class ProductsController extends Controller
             $jobs[] = new ImportItemFile($header, $name."-".time(), $chunk_file, $request['product_type_id'], Auth::user()->id, $transaction_id, $purchasing_type_id, $request['basis']);
         }
 
+        $counter = Counter::find(7);
+		$counter->increment('counter');
+        $queue_no = $counter->prefix . str_pad($counter->counter, 6,'0',STR_PAD_LEFT);
+
         $batch = Bus::batch($jobs)->then(function (Batch $batch) {
             // All jobs completed successfully...
         })->catch(function (Batch $batch, Throwable $e) {
             // First batch job failure detected...
+            $batch->cancel();
         })->finally(function (Batch $batch) {
             // The batch has finished executing...
-        })->name($name.' - Product File Uploading')->onQueue('product_imports')->dispatch();
+            broadcast(new QueueProcessing("failed", BatchHelpers::getBatch($batch->id)));
+            BatchHelpers::removeFromProcessing($batch->id);
+        })->name($name.' - Product File Uploading*_*'.$queue_no)->onQueue('product_imports')->dispatch();
 
         broadcast(new QueueProcessing("create", BatchHelpers::getBatch($batch->id)));
 
         $data['success'] = true;
         $data['heading'] = "Added To Queue";
-        $data['message'] = "File upload process was added to system queue, we will notify you once it is done";
+        $data['message'] = "File upload process was added to system queue with no. <b>".$queue_no."</b>, we will notify you once it is done";
         $data['uuid'] = $batch->id;
 
         return $data;

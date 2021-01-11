@@ -18,10 +18,33 @@ class ReportsController extends Controller
         return view('admin.reports.queue');
     }
 
+    public function getCurrent() {
+        $processing = BatchJobs::whereIn('id', function($query)
+                        {
+                            $query->select('uuid')
+                                ->from('current_job_running');
+                        })
+                        ->get();
+
+        $processing->transform(function ($value) {
+            $value->created_date = $value->created_at->format('M d, Y - h:i A');
+            return $value;
+        });
+
+        $data['current'] = $processing;
+
+        return response()->json($data);
+    }
+
     public function getBatches() {
         $forProcess = BatchJobs::where('cancelled_at', NULL)
                         ->where('pending_jobs', '!=', 0)
-                        ->orderBy('created_at', 'DESC')
+                        ->whereNotIn('id', function($query)
+                        {
+                            $query->select('uuid')
+                                ->from('current_job_running');
+                        })
+                        ->orderBy('created_at', 'ASC')
                         ->get();
         $forProcess->transform(function ($value) {
             $value->created_date = $value->created_at->format('M d, Y - h:i A');
@@ -34,9 +57,7 @@ class ReportsController extends Controller
     }
 
     public function getBatchesFailed() {
-        $failed = BatchJobs::where('cancelled_at', '!=', NULL)
-                        ->where('failed_jobs', '!=', 0)
-                        ->where('failed_job_ids', '!=', "[]")
+        $failed = BatchJobs::where('failed_job_ids', '!=', "[]")
                         ->orderBy('created_at', 'DESC')
                         ->paginate(10);
 
@@ -53,8 +74,8 @@ class ReportsController extends Controller
 
     public function getBatchesCompleted() {
         $completed = DB::table('job_batches')
-                        ->where('cancelled_at', NULL)
                         ->where('finished_at', '!=', NULL)
+                        ->where('pending_jobs', 0)
                         ->orderBy('created_at', 'DESC')
                         ->paginate(10);
 

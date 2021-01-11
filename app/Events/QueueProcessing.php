@@ -40,7 +40,7 @@ class QueueProcessing implements ShouldBroadcast, ShouldBroadcastNow
 
     public function broadcastAs()
     {
-        return 'queueprocess';
+        return 'queueprocess.'.$this->queue_type;
     }
 
     /**

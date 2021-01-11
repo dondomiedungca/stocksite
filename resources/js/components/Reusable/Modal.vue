@@ -31,6 +31,9 @@ export default {
         },
         saveNow: function() {
             this.$emit("met")
+        },
+        close: function() {
+            $(this.$refs[this.keyId]).modal("hide")
         }
     }
 }

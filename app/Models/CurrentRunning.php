@@ -5,19 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FailedJobs extends Model
+class CurrentRunning extends Model
 {
-    protected $table = 'failed_jobs';
+    protected $table = 'current_job_running';
 
     protected $fillable = [
-        'uuid',
-        'connection',
-        'queue',
-        'payload',
-        'exception'
+        'id',
+        'uuid'
     ];
 
     protected $casts = [
-        'uuid' => 'string'
+        'id' => 'string'
     ];
 }

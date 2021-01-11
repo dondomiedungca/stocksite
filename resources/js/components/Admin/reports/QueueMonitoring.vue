@@ -11,76 +11,134 @@
         </div>
         <div class="row">
             <div class="running col-md-6 pt-2" align="center">
-                <h4><i class="lni lni-tag"></i> Queue List / Running Queues</h4>
-                <br />
-                Total running and for processing queue(s): <b>{{ onProcess.length }}</b>
                 <table class="table table-bordered table-sm mt-3">
-                    <thead>
-                        <th>Status</th>
-                        <th>Queue Name</th>
-                        <th>Date Queued</th>
-                        <th>Actions</th>
+                    <thead align="center">
+                        <th colspan="4">
+                            <h4>Running Queue(s)</h4>
+                        </th>
                     </thead>
-                    <tbody v-if="onProcess.length">
-                        <tr v-if="!onProcess.length">
+                    <tbody>
+                        <tr>
+                            <td>Status</td>
+                            <td>Queue Name</td>
+                            <td>Queue Tag</td>
+                            <td>Date Queued</td>
+                        </tr>
+                        <tr v-if="!current.length">
                             <td colspan="4" align="center">There is no queue running as of now</td>
                         </tr>
-                        <tr v-else v-for="(queue, i) in onProcess" v-bind:key="i">
-                            <td></td>
-                            <td>{{ queue.name }}</td>
-                            <td>{{ queue.created_date }}</td>
-                            <td></td>
+                        <tr v-else>
+                            <td align="center"><img src="/assets/processing.gif" height="25px" alt="" /></td>
+                            <td>{{ name(current[0].name) }}</td>
+                            <td>{{ tag(current[0].name) }}</td>
+                            <td>{{ current[0].created_date }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="failed col-md-6 pt-2" align="center">
-                <h4><i class="lni lni-warning"></i> Failed Queues</h4>
+            <div class="queue col-md-6 pt-2">
+                <table class="table table-bordered table-sm mt-3">
+                    <thead align="center">
+                        <th colspan="4">
+                            <h4>For Processing Queue(s)</h4>
+                        </th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Status</td>
+                            <td>Queue Name</td>
+                            <td>Queue Tag</td>
+                            <td>Date Queued</td>
+                        </tr>
+                        <tr v-if="!onProcess.length">
+                            <td colspan="4" align="center">There is no queue for processing as of now</td>
+                        </tr>
+                        <tr v-else v-for="(queue, i) in onProcess" v-bind:key="i">
+                            <td align="center"><img src="/assets/queue.gif" height="25px" alt="" /></td>
+                            <td>{{ name(queue.name) }}</td>
+                            <td>{{ tag(queue.name) }}</td>
+                            <td>{{ queue.created_date }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="failed col-md-6 pt-2">
+                <h4 align="center"><i class="lni lni-warning"></i> Failed Queues</h4>
                 <br />
                 Total failed queue(s): <b v-if="Object.keys(faileds).length">{{ faileds.total }}</b>
                 <table class="table table-bordered table-sm mt-3">
                     <thead>
                         <th>Queue Name</th>
+                        <th>Queue Tag</th>
                         <th>Failure Details</th>
                         <th>Date Queued</th>
                         <th>Actions</th>
                     </thead>
                     <tbody v-if="Object.keys(faileds).length">
                         <tr v-if="!faileds.data.length" colspan="4">
-                            <td colspan="4" align="center">There is no failed queue as of now</td>
+                            <td colspan="5" align="center">There is no failed queue as of now</td>
                         </tr>
                         <tr v-else v-for="(queue, i) in faileds.data" v-bind:key="i">
-                            <td>{{ queue.name }}</td>
+                            <td>{{ name(queue.name) }}</td>
+                            <td>{{ tag(queue.name) }}</td>
                             <td align="center">
-                                <button class="btn btn-sm btn-info">
+                                <button @click="generateFailedDetail(i)" class="btn btn-sm btn-info">
                                     <i class="lni lni-eye"></i>
                                 </button>
                             </td>
                             <td>{{ queue.created_date }}</td>
                             <td align="center">
-                                <button class="btn btn-sm btn-info">
+                                <button @click="generateRetry(i)" class="btn btn-sm btn-info">
                                     <i class="lni lni-reload"></i>
                                 </button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+                <div class="modal fade" id="failure_details" tabindex="-1" data-backdrop="static" data-keyboard="false" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" v-if="Object.keys(failedDetails).length">{{ tag(failedDetails.name) }} - Failure Detail</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <ul>
+                                    <li v-for="(details, i) in failedDetails.failed_jobs" v-bind:key="i">{{ shorter(details.exception) }}</li>
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <modal ref="retry" :keyId="'retry'" :title="'Retry Queue'" :show_submit="true" :icon="'fa fa-check'" :submit_name="'Retry'" @met="retry">
+                    <p>Do you want to retry the process of this queue?</p>
+                </modal>
                 <paginate :data="faileds" :limit="3" v-on:pagination-change-page="getBatchesFailed"></paginate>
             </div>
-            <div class="completed col-md-12 pt-2" align="center">
-                <h4><i class="lni lni-checkmark-circle"></i> Completed Queues</h4>
+            <div class="completed col-md-6 pt-2">
+                <h4 align="center"><i class="lni lni-checkmark-circle"></i> Completed Queues</h4>
                 <br />
                 Total completed queue(s): <b v-if="Object.keys(completed).length">{{ completed.total }}</b>
                 <table class="table table-hover table-bordered table-sm mt-3">
                     <thead>
                         <th>#</th>
                         <th>Queue Name</th>
+                        <th>Queue Tag</th>
                         <th>Date Queued</th>
                     </thead>
                     <tbody v-if="Object.keys(completed).length">
-                        <tr v-for="(queue, i) in completed.data" v-bind:key="i">
+                        <tr v-if="!completed.data.length">
+                            <td colspan="4" align="center">No completed queue as of now</td>
+                        </tr>
+                        <tr v-else v-for="(queue, i) in completed.data" v-bind:key="i">
                             <td>{{ i + 1 }}</td>
-                            <td>{{ queue.name }}</td>
+                            <td>{{ name(queue.name) }}</td>
+                            <td>{{ tag(queue.name) }}</td>
                             <td>{{ queue.created_date }}</td>
                         </tr>
                     </tbody>
@@ -102,20 +160,46 @@ export default {
         return {
             onProcess: [],
             faileds: {},
-            completed: {}
+            completed: {},
+            current: [],
+            //
+            incoming_queues: [],
+            //
+            for_processing_queues_isManaging: false,
+            failedDetails: {},
+            for_retry: {}
         }
     },
     created() {
+        this.currentProcessing()
         this.getBatches()
         this.getBatchesFailed()
         this.getBatchesCompleted()
     },
     mounted() {
-        window.Echo.channel("queueprocess").listen(".queueprocess", e => {
-            console.log(e)
+        window.Echo.channel("queueprocess").listen(".queueprocess.create", e => {
+            this.onProcess.push(e.queue_payload)
+        })
+
+        window.Echo.channel("queueprocess").listen(".queueprocess.processing", e => {
+            this.fromQueueToCurrent(e.queue_payload)
+        })
+
+        window.Echo.channel("queueprocess").listen(".queueprocess.complete", e => {
+            this.fromCurrentToComplete(e.queue_payload)
+        })
+
+        window.Echo.channel("queueprocess").listen(".queueprocess.failed", e => {
+            this.fromCurrentToFailed(e.queue_payload)
         })
     },
     methods: {
+        currentProcessing: function() {
+            var url = "/admin/reports/get-current-queue-processing"
+            axios.get(url).then(res => {
+                this.current = res.data.current
+            })
+        },
         getBatches: function() {
             var url = "/admin/reports/get-queue-batches"
             axios.get(url).then(res => {
@@ -139,6 +223,57 @@ export default {
             axios.get(url + "?page=" + page).then(res => {
                 this.completed = res.data.completed
             })
+        },
+        name: function(n) {
+            return n.split("*_*")[0]
+        },
+        tag: function(n) {
+            return n.split("*_*")[1]
+        },
+        shorter: function(description) {
+            var end_line = description.indexOf("|")
+            return description.substring(0, end_line)
+        },
+        retry: function() {
+            this.$refs.retry.close()
+        },
+        fromQueueToCurrent: function(job) {
+            this.onProcess = this.onProcess.filter(queue => {
+                return queue.id != job.id
+            })
+            this.current = [job]
+        },
+        fromCurrentToComplete: function(job) {
+            this.current = this.current.filter(queue => {
+                return queue.id != job.id
+            })
+            this.completed.total++
+            if (this.completed.total < 10) {
+                this.completed.data.unshift(job)
+            } else {
+                this.completed.data.unshift(job)
+                this.completed.data.splice(this.completed.data.length - 1, 1)
+            }
+        },
+        fromCurrentToFailed: function(job) {
+            this.current = this.current.filter(queue => {
+                return queue.id != job.id
+            })
+            this.faileds.total++
+            if (this.faileds.total < 10) {
+                this.faileds.data.unshift(job)
+            } else {
+                this.faileds.data.unshift(job)
+                this.faileds.data.splice(this.faileds.data.length - 1, 1)
+            }
+        },
+        generateFailedDetail: function(index) {
+            this.failedDetails = this.faileds.data[index]
+            $("#failure_details").modal("show")
+        },
+        generateRetry: function(index) {
+            this.for_retry = this.faileds.data[index]
+            this.$refs.retry.trigger()
         }
     }
 }
@@ -155,10 +290,14 @@ export default {
     min-height: 465px;
 }
 
-.running {
+.queue {
     background: #f2f2f2;
     min-height: 465px;
-    max-height: 465px;
+}
+
+.running {
+    background: #fafafa;
+    min-height: 465px;
 }
 
 table.table-bordered {
@@ -167,8 +306,10 @@ table.table-bordered {
 }
 table.table-bordered > thead > th {
     border: 1px solid #404040;
+    vertical-align: middle;
 }
 table.table-bordered > tbody > tr > td {
     border: 1px solid #404040;
+    vertical-align: middle;
 }
 </style>

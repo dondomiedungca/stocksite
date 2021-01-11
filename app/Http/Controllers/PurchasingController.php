@@ -11,6 +11,8 @@ use App\Models\Counter;
 
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Bus;
+
 class PurchasingController extends Controller
 {
     public function index() {

@@ -9,6 +9,9 @@ use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Log;
 
 use App\Events\QueueProcessing;
+use Illuminate\Support\Facades\Bus;
+
+use App\Http\helpers\BatchHelpers;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,15 +37,24 @@ class AppServiceProvider extends ServiceProvider
             // $event->job
             // $event->job->payload()
             $payload = $event->job->payload();
-            $myJob = unserialize($payload['data']['command']);
+            $batch = unserialize($payload['data']['command']);
 
-            broadcast(new QueueProcessing("processing", $myJob));
+            $result = BatchHelpers::willBroadcastProcess($batch->batchId);
         });
 
         Queue::after(function (JobProcessed $event) {
             // $event->connectionName
             // $event->job
             // $event->job->payload()
+            $payload = $event->job->payload();
+            $batch = unserialize($payload['data']['command']);
+            $batch_details = Bus::findBatch($batch->batchId);
+
+            if((int) $batch_details->progress() == 100) {
+                broadcast(new QueueProcessing("complete", BatchHelpers::getBatch($batch->batchId)));
+                $remove = BatchHelpers::removeFromProcessing($batch->batchId);
+                // $remove = BatchHelpers::removeCancelledAt($batch->batchId);
+            }
         });
     }
 }

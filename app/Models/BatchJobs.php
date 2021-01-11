@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\FailedJobs;
 
 use Illuminate\Support\Facades\DB;
 
@@ -23,13 +24,15 @@ class BatchJobs extends Model
         'finished_at'
     ];
 
+    protected $casts = [
+        'id' => 'string'
+    ];
+
     public function failed_jobs() {
         $ids = json_decode($this->failed_job_ids);
         
-        return DB::table('failed_jobs')
-                ->whereIn('uuid', $ids)
-                ->get();
+        $failed = FailedJobs::whereIn('uuid', $ids)->get();
 
-        return $ids;
+        return $failed;
     }
 }
