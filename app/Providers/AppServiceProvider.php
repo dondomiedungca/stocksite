@@ -33,9 +33,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Queue::before(function (JobProcessing $event) {
-            // $event->connectionName
-            // $event->job
-            // $event->job->payload()
             $payload = $event->job->payload();
             $batch = unserialize($payload['data']['command']);
 
@@ -43,17 +40,16 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Queue::after(function (JobProcessed $event) {
-            // $event->connectionName
-            // $event->job
-            // $event->job->payload()
             $payload = $event->job->payload();
             $batch = unserialize($payload['data']['command']);
             $batch_details = Bus::findBatch($batch->batchId);
 
-            if((int) $batch_details->progress() == 100) {
-                broadcast(new QueueProcessing("complete", BatchHelpers::getBatch($batch->batchId)));
-                $remove = BatchHelpers::removeFromProcessing($batch->batchId);
-                // $remove = BatchHelpers::removeCancelledAt($batch->batchId);
+            if((int) $batch_details->failedJobs > 0) {
+                if((int) $batch_details->progress() == 100) {
+                    BatchHelpers::generateDuration($batch->batchId);
+                    broadcast(new QueueProcessing("complete", BatchHelpers::getBatch($batch->batchId)));
+                    $remove = BatchHelpers::removeFromProcessing($batch->batchId);
+                }
             }
         });
     }

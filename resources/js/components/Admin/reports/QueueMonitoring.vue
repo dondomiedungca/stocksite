@@ -129,6 +129,7 @@
                         <th>#</th>
                         <th>Queue Name</th>
                         <th>Queue Tag</th>
+                        <th>Process Duration</th>
                         <th>Date Queued</th>
                     </thead>
                     <tbody v-if="Object.keys(completed).length">
@@ -139,6 +140,7 @@
                             <td>{{ i + 1 }}</td>
                             <td>{{ name(queue.name) }}</td>
                             <td>{{ tag(queue.name) }}</td>
+                            <td>{{ queue.duration }}</td>
                             <td>{{ queue.created_date }}</td>
                         </tr>
                     </tbody>
@@ -168,6 +170,15 @@ export default {
             for_processing_queues_isManaging: false,
             failedDetails: {},
             for_retry: {}
+        }
+    },
+    notifications: {
+        showNotif: {
+            title: "",
+            message: "",
+            type: "",
+            timeout: 3000,
+            position: "bottomLeft"
         }
     },
     created() {
@@ -236,6 +247,8 @@ export default {
         },
         retry: function() {
             this.$refs.retry.close()
+            this.showNotif({ title: "Added To Queue", message: "Your queue was added again to queue system", type: "success" })
+            this.fromFailedToQueue(this.for_retry.id)
         },
         fromQueueToCurrent: function(job) {
             this.onProcess = this.onProcess.filter(queue => {
@@ -266,6 +279,15 @@ export default {
                 this.faileds.data.unshift(job)
                 this.faileds.data.splice(this.faileds.data.length - 1, 1)
             }
+        },
+        fromFailedToQueue: function(id) {
+            this.faileds.data = this.faileds.data.filter(queue => {
+                return queue.id != id
+            })
+            this.faileds.total--
+            axios.get("/admin/reports/queue-retry/" + id).then(res => {
+                console.log(res.data)
+            })
         },
         generateFailedDetail: function(index) {
             this.failedDetails = this.faileds.data[index]

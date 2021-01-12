@@ -6,6 +6,8 @@ use App\Models\BatchJobs;
 use App\Models\CurrentRunning;
 use App\Events\QueueProcessing;
 
+use Carbon\Carbon;
+
 use Illuminate\Support\Facades\DB;
 
 class BatchHelpers {
@@ -33,6 +35,11 @@ class BatchHelpers {
                 ['uuid' => $uuid]
             );
 
+            $batch = BatchJobs::find($uuid);
+            $batch->date_processed = Carbon::now();
+            $batch->timestamps = false;
+            $batch->save();
+
             return true;
         }
     }
@@ -44,11 +51,25 @@ class BatchHelpers {
     }
 
     public static function removeCancelledAt($uuid) {
-        BatchJobs::where('id', $uuid)->update([
-            'cancelled_at' => NULL
-        ]);
+        $batch = BatchJobs::find($uuid);
+        $batch->cancelled_at = NULL;
+        $batch->timestamps = false;
+        $batch->save();
 
         return true;
+    }
+
+    public static function generateDuration($uuid) {
+        $batch = BatchJobs::where('id', $uuid)->first();
+
+        $process_time = Carbon::createFromFormat('Y-m-d H:i:s', $batch->date_processed);
+        $finished_at = Carbon::parse(date("Y-m-d H:i:s", $batch->finished_at));
+
+        $totalDuration =  $process_time->diff($finished_at)->format('%H:%I:%S');
+
+        $batch->duration = $totalDuration;
+        $batch->timestamps = false;
+        $batch->save();
     }
 
 }

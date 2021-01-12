@@ -21,6 +21,7 @@ class BatchJobs extends Model
         'options',
         'cancelled_at',
         'created_at',
+        'date_processed',
         'finished_at'
     ];
 

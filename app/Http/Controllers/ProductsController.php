@@ -221,7 +221,13 @@ class ProductsController extends Controller
             $batch->cancel();
         })->finally(function (Batch $batch) {
             // The batch has finished executing...
-            broadcast(new QueueProcessing("failed", BatchHelpers::getBatch($batch->id)));
+            if($batch->cancelled()) {
+                broadcast(new QueueProcessing("failed", BatchHelpers::getBatch($batch->id)));
+            }
+            if((int) $batch->progress() == 100) {
+                BatchHelpers::generateDuration($batch->id);
+                broadcast(new QueueProcessing("complete", BatchHelpers::getBatch($batch->id)));
+            }
             BatchHelpers::removeFromProcessing($batch->id);
         })->name($name.' - Product File Uploading*_*'.$queue_no)->onQueue('product_imports')->dispatch();
 

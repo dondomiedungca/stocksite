@@ -64,13 +64,14 @@ class ImportItemFile implements ShouldQueue
      */
     public function handle()
     {
+        sleep(10);
         if ($this->batch()->cancelled()) {
             return;
         }
         
         $csv_data = array_map('str_getcsv', file($this->chunk_directory));
         foreach ($csv_data as $key => $row) {
-            if(count($this->header) != count($row)) {
+            if(count($this->header) == count($row)) {
                 $data = array_combine($this->header, $row);
             } else {
                 $this->batch()->cancel();
@@ -78,5 +79,10 @@ class ImportItemFile implements ShouldQueue
             }
         }
 
+    }
+
+    public function failed(\Exception $e) {
+        broadcast(new QueueProcessing("failed", BatchHelpers::getBatch($this->batch()->id)));
+        BatchHelpers::removeFromProcessing($this->batch()->id);
     }
 }

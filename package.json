@@ -25,6 +25,7 @@
         "vue-template-compiler": "^2.6.10"
     },
     "dependencies": {
+        "izitoast": "^1.4.0",
         "moment": "^2.29.1",
         "sweetalert2": "^10.11.1",
         "vue-fragment": "^1.5.1",

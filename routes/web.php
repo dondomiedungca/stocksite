@@ -117,6 +117,7 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::get('/get-queue-batches-failed', [ReportsController::class, 'getBatchesFailed']);
         Route::get('/get-queue-batches-completed', [ReportsController::class, 'getBatchesCompleted']);
         Route::get('/get-current-queue-processing', [ReportsController::class, 'getCurrent']);
+        Route::get('/queue-retry/{id}', [ReportsController::class, 'queueRetry']);
     });
 
 });

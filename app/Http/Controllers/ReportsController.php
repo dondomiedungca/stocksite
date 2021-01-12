@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\helpers\BatchHelpers;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 
 use App\Models\BatchJobs;
+use App\Events\QueueProcessing;
 
 class ReportsController extends Controller
 {
@@ -86,6 +89,15 @@ class ReportsController extends Controller
 
         $data['completed'] = $completed;
 
+        return response()->json($data);
+    }
+
+    public function queueRetry($id) {
+        BatchHelpers::removeCancelledAt($id);
+        broadcast(new QueueProcessing("create", BatchHelpers::getBatch($id)));
+        $result = Artisan::call('queue:retry-batch', ['id' => $id]);
+
+        $data['response'] = $result;
         return response()->json($data);
     }
 }
