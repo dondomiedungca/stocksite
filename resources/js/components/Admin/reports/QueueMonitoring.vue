@@ -11,7 +11,7 @@
         </div>
         <div class="row">
             <div class="running col-md-6 pt-2" align="center">
-                <table class="table table-bordered table-sm mt-3">
+                <table class="table table-queue table-bordered table-sm mt-3">
                     <thead align="center">
                         <th colspan="4">
                             <h4>Running Queue(s)</h4>
@@ -37,7 +37,7 @@
                 </table>
             </div>
             <div class="queue col-md-6 pt-2">
-                <table class="table table-bordered table-sm mt-3">
+                <table class="table table-queue table-bordered table-sm mt-3">
                     <thead align="center">
                         <th colspan="4">
                             <h4>For Processing Queue(s)</h4>
@@ -66,7 +66,7 @@
                 <h4 align="center"><i class="lni lni-warning"></i> Failed Queues</h4>
                 <br />
                 Total failed queue(s): <b v-if="Object.keys(faileds).length">{{ faileds.total }}</b>
-                <table class="table table-bordered table-sm mt-3">
+                <table class="table table-queue table-bordered table-sm mt-3">
                     <thead>
                         <th>Queue Name</th>
                         <th>Queue Tag</th>
@@ -106,7 +106,7 @@
                             </div>
                             <div class="modal-body">
                                 <ul>
-                                    <li v-for="(details, i) in failedDetails.failed_jobs" v-bind:key="i">{{ shorter(details.exception) }}</li>
+                                    <li v-for="(details, i) in failedDetails.failed_jobs" v-bind:key="i" v-html="shorter(details.exception)"></li>
                                 </ul>
                             </div>
                             <div class="modal-footer">
@@ -124,7 +124,7 @@
                 <h4 align="center"><i class="lni lni-checkmark-circle"></i> Completed Queues</h4>
                 <br />
                 Total completed queue(s): <b v-if="Object.keys(completed).length">{{ completed.total }}</b>
-                <table class="table table-hover table-bordered table-sm mt-3">
+                <table class="table table-queue table-hover table-bordered table-sm mt-3">
                     <thead>
                         <th>#</th>
                         <th>Queue Name</th>
@@ -134,7 +134,7 @@
                     </thead>
                     <tbody v-if="Object.keys(completed).length">
                         <tr v-if="!completed.data.length">
-                            <td colspan="4" align="center">No completed queue as of now</td>
+                            <td colspan="5" align="center">No completed queue as of now</td>
                         </tr>
                         <tr v-else v-for="(queue, i) in completed.data" v-bind:key="i">
                             <td>{{ i + 1 }}</td>
@@ -322,15 +322,15 @@ export default {
     min-height: 465px;
 }
 
-table.table-bordered {
+.table.table-queue {
     border: 1px solid #404040;
     margin-top: 20px;
 }
-table.table-bordered > thead > th {
+table.table-queue > thead > th {
     border: 1px solid #404040;
     vertical-align: middle;
 }
-table.table-bordered > tbody > tr > td {
+table.table-queue > tbody > tr > td {
     border: 1px solid #404040;
     vertical-align: middle;
 }

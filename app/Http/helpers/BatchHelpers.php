@@ -53,6 +53,7 @@ class BatchHelpers {
     public static function removeCancelledAt($uuid) {
         $batch = BatchJobs::find($uuid);
         $batch->cancelled_at = NULL;
+        $batch->retry = 1;
         $batch->timestamps = false;
         $batch->save();
 

@@ -176,20 +176,21 @@ class ProductsController extends Controller
     }
 
     public function saveFile(Request $request) {
-        $filename = $request['file_name'];
+        $filename = ($request['file_name']);
         $file = $request['file'];
         $basis = $request['basis'];
         $transaction_id = $request['basis'] == 'purchasing' ? $request['transaction_id'] : NULL;
         $purchasing_type_id = $request['basis'] == 'purchasing' ? $request['purchasing_type_id'] : NULL;
         $extension = $file->getClientOriginalExtension();
         $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $chunk_count = 1000;
 
         $product_type = $this->getProductType($request['product_type_id']);
         $check_header = FileUpload::isValidHeader($file, $extension, $product_type);
         
         if(!$check_header['isValid']) {
             $data['heading'] = "Header(s) Incorrect";
-            $data['message'] = "The ff. headers are not found on your file </br></br> <b>".implode($check_header['difference'], ",")."</b>";
+            $data['message'] = "The ff. headers are not found on your file </br></br> \"<b>".implode($check_header['difference'], ",")."</b>\"";
             $data['success'] = false;
 
             return $data;
@@ -200,14 +201,14 @@ class ProductsController extends Controller
         $directory = FileUpload::createFileDirectory($name);
 
         // create chunk
-        $chunks = FileUpload::chunkFile($directory, $name, $file, 1000);
+        $chunks = FileUpload::chunkFile($directory, $name, $file, $chunk_count);
 
         // run queue on every chunk of file
         $chunk_files = glob(storage_path("app/$directory/*.csv"));
         $jobs = [];
 
         foreach ($chunk_files as $key => $chunk_file) {
-            $jobs[] = new ImportItemFile($header, $name."-".time(), $chunk_file, $request['product_type_id'], Auth::user()->id, $transaction_id, $purchasing_type_id, $request['basis']);
+            $jobs[] = new ImportItemFile($header, $key, $chunk_count, $filename, $name."-".time(), $chunk_file, $request['product_type_id'], Auth::user()->id, $transaction_id, $purchasing_type_id, $request['basis']);
         }
 
         $counter = Counter::find(7);
