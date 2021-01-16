@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
 use Throwable;
+use Illuminate\Support\Facades\Storage;
 
 use App\Http\helpers\TransactionHelpers;
 use App\Http\helpers\FileUpload;
@@ -122,7 +123,6 @@ class ProductsController extends Controller
     }
 
     public function saveManualItem(Request $request) {
-
         $counter = Counter::find(3);
 
         if($request['basis'] == 'purchasing') {
@@ -144,6 +144,26 @@ class ProductsController extends Controller
 
                 $purchase_order_type->inventories()->save($inventory);
 
+                $path = "product/Purchase_Order_type_$purchase_order_type->id";
+
+                if(!Storage::exists($path)) {
+                    Storage::makeDirectory($path);
+                } else {
+                    Storage::deleteDirectory($path);
+                    Storage::makeDirectory($path);
+                }
+
+                if($request->hasFile('photo')) {
+                    $file = $request['photo'];
+                    $extension = $file->getClientOriginalExtension();
+                    $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                    $exact_name = $name.".".$extension;
+
+                    $path = Storage::putFileAs(
+                        $path, $request->file('photo'), $exact_name
+                    );
+                }
+
                 TransactionHelpers::manageStatus($request['transaction_id']);
             }
         } else {
@@ -163,14 +183,14 @@ class ProductsController extends Controller
         $inventory = new Inventory();
         $inventory->stock_number = $stock_number;
         $inventory->product_type_id = $product_type_id;
-        $inventory->inventory_status_id = $request['inventory']['item_status_id'];
-        $inventory->inventory_cosmetic_Id = $request['inventory']['item_cosmetic_id'];
-        $inventory->item_cosmetic_description = $request['inventory']['item_cosmetic_description'];
-        $inventory->item_description = $request['inventory']['item_description'];
-        $inventory->origin_price = $request['inventory']['origin_price'];
-        $inventory->selling_price = $request['inventory']['selling_price'];
-        $inventory->discount_percentage = $request['inventory']['discount_percentage'];
-        $inventory->details = $request['inventory']['details'];
+        $inventory->inventory_status_id = json_decode($request['inventory'])->item_status_id;
+        $inventory->inventory_cosmetic_Id = json_decode($request['inventory'])->item_cosmetic_id;
+        $inventory->item_cosmetic_description = json_decode($request['inventory'])->item_cosmetic_description;
+        $inventory->item_description = json_decode($request['inventory'])->item_description;
+        $inventory->origin_price = json_decode($request['inventory'])->origin_price;
+        $inventory->selling_price = json_decode($request['inventory'])->selling_price;
+        $inventory->discount_percentage = json_decode($request['inventory'])->discount_percentage;
+        $inventory->details = json_decode($request['inventory'])->details;
 
         return $inventory;
     }
@@ -227,6 +247,7 @@ class ProductsController extends Controller
             }
             if((int) $batch->progress() == 100) {
                 BatchHelpers::generateDuration($batch->id);
+                BatchHelpers::importMessage($batch->id, "File content was successfully inserted to database.");
                 broadcast(new QueueProcessing("complete", BatchHelpers::getBatch($batch->id)));
             }
             BatchHelpers::removeFromProcessing($batch->id);

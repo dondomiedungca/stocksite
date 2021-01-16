@@ -15,7 +15,7 @@ class CreateInventoriesTable extends Migration
     {
         Schema::create('inventories', function (Blueprint $table) {
             $table->id();
-            $table->string('stock_number');
+            $table->string('stock_number')->nullable();
             $table->integer('inventory_status_id')->default(1);
             $table->integer('inventory_cosmetic_id')->default(1);
             $table->longText('item_cosmetic_description')->nullable();

@@ -101,7 +101,7 @@ class PurchasingController extends Controller
                                             'purchase_orders', 
                                             'purchase_orders.receiver.address.address_type', 
                                             'purchase_orders.user', 
-                                            'purchase_orders.purchase_order_types',
+                                            'purchase_orders.purchase_order_types.photo',
                                             'purchase_orders.purchase_order_types.product_types.product_attributes.column_selections'
                                         )->first();
 
@@ -121,10 +121,36 @@ class PurchasingController extends Controller
                                             'purchase_orders', 
                                             'purchase_orders.receiver.address.address_type', 
                                             'purchase_orders.user', 
-                                            'purchase_orders.purchase_order_types',
+                                            'purchase_orders.purchase_order_types.photo',
+                                            'purchase_orders.purchase_order_types.inventories',
                                             'purchase_orders.purchase_order_types.product_types.product_attributes.column_selections'
                                         )->first();
         $data['purchase_order'] = $purchaseOrder;
+
+        return response()->json($data);
+    }
+
+    public function removePurchasing($id = NULL) {
+        $transaction = Transactions::with('purchase_orders.purchase_order_types.inventories')->whereId($id)->first();
+
+        foreach ($transaction->purchase_orders->purchase_order_types as $key => $purchase_order_type) {
+            $purchase_order_type->inventories()->delete();
+            $purchase_order_type->inventories()->detach();
+        }
+
+        $transaction->delete();
+
+        $data['isSuccess'] = true;
+        $data['heading'] = 'Purchase Order Deleted';
+        $data['message'] = 'All item(s) in this purchasing order are now removed';
+
+        return response()->json($data);
+    }
+
+    public function getPurchasingType($id) {
+        $purchasing_type = PurchasingTypes::with('photo','product_types.product_attributes.column_selections')->whereId($id)->first();
+
+        $data['purchasing'] = $purchasing_type;
 
         return response()->json($data);
     }

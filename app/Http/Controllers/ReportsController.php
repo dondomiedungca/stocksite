@@ -76,14 +76,13 @@ class ReportsController extends Controller
     }
 
     public function getBatchesCompleted() {
-        $completed = DB::table('job_batches')
-                        ->where('finished_at', '!=', NULL)
+        $completed = BatchJobs::with('message')->where('finished_at', '!=', NULL)
                         ->where('pending_jobs', 0)
                         ->orderBy('created_at', 'DESC')
                         ->paginate(10);
 
         $completed->getCollection()->transform(function ($value) {
-            $value->created_date = date('M d, Y - h:i A', $value->created_at);
+            $value->created_date = $value->created_at->format('M d, Y - h:i A');
             return $value;
         });
 

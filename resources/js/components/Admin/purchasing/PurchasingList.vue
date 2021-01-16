@@ -22,10 +22,11 @@
         <div class="row">
             <div class="col-md-12 mb-5">
                 <div class="table-responsive">
-                    <table class="table table-striped table-sm">
+                    <table class="table table-bordered table-striped table-sm">
                         <thead>
                             <tr>
                                 <th>#</th>
+                                <th>Trash</th>
                                 <th>Purchase Order #</th>
                                 <th>Transaction Status</th>
                                 <th>Delivery Status</th>
@@ -38,9 +39,17 @@
                                 <th>Date Created</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr v-for="(purchase_order, i) in purchaseOrders.data" v-bind:key="i">
+                        <tbody v-if="Object.keys(purchaseOrders).length">
+                            <tr v-if="!purchaseOrders.data.length">
+                                <td colspan="12" align="center">No Results Found</td>
+                            </tr>
+                            <tr v-else v-for="(purchase_order, i) in purchaseOrders.data" v-bind:key="i">
                                 <td>#{{ i + 1 }}</td>
+                                <td>
+                                    <button @click="removePurchasing(purchase_order.id)" class="btn btn-danger btn-sm">
+                                        <i class="lni lni-trash"></i>
+                                    </button>
+                                </td>
                                 <td>
                                     <a :href="'/admin/purchasing/purchase-order/' + purchase_order.id">{{ purchase_order.transaction_code }}</a>
                                 </td>
@@ -109,6 +118,32 @@ export default {
             axios.get("/admin/currency/get-currency").then(result => {
                 this.currency = result.data
             })
+        },
+        removePurchasing: function(transaction_id) {
+            var self = this
+            swal.queue([
+                {
+                    title: "Remove Purchasing",
+                    text: "All inventories under this purchasing will remove, proceed?",
+                    icon: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonColor: "#42d1f5",
+                    confirmButtonText: "Yes, remove now",
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        return axios.get("/admin/purchasing/remove-purchasing/" + transaction_id).then(response => {
+                            swal.fire({
+                                title: response.data.heading,
+                                text: response.data.message,
+                                icon: response.data.isSuccess ? "success" : "error"
+                            })
+                            self.getList(self.purchaseOrders.current_page)
+                        })
+                    }
+                }
+            ])
         }
     }
 }

@@ -2,6 +2,14 @@
     <div v-if="Object.keys(base_product_type).length && item_data.stock_number != ''">
         <div class="row">
             <div class="col-md-12">
+                <h4>* Product Photo</h4>
+                <div class="row">
+                    <div class="form-group col-md-4">
+                        <label for="">Choose file</label>
+                        <input id="upload-photo" ref="uploadPhoto" @change="parseFilePhoto($event)" type="file" class="form-control form-control-sm" :class="{ 'is-invalid': $v.photo.$error }" />
+                        <div class="invalid-feedback" v-if="$v.photo.$error">This photo is required</div>
+                    </div>
+                </div>
                 <h4>* Primary Details</h4>
                 <div class="row">
                     <div class="form-group col-md-4">
@@ -87,6 +95,8 @@ export default {
     props: ["basis", "product_type", "purchasing_type_id", "transaction_id"],
     data() {
         return {
+            photo: "",
+            purchasing_type: {},
             base_product_type: {},
             item_data: {
                 stock_number: "",
@@ -108,7 +118,7 @@ export default {
         this.createValidation()
         this.getStockNumber()
         this.getCosmetics()
-        this.getStatuses()
+        this.getStatuses(), this.getPurchasing()
     },
     methods: {
         getProductTypes: function() {},
@@ -118,6 +128,11 @@ export default {
             } else {
                 this.base_product_type = this.product_type
             }
+        },
+        getPurchasing: function() {
+            axios.get("/admin/purchasing/get-purchasing-type/" + this.purchasing_type_id).then(res => {
+                this.purchasing_type = res.data.purchasing
+            })
         },
         getStockNumber: function() {
             axios.get("/admin/products/get-stock-number").then(res => {
@@ -133,6 +148,17 @@ export default {
             axios.get("/admin/products/get-item-statuses").then(res => {
                 this.statuses = res.data.statuses
             })
+        },
+        createValidationPhoto: function() {
+            var validations = {}
+
+            if (this.purchasing_type.photo == null) {
+                validations = {
+                    required
+                }
+            }
+
+            return validations
         },
         createValidation: function() {
             var validations = {}
@@ -153,10 +179,21 @@ export default {
 
             return validations
         },
+        parseFilePhoto: function() {
+            let uploadFiles = document.getElementById("upload-photo")
+            this.photo = this.$refs.uploadPhoto.files[0]
+        },
         saveItem: function() {
             this.$v.$touch()
             if (!this.$v.$invalid) {
                 var self = this
+                let formData = new FormData()
+                formData.append("photo", self.photo)
+                formData.append("inventory", JSON.stringify(self.item_data))
+                formData.append("purchasing_type_id", self.purchasing_type_id)
+                formData.append("basis", self.basis)
+                formData.append("transaction_id", self.transaction_id)
+                formData.append("product_type_id", self.base_product_type.id)
                 swal.queue([
                     {
                         title: "Save Item",
@@ -169,12 +206,8 @@ export default {
                         showLoaderOnConfirm: true,
                         preConfirm: () => {
                             return axios
-                                .post(`/admin/products/save-manual-item`, {
-                                    inventory: self.item_data,
-                                    purchasing_type_id: self.purchasing_type_id,
-                                    basis: this.basis,
-                                    transaction_id: this.transaction_id,
-                                    product_type_id: this.base_product_type.id
+                                .post(`/admin/products/save-manual-item`, formData, {
+                                    headers: { "Content-Type": "multipart/form-data" }
                                 })
                                 .then(result => {
                                     swal.fire(result.data.heading, result.data.message, result.data.success ? "success" : "error")
@@ -190,6 +223,7 @@ export default {
     },
     validations() {
         return {
+            photo: this.createValidationPhoto(),
             item_data: {
                 item_cosmetic_description: {
                     required

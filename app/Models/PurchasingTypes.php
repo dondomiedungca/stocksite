@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 use App\Models\Inventory;
+use App\Models\Photable;
 
 class PurchasingTypes extends Model
 {
@@ -32,5 +33,10 @@ class PurchasingTypes extends Model
     public function inventories()
     {
         return $this->morphToMany(Inventory::class, 'transaction_item');
+    }
+
+    public function photo()
+    {
+        return $this->morphOne(Photable::class, 'photable');
     }
 }

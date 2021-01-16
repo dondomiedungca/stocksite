@@ -3,6 +3,7 @@
 namespace App\Http\helpers;
 
 use App\Models\BatchJobs;
+use App\Models\BatchMessage;
 use App\Models\CurrentRunning;
 use App\Events\QueueProcessing;
 
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 class BatchHelpers {
 
     public static function getBatch($uuid) {
-        $batch = BatchJobs::where('id', $uuid)
+        $batch = BatchJobs::with('message')->where('id', $uuid)
                             ->get();
 
         $batch->transform(function ($value) {
@@ -71,6 +72,17 @@ class BatchHelpers {
         $batch->duration = $totalDuration;
         $batch->timestamps = false;
         $batch->save();
+    }
+
+    public static function importMessage($uuid = NULL, $message = NULL) {
+        $batch = BatchJobs::find($uuid);
+
+        $mess = new BatchMessage();
+        $mess->message = $message;
+        $mess->batch()->associate($batch);
+        $mess->save();
+
+        return true;
     }
 
 }

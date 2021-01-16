@@ -47,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
             if((int) $batch_details->failedJobs > 0) {
                 if((int) $batch_details->progress() == 100) {
                     BatchHelpers::generateDuration($batch->batchId);
+                    BatchHelpers::importMessage($batch->batchId, "File content was successfully inserted to database.");
                     broadcast(new QueueProcessing("complete", BatchHelpers::getBatch($batch->batchId)));
                     $remove = BatchHelpers::removeFromProcessing($batch->batchId);
                 }

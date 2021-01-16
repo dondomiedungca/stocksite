@@ -36,4 +36,8 @@ class BatchJobs extends Model
 
         return $failed;
     }
+
+    public function message() {
+        return $this->hasOne('App\Models\BatchMessage', 'batch_id');
+    }
 }

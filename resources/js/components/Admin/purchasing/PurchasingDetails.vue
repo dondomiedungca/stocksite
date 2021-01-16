@@ -87,7 +87,7 @@
                             <td>{{ numberWithCommas(inventory.total_items_to_receive) }}</td>
                             <td><span v-html="currency.symbol"></span> {{ numberWithCommas(inventory.inventory_total_price.toFixed(2)) }}</td>
                             <td>
-                                <button @click="receive(inventory)" class="btn btn-primary btn-sm"><i class="fa fa-arrow-down"></i> Receive Items</button>
+                                <button :disabled="inventory.total_items_to_receive == 0 ? true : false" @click="receive(inventory)" class="btn btn-primary btn-sm"><i class="fa fa-arrow-down"></i> Receive Items</button>
                             </td>
                         </tr>
                         <tr>

@@ -110,6 +110,8 @@ Route::group(['middleware' => 'adminRoute'], function () {
     Route::prefix('admin/purchasing')->group(function () {
         Route::post('/create', [PurchasingController::class, 'store']);
         Route::get('/purchasing-all-list', [PurchasingController::class, 'getAllPurchaseOrders']);
+        Route::get('/get-purchasing-type/{id}', [PurchasingController::class, 'getPurchasingType']);
+        Route::get('/remove-purchasing/{id}', [PurchasingController::class, 'removePurchasing']);
     });
 
     Route::prefix('admin/reports')->group(function () {

@@ -79,7 +79,7 @@ class ImportItemFile implements ShouldQueue
             $checked_data = isNotEmpty($this->product_type_id, $data);
 
             if($checked_data['isValid']) {
-                Log::info($data);
+                Products::importItems($this->product_type_id, $this->purchasing_type_id, $data);
             } else {
                 $this->batch()->cancel();
                 $line = (((int) $this->chunk_position) * (int) $this->chunk_count) + ($key + 1);
@@ -87,6 +87,7 @@ class ImportItemFile implements ShouldQueue
             }
         }
 
+        
     }
 
     public function failed(\Exception $e) {

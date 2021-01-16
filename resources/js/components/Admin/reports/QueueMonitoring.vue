@@ -130,21 +130,30 @@
                         <th>Queue Name</th>
                         <th>Queue Tag</th>
                         <th>Process Duration</th>
+                        <th>Message</th>
                         <th>Date Queued</th>
                     </thead>
                     <tbody v-if="Object.keys(completed).length">
                         <tr v-if="!completed.data.length">
-                            <td colspan="5" align="center">No completed queue as of now</td>
+                            <td colspan="6" align="center">No completed queue as of now</td>
                         </tr>
                         <tr v-else v-for="(queue, i) in completed.data" v-bind:key="i">
                             <td>{{ i + 1 }}</td>
                             <td>{{ name(queue.name) }}</td>
                             <td>{{ tag(queue.name) }}</td>
                             <td>{{ queue.duration }}</td>
+                            <td align="center">
+                                <button @click="showMessage(queue.message.message)" class="btn btn-primary btn-sm">
+                                    <i class="lni lni-bubble"></i>
+                                </button>
+                            </td>
                             <td>{{ queue.created_date }}</td>
                         </tr>
                     </tbody>
                 </table>
+                <modal ref="message" :keyId="'message'" :title="'Queue Success Info'" :show_submit="false">
+                    <p v-html="this.message"></p>
+                </modal>
                 <paginate :data="completed" :limit="3" v-on:pagination-change-page="getBatchesCompleted"></paginate>
             </div>
         </div>
@@ -169,7 +178,8 @@ export default {
             //
             for_processing_queues_isManaging: false,
             failedDetails: {},
-            for_retry: {}
+            for_retry: {},
+            message: ""
         }
     },
     notifications: {
@@ -296,6 +306,10 @@ export default {
         generateRetry: function(index) {
             this.for_retry = this.faileds.data[index]
             this.$refs.retry.trigger()
+        },
+        showMessage: function(message) {
+            this.message = message
+            this.$refs.message.trigger()
         }
     }
 }
