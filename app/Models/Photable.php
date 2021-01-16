@@ -12,9 +12,7 @@ class Photable extends Model
     protected $table = 'photables';
 
     protected $fillable = [
-        'photo_name',
-        'photable_id',
-        'photable_type'
+        'photo_name'
     ];
 
     public function photable()

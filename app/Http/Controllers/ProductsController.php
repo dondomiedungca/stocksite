@@ -26,6 +26,7 @@ use App\Models\Transactions;
 use App\Models\PurchaseOrders;
 use App\Models\PurchasingTypes;
 use App\Models\Inventory;
+use App\Models\Photable;
 
 class ProductsController extends Controller
 {
@@ -159,9 +160,12 @@ class ProductsController extends Controller
                     $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                     $exact_name = $name.".".$extension;
 
-                    $path = Storage::putFileAs(
-                        $path, $request->file('photo'), $exact_name
-                    );
+                    Storage::putFileAs($path, $request->file('photo'), $exact_name);
+
+                    $photo = new Photable();
+                    $photo->photo_name = $exact_name;
+
+                    $purchase_order_type->photo()->save($photo);
                 }
 
                 TransactionHelpers::manageStatus($request['transaction_id']);

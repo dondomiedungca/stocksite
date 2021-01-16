@@ -1,9 +1,9 @@
 <template>
-    <div v-if="Object.keys(base_product_type).length && item_data.stock_number != ''">
+    <div v-if="Object.keys(base_product_type).length && item_data.stock_number != '' && Object.keys(purchasing_type).length">
         <div class="row">
             <div class="col-md-12">
-                <h4>* Product Photo</h4>
-                <div class="row">
+                <h4 v-if="purchasing_type.photo == null">* Product Photo</h4>
+                <div v-if="purchasing_type.photo == null" class="row">
                     <div class="form-group col-md-4">
                         <label for="">Choose file</label>
                         <input id="upload-photo" ref="uploadPhoto" @change="parseFilePhoto($event)" type="file" class="form-control form-control-sm" :class="{ 'is-invalid': $v.photo.$error }" />
@@ -116,6 +116,7 @@ export default {
     created() {
         this.initialize()
         this.createValidation()
+        this.createValidationPhoto()
         this.getStockNumber()
         this.getCosmetics()
         this.getStatuses(), this.getPurchasing()
