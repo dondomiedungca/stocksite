@@ -41,7 +41,7 @@ class ReportsController extends Controller
 
     public function getBatches() {
         $forProcess = BatchJobs::where('cancelled_at', NULL)
-                        ->where('pending_jobs', '!=', 0)
+                        ->where('pending_jobs', '>', 0)
                         ->whereNotIn('id', function($query)
                         {
                             $query->select('uuid')
@@ -77,7 +77,7 @@ class ReportsController extends Controller
 
     public function getBatchesCompleted() {
         $completed = BatchJobs::with('message')->where('finished_at', '!=', NULL)
-                        ->where('pending_jobs', 0)
+                        ->where('pending_jobs', '<=', 0)
                         ->orderBy('created_at', 'DESC')
                         ->paginate(10);
 

@@ -15,9 +15,11 @@ use App\Models\Transactions;
 use App\Models\PurchasingTypes;
 use App\Models\Inventory;
 use App\Models\FileUploaded;
+
 use App\Events\QueueProcessing;
 use App\Http\helpers\BatchHelpers;
 use App\Http\helpers\Products;
+use App\Http\helpers\PhotoHelpers;
 
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -28,6 +30,8 @@ class ImportItemFile implements ShouldQueue
 
     public $header;
     public $chunk_position;
+    public $photo_path;
+    public $photo_name;
     public $chunk_count;
     public $filename_time;
     public $filename;
@@ -44,9 +48,11 @@ class ImportItemFile implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($header, $chunk_position, $chunk_count, $filename, $filename_time, $chunk_directory, $product_type_id = NULL, $user_id = NULL, $transaction_id = NULL, $purchasing_type_id = NULL, $basis = NULL)
+    public function __construct($header, $photo_name, $photo_path, $chunk_position, $chunk_count, $filename, $filename_time, $chunk_directory, $product_type_id = NULL, $user_id = NULL, $transaction_id = NULL, $purchasing_type_id = NULL, $basis = NULL)
     {
         $this->header = $header;
+        $this->photo_name = $photo_name;
+        $this->photo_path = $photo_path;
         $this->chunk_position = $chunk_position;
         $this->chunk_count = $chunk_count;
         $this->filename_time = $filename_time;
@@ -74,12 +80,21 @@ class ImportItemFile implements ShouldQueue
         if($this->chunk_position == 0) {
            unset($csv_data[0]);
         }
+        // if this kind of importing is related on purchasing type
+        if($this->purchasing_type_id != NULL) {
+            $purchasing_type = PurchasingTypes::find($this->purchasing_type_id);
+            if(!$purchasing_type->photo()->exists()) {
+                $photable = PhotoHelpers::saveThroughFileName($this->photo_path, $this->photo_name, $this->purchasing_type_id, NULL);
+            }
+        }
+
+        Log::info($csv_data);
         foreach ($csv_data as $key => $row) {
             $data = array_combine($this->header, $row);
             $checked_data = isNotEmpty($this->product_type_id, $data);
 
             if($checked_data['isValid']) {
-                Products::importItems($this->product_type_id, $this->purchasing_type_id, $data);
+                Products::importItems($this->photo_path, $this->photo_name, $this->product_type_id, $this->purchasing_type_id, $data);
             } else {
                 $this->batch()->cancel();
                 $line = (((int) $this->chunk_position) * (int) $this->chunk_count) + ($key + 1);
@@ -87,7 +102,6 @@ class ImportItemFile implements ShouldQueue
             }
         }
 
-        
     }
 
     public function failed(\Exception $e) {

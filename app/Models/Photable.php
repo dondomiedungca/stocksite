@@ -12,6 +12,7 @@ class Photable extends Model
     protected $table = 'photables';
 
     protected $fillable = [
+        'path',
         'photo_name'
     ];
 

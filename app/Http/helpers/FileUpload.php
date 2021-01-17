@@ -30,8 +30,7 @@ class FileUpload {
         }
     }
 
-    public static function createFileDirectory($filename) {
-        $path = "product/temp/$filename";
+    public static function createFileDirectory($path) {
 
         if(!Storage::exists($path)) {
             Storage::makeDirectory($path);
@@ -53,7 +52,20 @@ class FileUpload {
 
         return true;
     }
+    
+    public static function checkIfDirectoryExist($path) {
+        if(!Storage::exists($path)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 
+    public static function removePath($path) {
+        Storage::deleteDirectory($path);
+
+        return true;
+    }
 }
 
 ?>

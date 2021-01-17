@@ -16,6 +16,16 @@
         <div class="col-md-12">
             <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#exampleModal"><i class="fa fa-upload"></i> Upload File</button>
         </div>
+        <div class="col-md-12 mt-4 mb-5">
+            <h4 v-if="purchasing_type.photo == null">* Product Photo</h4>
+            <div v-if="purchasing_type.photo == null" class="row">
+                <div class="form-group col-md-4">
+                    <label for="">Choose file</label>
+                    <input id="upload-photo" ref="uploadPhoto" @change="parseFilePhoto($event)" type="file" class="form-control form-control-sm" :class="{ 'is-invalid': $v.photo.$error }" />
+                    <div class="invalid-feedback" v-if="$v.photo.$error">This photo is required</div>
+                </div>
+            </div>
+        </div>
         <div class="modal fade" id="exampleModal" tabindex="-1" data-backdrop="static" data-keyboard="false" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <form method="POST" enctype="multipart/form-data" @submit.prevent="uploadItems">
@@ -53,10 +63,12 @@
 </template>
 
 <script>
+import { required } from "vuelidate/lib/validators"
 export default {
     props: ["basis", "product_type", "purchasing_type_id", "transaction_id"],
     created() {
         this.initialize()
+        this.getPurchasing()
     },
     data() {
         return {
@@ -64,7 +76,9 @@ export default {
             loaded: 0,
             file: "",
             fileName: "",
-            base_product_type: {}
+            base_product_type: {},
+            purchasing_type: {},
+            photo: ""
         }
     },
     methods: {
@@ -75,6 +89,11 @@ export default {
                 this.getProductTypes()
             }
         },
+        getPurchasing: function() {
+            axios.get("/admin/purchasing/get-purchasing-type/" + this.purchasing_type_id).then(res => {
+                this.purchasing_type = res.data.purchasing
+            })
+        },
         parseFile: function() {
             let uploadFiles = document.getElementById("upload-file")
             let file_Name = uploadFiles.value.split("\\")
@@ -82,41 +101,68 @@ export default {
             this.file = this.$refs.uploadFile.files[0]
         },
         uploadItems: function() {
-            let formData = new FormData()
-            formData.append("file", this.file)
-            formData.append("file_name", this.fileName)
-            formData.append("product_type_id", this.base_product_type.id)
-            formData.append("basis", this.basis)
-            formData.append("purchasing_type_id", this.purchasing_type_id)
+            this.$v.$touch()
+            if (!this.$v.$invalid) {
+                let formData = new FormData()
+                formData.append("photo", this.photo)
+                formData.append("file", this.file)
+                formData.append("file_name", this.fileName)
+                formData.append("product_type_id", this.base_product_type.id)
+                formData.append("basis", this.basis)
+                formData.append("purchasing_type_id", this.purchasing_type_id)
 
-            var vm = this
-            this.saving = true
-            axios
-                .post("/admin/products/save-file", formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                    onUploadProgress: progressEvent => {
-                        let newLoad = parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total)) - (Math.floor(Math.random() * 50) + 1)
-                        if (newLoad > vm.loaded) {
-                            vm.loaded = newLoad
+                var vm = this
+                this.saving = true
+                axios
+                    .post("/admin/products/save-file", formData, {
+                        headers: { "Content-Type": "multipart/form-data" },
+                        onUploadProgress: progressEvent => {
+                            let newLoad = parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total)) - (Math.floor(Math.random() * 50) + 1)
+                            if (newLoad > vm.loaded) {
+                                vm.loaded = newLoad
+                            }
                         }
-                    }
-                })
-                .then(response => {
-                    if (response.data.success) {
-                        vm.loaded = 100
-                    }
-                    setTimeout(() => {
-                        this.saving = false
-                        swal.fire({ title: response.data.heading, icon: response.data.success ? "success" : "error", html: response.data.message })
-                        document.getElementById("upload-file").value = ""
-                        vm.loaded = 0
-                        vm.file = ""
-                        vm.fileName = ""
-                    }, 1000)
-                })
-                .catch(error => {
-                    swal.fire("Something went wrong", "Something error occured while uploading", "error")
-                })
+                    })
+                    .then(response => {
+                        if (response.data.success) {
+                            vm.loaded = 100
+                        }
+                        setTimeout(() => {
+                            this.saving = false
+                            swal.fire({ title: response.data.heading, icon: response.data.success ? "success" : "error", html: response.data.message })
+                            document.getElementById("upload-file").value = ""
+                            vm.loaded = 0
+                            vm.file = ""
+                            vm.fileName = ""
+                        }, 1000)
+                    })
+                    .catch(error => {
+                        swal.fire("Something went wrong", "Something error occured while uploading", "error")
+                    })
+            }
+        },
+        createValidationPhoto: function() {
+            var validations = {}
+
+            if (this.purchasing_type.photo == null) {
+                validations = {
+                    required
+                }
+            }
+
+            return validations
+        },
+        parseFilePhoto: function() {
+            let uploadFiles = document.getElementById("upload-photo")
+            this.photo = this.$refs.uploadPhoto.files[0]
+        }
+    },
+    validations() {
+        return {
+            photo: this.createValidationPhoto(),
+            file: {
+                required
+            }
         }
     }
 }

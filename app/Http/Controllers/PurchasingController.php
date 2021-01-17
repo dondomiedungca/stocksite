@@ -12,6 +12,7 @@ use App\Models\Counter;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Storage;
 
 class PurchasingController extends Controller
 {
@@ -135,7 +136,9 @@ class PurchasingController extends Controller
 
         foreach ($transaction->purchase_orders->purchase_order_types as $key => $purchase_order_type) {
             $purchase_order_type->inventories()->delete();
+            Storage::deleteDirectory($purchase_order_type->photo->path);
             $purchase_order_type->inventories()->detach();
+            $purchase_order_type->photo()->delete();
         }
 
         $transaction->delete();

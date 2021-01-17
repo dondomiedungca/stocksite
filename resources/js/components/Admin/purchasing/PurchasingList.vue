@@ -44,24 +44,24 @@
                                 <td colspan="12" align="center">No Results Found</td>
                             </tr>
                             <tr v-else v-for="(purchase_order, i) in purchaseOrders.data" v-bind:key="i">
-                                <td>#{{ i + 1 }}</td>
-                                <td>
+                                <td align="center">#{{ i + 1 }}</td>
+                                <td align="center">
                                     <button @click="removePurchasing(purchase_order.id)" class="btn btn-danger btn-sm">
                                         <i class="lni lni-trash"></i>
                                     </button>
                                 </td>
-                                <td>
+                                <td align="center">
                                     <a :href="'/admin/purchasing/purchase-order/' + purchase_order.id">{{ purchase_order.transaction_code }}</a>
                                 </td>
-                                <td>{{ purchase_order.transaction_status.transaction_status_name }}</td>
-                                <td>{{ purchase_order.delivery_status.name }}</td>
-                                <td>{{ purchase_order.item_status.name }}</td>
-                                <td>{{ purchase_order.supplier.supplier_name }}</td>
-                                <td>{{ purchase_order.purchase_orders.receiver.receiver_first_name }} {{ purchase_order.purchase_orders.receiver.receiver_last_name }}</td>
-                                <td>{{ purchase_order.purchase_orders.purchase_order_types.length }}</td>
-                                <td><span v-html="currency.symbol"></span> {{ numberWithCommas(purchase_order.total_price.toFixed(2)) }}</td>
-                                <td>{{ purchase_order.purchase_orders.user.first_name }} {{ purchase_order.purchase_orders.user.last_name }}</td>
-                                <td>{{ date_format(purchase_order.created_at) }}</td>
+                                <td align="center">{{ purchase_order.transaction_status.transaction_status_name }}</td>
+                                <td align="center">{{ purchase_order.delivery_status.name }}</td>
+                                <td align="center">{{ purchase_order.item_status.name }}</td>
+                                <td align="center">{{ purchase_order.supplier.supplier_name }}</td>
+                                <td align="center">{{ purchase_order.purchase_orders.receiver.receiver_first_name }} {{ purchase_order.purchase_orders.receiver.receiver_last_name }}</td>
+                                <td align="center">{{ purchase_order.purchase_orders.purchase_order_types.length }}</td>
+                                <td align="center"><span v-html="currency.symbol"></span> {{ numberWithCommas(purchase_order.total_price.toFixed(2)) }}</td>
+                                <td align="center">{{ purchase_order.purchase_orders.user.first_name }} {{ purchase_order.purchase_orders.user.last_name }}</td>
+                                <td align="center">{{ date_format(purchase_order.created_at) }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -149,4 +149,11 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+table.table-bordered > thead > th {
+    vertical-align: middle;
+}
+table.table-bordered > tbody > tr > td {
+    vertical-align: middle;
+}
+</style>

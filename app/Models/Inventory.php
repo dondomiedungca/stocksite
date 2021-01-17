@@ -31,4 +31,9 @@ class Inventory extends Model
     {
         return $this->morphedByMany(PurchasingTypes::class, 'transaction_item');
     }
+
+    public function photo()
+    {
+        return $this->morphOne(Photable::class, 'photable');
+    }
 }

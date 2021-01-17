@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\helpers\TransactionHelpers;
 use App\Http\helpers\FileUpload;
 use App\Http\helpers\BatchHelpers;
+use App\Http\helpers\PhotoHelpers;
 
 use App\Jobs\ImportItemFile;
 use App\Events\QueueProcessing;
@@ -145,27 +146,11 @@ class ProductsController extends Controller
 
                 $purchase_order_type->inventories()->save($inventory);
 
-                $path = "product/Purchase_Order_type_$purchase_order_type->id";
+                if(!$purchase_order_type->photo()->exists()) {
+                    $path = "product/Purchase_Order_Type_$purchase_order_type->id";
+                    $directory = FileUpload::createFileDirectory($path);
 
-                if(!Storage::exists($path)) {
-                    Storage::makeDirectory($path);
-                } else {
-                    Storage::deleteDirectory($path);
-                    Storage::makeDirectory($path);
-                }
-
-                if($request->hasFile('photo')) {
-                    $file = $request['photo'];
-                    $extension = $file->getClientOriginalExtension();
-                    $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-                    $exact_name = $name.".".$extension;
-
-                    Storage::putFileAs($path, $request->file('photo'), $exact_name);
-
-                    $photo = new Photable();
-                    $photo->photo_name = $exact_name;
-
-                    $purchase_order_type->photo()->save($photo);
+                    $photable = PhotoHelpers::createPhotable($path, $request, $purchase_order_type);
                 }
 
                 TransactionHelpers::manageStatus($request['transaction_id']);
@@ -174,6 +159,13 @@ class ProductsController extends Controller
             $counter->increment('counter');
             $stock_number = $counter->prefix . str_pad($counter->counter, 6,'0',STR_PAD_LEFT);
             $inventory = $this->createInventory($request, $stock_number, $request['product_type_id']);
+            
+            $path = "product/Product_Image_$inventory->id";
+
+            if(!FileUpload::checkIfDirectoryExist($path)) {
+                $directory = FileUpload::createFileDirectory($path);
+                $photable = PhotoHelpers::createPhotable($path, $request, $inventory);
+            }
         }
 
         $data['success'] = true;
@@ -200,13 +192,25 @@ class ProductsController extends Controller
     }
 
     public function saveFile(Request $request) {
-        $filename = ($request['file_name']);
+        $filename = $request['file_name'];
         $file = $request['file'];
+        $extension = $file->getClientOriginalExtension();
+        $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+        if($request->hasFile('photo')) {
+            $photo = $request['photo'];
+            $photo_extension = $photo->getClientOriginalExtension();
+            $photo_name = pathinfo($photo->getClientOriginalName(), PATHINFO_FILENAME);
+            $photo_file_name = $photo_name.".".$photo_extension;
+        } else {
+            $photo_file_name = NULL;
+            $photo_path = NULL;
+        }
+
         $basis = $request['basis'];
         $transaction_id = $request['basis'] == 'purchasing' ? $request['transaction_id'] : NULL;
         $purchasing_type_id = $request['basis'] == 'purchasing' ? $request['purchasing_type_id'] : NULL;
-        $extension = $file->getClientOriginalExtension();
-        $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
         $chunk_count = 1000;
 
         $product_type = $this->getProductType($request['product_type_id']);
@@ -222,7 +226,21 @@ class ProductsController extends Controller
         $header = $check_header['header'];
 
         // create directory
-        $directory = FileUpload::createFileDirectory($name);
+        $path = "product/temp/$filename";
+        $directory = FileUpload::createFileDirectory($path);
+
+        if($request->hasFile('photo')) {
+            if($purchasing_type_id != NULL) {
+                $purchasing_type = PurchasingTypes::find($purchasing_type_id);
+                if(!$purchasing_type->photo()->exists()) {
+                    $photo_path = "product/Purchase_Order_Type_$purchasing_type_id";
+                    PhotoHelpers::savePhoto($photo_path, $photo, $photo_file_name);
+                }
+            } else {
+                $photo_path = "product/Product_Image_".time();
+                PhotoHelpers::savePhoto($photo_path, $photo, $photo_file_name);
+            }
+        }
 
         // create chunk
         $chunks = FileUpload::chunkFile($directory, $name, $file, $chunk_count);
@@ -232,19 +250,19 @@ class ProductsController extends Controller
         $jobs = [];
 
         foreach ($chunk_files as $key => $chunk_file) {
-            $jobs[] = new ImportItemFile($header, $key, $chunk_count, $filename, $name."-".time(), $chunk_file, $request['product_type_id'], Auth::user()->id, $transaction_id, $purchasing_type_id, $request['basis']);
+            $jobs[] = new ImportItemFile($header, $photo_file_name, $photo_path, $key, $chunk_count, $filename, $name."-".time(), $chunk_file, $request['product_type_id'], Auth::user()->id, $transaction_id, $purchasing_type_id, $request['basis']);
         }
 
         $counter = Counter::find(7);
 		$counter->increment('counter');
         $queue_no = $counter->prefix . str_pad($counter->counter, 6,'0',STR_PAD_LEFT);
 
-        $batch = Bus::batch($jobs)->then(function (Batch $batch) {
+        $batch = Bus::batch($jobs)->then(function (Batch $batch){
             // All jobs completed successfully...
         })->catch(function (Batch $batch, Throwable $e) {
             // First batch job failure detected...
             $batch->cancel();
-        })->finally(function (Batch $batch) {
+        })->finally(function (Batch $batch) use ($directory) {
             // The batch has finished executing...
             if($batch->cancelled()) {
                 broadcast(new QueueProcessing("failed", BatchHelpers::getBatch($batch->id)));
@@ -253,6 +271,7 @@ class ProductsController extends Controller
                 BatchHelpers::generateDuration($batch->id);
                 BatchHelpers::importMessage($batch->id, "File content was successfully inserted to database.");
                 broadcast(new QueueProcessing("complete", BatchHelpers::getBatch($batch->id)));
+                FileUpload::removePath($directory);
             }
             BatchHelpers::removeFromProcessing($batch->id);
         })->name($name.' - Product File Uploading*_*'.$queue_no)->onQueue('product_imports')->dispatch();

@@ -119,7 +119,8 @@ export default {
         this.createValidationPhoto()
         this.getStockNumber()
         this.getCosmetics()
-        this.getStatuses(), this.getPurchasing()
+        this.getStatuses()
+        this.getPurchasing()
     },
     methods: {
         getProductTypes: function() {},
