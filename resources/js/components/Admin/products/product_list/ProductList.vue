@@ -99,18 +99,32 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-12">
+                <paginate :data="products" :limit="3" v-on:pagination-change-page="getProducts"></paginate>
+            </div>
+        </div>
         <modal ref="details" :keyId="'details'" :title="title + ' - Full Details'" :show_submit="false">
             <product-details :details="details"></product-details>
         </modal>
-        <modal ref="edit" :keyId="'edit'" :title="title + ' - Edit Mode'" :show_submit="false">
-            <edit-product :product="forEdit" :product_type="product_type"></edit-product>
+        <modal ref="edit" :keyId="'edit'" :title="title + ' - Edit Mode'" :show_submit="true" :icon="'fa fa-check'" :submit_name="'Save Changes'" @met="validateThenSAve">
+            <edit-product ref="validate" :product="forEdit" :product_type="product_type"></edit-product>
         </modal>
     </div>
 </template>
 
 <script>
 import moment from "moment"
+import Pagination from "./../../../Reusable/Pagination"
 export default {
+    components: {
+        paginate: Pagination
+    },
+    watch: {
+        selected_product_type_id: function(newVal, oldVal) {
+            this.getProducts(1)
+        }
+    },
     created() {
         this.getProductTypes()
         this.getProducts()
@@ -173,6 +187,9 @@ export default {
             this.forEdit = product
             this.product_type = product.product_type
             this.$refs.edit.trigger()
+        },
+        validateThenSAve: function() {
+            this.$refs.validate.validate()
         }
     }
 }

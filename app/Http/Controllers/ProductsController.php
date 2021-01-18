@@ -311,4 +311,26 @@ class ProductsController extends Controller
 
         return response()->json($products);
     }
+
+    public function updateProduct(Request $request) {
+        $inventory = $request['inventory'];
+
+        $inv = Inventory::find($inventory['id']);
+        $inv->inventory_status_id = $inventory['inventory_status_id'];
+        $inv->inventory_cosmetic_id = $inventory['inventory_cosmetic_id'];
+        $inv->item_cosmetic_description = $inventory['item_cosmetic_description'];
+        $inv->item_description = $inventory['item_description'];
+        $inv->origin_price = $inventory['origin_price'];
+        $inv->selling_price = $inventory['selling_price'];
+        $inv->discount_percentage = $inventory['discount_percentage'];
+        $inv->details = $inventory['details'];
+        $inv->save();
+
+        $data['heading'] = 'Product Updated';
+        $data['isSuccess'] = true;
+        $data['message'] = $inventory['stock_number']." was successfully updated";
+
+        return response()->json($data);
+
+    }
 }
