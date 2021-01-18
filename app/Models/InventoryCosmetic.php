@@ -12,4 +12,8 @@ class InventoryCosmetic extends Model
     protected $fillable = [
         'name'
     ];
+
+    public function inventory() {
+        return $this->hasMany('App\Models\Inventory', 'inventory_cosmetic_id');
+    }
 }

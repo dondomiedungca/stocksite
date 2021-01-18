@@ -23,6 +23,7 @@
                 </button>
             </div>
         </div>
+        <bread-crumbs :urls="urls"></bread-crumbs>
         <div class="row">
             <div class="col-md-12 mb-5">
                 <div class="card bg-light">
@@ -232,6 +233,17 @@ const greater = value => value > 0
 export default {
     data() {
         return {
+            urls: [
+                {
+                    name: "Purchasing",
+                    url: "/admin/purchasing",
+                    active: false
+                },
+                {
+                    name: "Create Purchasing",
+                    active: true
+                },
+            ],
             currency: {},
             suppliers: [],
             selected_supplier: {},

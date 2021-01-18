@@ -14,6 +14,7 @@
                 </button>
             </div>
         </div>
+        <bread-crumbs :urls="urls"></bread-crumbs>
         <div class="row mt-5">
             <div class="col-md-12">
                 <small v-if="Object.keys(purchaseOrders).length">Showing {{ purchaseOrders.from == null ? 0 : purchaseOrders.from }} to {{ purchaseOrders.to == null ? 0 : purchaseOrders.to }} of {{ numberWithCommas(purchaseOrders.total) }} purchase order(s)</small>
@@ -86,6 +87,17 @@ export default {
     },
     data() {
         return {
+            urls: [
+                {
+                    name: "Purchasing",
+                    url: "/admin/purchasing",
+                    active: false
+                },
+                {
+                    name: "Purchasing List",
+                    active: true
+                }
+            ],
             purchaseOrders: {},
             currency: {}
         }

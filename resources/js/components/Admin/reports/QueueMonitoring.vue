@@ -9,6 +9,7 @@
                 </button>
             </div>
         </div>
+        <bread-crumbs :urls="urls"></bread-crumbs>
         <div class="row">
             <div class="running col-md-6 pt-2" align="center">
                 <table class="table table-queue table-bordered table-sm mt-3">
@@ -169,6 +170,17 @@ export default {
     },
     data() {
         return {
+            urls: [
+                {
+                    name: "Reports",
+                    url: '/admin/reports',
+                    active: false
+                },
+                {
+                    name: "Queue Management",
+                    active: true
+                }
+            ],
             onProcess: [],
             faileds: {},
             completed: {},

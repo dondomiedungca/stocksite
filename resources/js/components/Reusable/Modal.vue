@@ -13,8 +13,8 @@
                         <slot></slot>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
-                        <button v-if="show_submit" type="button" @click="saveNow" class="btn btn-primary"><i :class="icon"></i> {{ submit_name }}</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+                        <button v-if="show_submit" type="button" @click="saveNow" class="btn btn-primary btn-sm"><i :class="icon"></i> {{ submit_name }}</button>
                     </div>
                 </div>
             </div>

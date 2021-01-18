@@ -9,6 +9,7 @@
                 </button>
             </div>
         </div>
+        <bread-crumbs :urls="urls"></bread-crumbs>
         <div class="row">
             <div class="col-md-12 mb-5">
                 <div class="card bg-light">
@@ -142,6 +143,17 @@ const isProductType = value => /^[a-zA-Z_\s]*$/im.test(value)
 export default {
     data() {
         return {
+            urls: [
+                {
+                    name: "Products",
+                    url: "/admin/products",
+                    active: false
+                },
+                {
+                    name: "Add Product Type",
+                    active: true
+                }
+            ],
             product_type_name: "",
             columns: [],
             product_types: {},

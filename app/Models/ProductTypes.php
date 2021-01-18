@@ -32,4 +32,8 @@ class ProductTypes extends Model
             return $field->product_column_name;
         })->toArray();
     }
+
+    public function inventory() {
+        return $this->hasMany('App\Models\Inventory', 'product_type_id');
+    }
 }

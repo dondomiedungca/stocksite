@@ -9,6 +9,7 @@
                 </button>
             </div>
         </div>
+        <bread-crumbs :urls="urls"></bread-crumbs>
         <h2>Navigations</h2>
         <br />
         <div class="row">
@@ -31,6 +32,12 @@
 export default {
     data() {
         return {
+            urls: [
+                {
+                    name: "Reports",
+                    active: true
+                }
+            ],
             menus: [
                 {
                     url: "/admin/reports/queue-management",

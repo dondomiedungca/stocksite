@@ -55,9 +55,12 @@ Vue.component("purchasing-list", require("./components/Admin/purchasing/Purchasi
 Vue.component("purchasing-details", require("./components/Admin/purchasing/PurchasingDetails.vue").default)
 
 Vue.component("products-index", require("./components/Admin/products/Index.vue").default)
+Vue.component("product-list", require("./components/Admin/products/product_list/ProductList.vue").default)
 Vue.component("product-types", require("./components/Admin/products/addProductType.vue").default)
 Vue.component("import-manual", require("./components/Admin/products/ImportManual.vue").default)
 Vue.component("import-file", require("./components/Admin/products/ImportFile.vue").default)
+Vue.component("product-details", require("./components/Admin/products/product_list/Details.vue").default)
+Vue.component("edit-product", require("./components/Admin/products/product_list/EditProduct.vue").default)
 
 Vue.component("reports-index", require("./components/Admin/reports/Index.vue").default)
 Vue.component("queue-monitoring-index", require("./components/Admin/reports/QueueMonitoring.vue").default)
@@ -66,6 +69,7 @@ Vue.component("queue-monitoring-index", require("./components/Admin/reports/Queu
 Vue.component("modal", require("./components/Reusable/Modal.vue").default)
 Vue.component("address-form", require("./components/Reusable/AddressForm.vue").default)
 Vue.component("pagination", require("./components/Reusable/Pagination.vue").default)
+Vue.component("bread-crumbs", require("./components/Reusable/BreadCrumbs.vue").default)
 
 // SUPPLIER
 Vue.component("add-supplier", require("./components/Admin/supplier/addSupplier.vue").default)

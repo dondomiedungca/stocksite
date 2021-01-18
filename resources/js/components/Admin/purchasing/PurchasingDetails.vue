@@ -14,6 +14,7 @@
                 </button>
             </div>
         </div>
+        <bread-crumbs :urls="urls"></bread-crumbs>
         <div class="row mt-3">
             <div class="col-md-6">
                 <h4>
@@ -168,6 +169,22 @@ export default {
     },
     data() {
         return {
+            urls: [
+                {
+                    name: "Purchasing",
+                    url: "/admin/purchasing",
+                    active: false
+                },
+                {
+                    name: "Purchasing List",
+                    url: "/admin/purchasing/purchasing-list",
+                    active: false
+                },
+                {
+                    name: "Purchasing Details",
+                    active: false
+                },
+            ],
             currency: {},
             forReceive: {},
             willReceive: false,

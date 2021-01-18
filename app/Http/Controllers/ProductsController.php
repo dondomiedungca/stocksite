@@ -39,6 +39,10 @@ class ProductsController extends Controller
         return view('admin.products.product_types');
     }
 
+    public function productList() {
+        return view('admin.products.product_list');
+    }
+
     public function addProductTypes(Request $request) {
         $product_type = new ProductTypes();
         $product_type->product_name = $request->product_name;
@@ -294,5 +298,17 @@ class ProductsController extends Controller
         $data['product_type'] = $product_type;
 
         return $data;
+    }
+
+    public function getProductsViaProductType($product_type_id = NULL, $searches = NULL) {
+        $searches = json_decode($searches);
+        $products = Inventory::query();
+
+        $products->with('product_type.product_attributes.column_selections', 'status', 'cosmetic');
+        $products->where('product_type_id', $product_type_id);
+
+        $products = $products->paginate(10);
+
+        return response()->json($products);
     }
 }

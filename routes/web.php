@@ -51,6 +51,7 @@ Route::group(['middleware' => 'adminRoute'], function () {
     Route::prefix('admin/products')->group(function () {
         Route::get('/', [ProductsController::class, 'index']);
         Route::get('/add-product-type', [ProductsController::class, 'productTypes']);
+        Route::get('/product-list', [ProductsController::class, 'productList']);
     });
 
     Route::prefix('admin/reports')->group(function () {
@@ -73,6 +74,7 @@ Route::prefix('admin')->group(function () {
 
 Route::group(['middleware' => 'adminRoute'], function () {
 
+
     Route::prefix('admin/products')->group(function () {
         Route::post('/add-product-type', [ProductsController::class, 'addProductTypes']);
         Route::get('/get-product-types', [ProductsController::class, 'getProductTypes']);
@@ -83,6 +85,7 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::get('/get-item-statuses', [ProductsController::class, 'getItemStatuses']);
         Route::post('/save-manual-item', [ProductsController::class, 'saveManualItem']);
         Route::post('/save-file', [ProductsController::class, 'saveFile']);
+        Route::get('/get-products-via-product-types/{product_type_id}/{searches}', [ProductsController::class, 'getProductsViaProductType']);
     });
 
     Route::prefix('admin/supplier')->group(function () {

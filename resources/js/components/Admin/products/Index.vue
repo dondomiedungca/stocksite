@@ -9,6 +9,7 @@
                 </button>
             </div>
         </div>
+        <bread-crumbs :urls="urls"></bread-crumbs>
         <h2>Navigations</h2>
         <br />
         <div class="row">
@@ -31,6 +32,12 @@
 export default {
     data() {
         return {
+            urls: [
+                {
+                    name: "Products",
+                    active: false
+                }
+            ],
             menus: [
                 {
                     url: "/admin/products/add-product-type",
@@ -42,13 +49,13 @@ export default {
                     url: "/admin/products/product-list",
                     icon: "fa fa-list",
                     title: "Product List",
-                    description: "Show the entire inventories, manage by the product types."
+                    description: "Show the entire inventories, managed by the product types."
                 },
                 {
                     url: "/admin/products/product-import",
                     icon: "fa fa-dropbox",
                     title: "Import Product",
-                    description: "Import items base on their product type, import the items via CSV, XLSX or manually."
+                    description: "Import item(s) base on their product type, import the items via CSV, XLSX or manually."
                 }
             ]
         }
