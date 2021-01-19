@@ -117,30 +117,32 @@ export default {
             this.$v.$touch()
             if (!this.$v.$invalid) {
                 var self = this
-            swal.queue([
-                {
-                    title: "Update This Product",
-                    text: "Save changes in this item now?",
-                    icon: "info",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonColor: "#42d1f5",
-                    confirmButtonText: "Yes, update now",
-                    showLoaderOnConfirm: true,
-                    preConfirm: () => {
-                        return axios.post("/admin/products/update-product", {
-                            inventory: self.product
-                        }).then(response => {
-                            swal.fire({
-                                title: response.data.heading,
-                                text: response.data.message,
-                                icon: response.data.isSuccess ? "success" : "error"
-                            })
-                        })
+                swal.queue([
+                    {
+                        title: "Update This Product",
+                        text: "Save changes in this item now?",
+                        icon: "info",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonColor: "#42d1f5",
+                        confirmButtonText: "Yes, update now",
+                        showLoaderOnConfirm: true,
+                        preConfirm: () => {
+                            return axios
+                                .post("/admin/products/update-product", {
+                                    inventory: self.product
+                                })
+                                .then(response => {
+                                    swal.fire({
+                                        title: response.data.heading,
+                                        text: response.data.message,
+                                        icon: response.data.isSuccess ? "success" : "error"
+                                    })
+                                })
+                        }
                     }
-                }
-            ])
+                ])
             }
         }
     },

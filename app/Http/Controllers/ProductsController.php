@@ -333,4 +333,26 @@ class ProductsController extends Controller
         return response()->json($data);
 
     }
+
+    public function removeProduct(Request $request) {
+        $inventory = $request['inventory'];
+
+        $inv = Inventory::find($inventory['id']);
+
+        if($inv->photo()->exists()) {
+            $inv->photo()->delete();
+        }
+
+        if($inv->purchasing_type()->exists()) {
+            $inv->purchasing_type()->detach();
+        }
+
+        $inv->delete();
+
+        $data['isSuccess'] = true;
+        $data['message'] = 'Product has been removed successfuly';
+        $data['heading'] = "Product Removed";
+
+        return response()->json($data);
+    }
 }

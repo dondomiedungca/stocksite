@@ -86,6 +86,7 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::post('/save-manual-item', [ProductsController::class, 'saveManualItem']);
         Route::post('/save-file', [ProductsController::class, 'saveFile']);
         Route::post('/update-product', [ProductsController::class, 'updateProduct']);
+        Route::post('/remove-product', [ProductsController::class, 'removeProduct']);
         Route::get('/get-products-via-product-types/{product_type_id}/{searches}', [ProductsController::class, 'getProductsViaProductType']);
     });
 

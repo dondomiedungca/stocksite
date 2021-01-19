@@ -51,7 +51,7 @@
                             <tr v-else v-for="(product, i) in products.data" v-bind:key="i">
                                 <td align="center">#{{ i + 1 }}</td>
                                 <td align="center">
-                                    <button class="btn btn-sm btn-danger">
+                                    <button @click="removeAttempt(product)" class="btn btn-sm btn-danger">
                                         <i class="lni lni-trash"></i>
                                     </button>
                                     <button @click="editProduct(product)" class="btn btn-sm btn-primary">
@@ -190,6 +190,34 @@ export default {
         },
         validateThenSAve: function() {
             this.$refs.validate.validate()
+        },
+        removeAttempt: function(product) {
+            swal.queue([
+                {
+                    title: "Remove " + product.stock_number,
+                    text: "This will permanently remove, proceed?",
+                    icon: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonColor: "#42d1f5",
+                    confirmButtonText: "Yes, remove now",
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        return axios
+                            .post("/admin/products/remove-product", {
+                                inventory: product
+                            })
+                            .then(response => {
+                                swal.fire({
+                                    title: response.data.heading,
+                                    text: response.data.message,
+                                    icon: response.data.isSuccess ? "success" : "error"
+                                })
+                            })
+                    }
+                }
+            ])
         }
     }
 }
