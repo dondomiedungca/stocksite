@@ -135,10 +135,12 @@ class PurchasingController extends Controller
         $transaction = Transactions::with('purchase_orders.purchase_order_types.inventories')->whereId($id)->first();
 
         foreach ($transaction->purchase_orders->purchase_order_types as $key => $purchase_order_type) {
+            if($purchase_order_type->photo()->exists()) {
+                Storage::deleteDirectory($purchase_order_type->photo->path);
+                $purchase_order_type->photo()->delete();
+            }
             $purchase_order_type->inventories()->delete();
-            Storage::deleteDirectory($purchase_order_type->photo->path);
             $purchase_order_type->inventories()->detach();
-            $purchase_order_type->photo()->delete();
         }
 
         $transaction->delete();

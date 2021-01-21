@@ -43,6 +43,10 @@ class ProductsController extends Controller
         return view('admin.products.product_list');
     }
 
+    public function productImport() {
+        return view('admin.products.product_import');
+    }
+
     public function addProductTypes(Request $request) {
         $product_type = new ProductTypes();
         $product_type->product_name = $request->product_name;
@@ -189,8 +193,9 @@ class ProductsController extends Controller
         $inventory->item_description = json_decode($request['inventory'])->item_description;
         $inventory->origin_price = json_decode($request['inventory'])->origin_price;
         $inventory->selling_price = json_decode($request['inventory'])->selling_price;
-        $inventory->discount_percentage = json_decode($request['inventory'])->discount_percentage;
+        $inventory->discount_percentage = (json_decode($request['inventory'])->discount_percentage == NULL || json_decode($request['inventory'])->discount_percentage == '') ? 0.00 : json_decode($request['inventory'])->discount_percentage;
         $inventory->details = json_decode($request['inventory'])->details;
+        $inventory->save();
 
         return $inventory;
     }
@@ -339,12 +344,34 @@ class ProductsController extends Controller
 
         $inv = Inventory::find($inventory['id']);
 
+        // If this inventory was imported via local
         if($inv->photo()->exists()) {
-            $inv->photo()->delete();
+            $relation_model_photo = $inv->photo()->pluck('path');
+            $remaining_count_of_other_related = Photable::where([
+                'path' => $relation_model_photo[0],
+                'photable_type' => Inventory::class
+            ])->get();
+
+            if($inv->photo()->exists()) {
+                if($remaining_count_of_other_related->count() > 1) {
+                    $inv->photo()->delete();
+                } else {
+                    $inv->photo()->delete();
+                    FileUpload::removePath($remaining_count_of_other_related[0]->path);
+                }
+            }
         }
 
+        // if it is via purchasing
         if($inv->purchasing_type()->exists()) {
-            $inv->purchasing_type()->detach();
+            $relation_model_photo_path_name = $inv->purchasing_type()->first()->photo->path;
+
+            $inventory_remaining = $inv->purchasing_type()->first()->inventories->count();
+
+            if($inventory_remaining == 1) {
+                FileUpload::removePath($relation_model_photo_path_name);
+                $inv->purchasing_type()->first()->photo()->delete();
+            }
         }
 
         $inv->delete();
@@ -355,4 +382,5 @@ class ProductsController extends Controller
 
         return response()->json($data);
     }
+
 }

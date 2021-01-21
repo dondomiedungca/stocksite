@@ -1,13 +1,23 @@
 <template>
-    <div v-if="Object.keys(base_product_type).length && item_data.stock_number != '' && Object.keys(purchasing_type).length">
+    <div>
         <div class="row">
             <div class="col-md-12">
-                <h4 v-if="purchasing_type.photo == null">* Product Photo</h4>
-                <div v-if="purchasing_type.photo == null" class="row">
-                    <div class="form-group col-md-4">
-                        <label for="">Choose file</label>
-                        <input id="upload-photo" ref="uploadPhoto" @change="parseFilePhoto($event)" type="file" class="form-control form-control-sm" :class="{ 'is-invalid': $v.photo.$error }" />
-                        <div class="invalid-feedback" v-if="$v.photo.$error">This photo is required</div>
+                <h4 v-if="basis != 'purchasing' && product_types.length">* Product Types</h4>
+                <div v-if="basis != 'purchasing' && product_types.length" class="row mb-3">
+                    <div class="col-4">
+                        <select class="custom-select custom-select-sm" v-model="selected_product_type">
+                            <option v-for="(product_type, i) in product_types" v-bind:key="i" :value="i">-- {{ product_type.product_name }} --</option>
+                        </select>
+                    </div>
+                </div>
+                <div v-if="willShow()">
+                    <h4>* Product Photo</h4>
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <label for="">Choose file</label>
+                            <input id="upload-photo" ref="uploadPhoto" @change="parseFilePhoto($event)" type="file" class="form-control form-control-sm" :class="{ 'is-invalid': $v.photo.$error }" />
+                            <div class="invalid-feedback" v-if="$v.photo.$error">This photo is required</div>
+                        </div>
                     </div>
                 </div>
                 <h4>* Primary Details</h4>
@@ -53,8 +63,8 @@
                         <input type="number" min="0" max="100" class="form-control form-control-sm" v-model="item_data.discount_percentage" />
                     </div>
                 </div>
-                <h4>* Item Specification</h4>
-                <div class="row">
+                <h4 v-if="Object.keys(base_product_type).length && item_data.stock_number != ''">* Item Specification</h4>
+                <div v-if="Object.keys(base_product_type).length && item_data.stock_number != ''" class="row">
                     <div v-for="(column, i) in base_product_type.product_attributes" v-bind:key="i" class="form-group col-md-4">
                         <label><span v-if="column.product_column_is_required" style="color: red;">* </span>{{ column.product_column_name }}</label>
                         <fragment v-if="column.product_column_input_type == 'INPUT'">
@@ -92,11 +102,29 @@ import { required } from "vuelidate/lib/validators"
 
 export default {
     components: { Fragment },
-    props: ["basis", "product_type", "purchasing_type_id", "transaction_id"],
+    props: {
+        basis: {
+            type: String,
+            required: true
+        },
+        product_type: {
+            type: Object,
+            default: null
+        },
+        purchasing_type_id: {
+            type: Number,
+            default: null
+        },
+        transaction_id: {
+            type: Number,
+            default: null
+        }
+    },
     data() {
         return {
             photo: "",
             purchasing_type: {},
+            selected_product_type: "",
             base_product_type: {},
             item_data: {
                 stock_number: "",
@@ -110,7 +138,18 @@ export default {
                 details: {}
             },
             statuses: [],
-            cosmetics: []
+            cosmetics: [],
+            product_types: []
+        }
+    },
+    watch: {
+        product_types: function() {
+            this.selected_product_type = 0
+            this.createValidation()
+        },
+        selected_product_type: function(newVal, oldVal) {
+            this.base_product_type = this.product_types[newVal]
+            this.createValidation()
         }
     },
     created() {
@@ -123,13 +162,30 @@ export default {
         this.getPurchasing()
     },
     methods: {
-        getProductTypes: function() {},
+        willShow: function() {
+            if(this.basis != 'purchasing') {
+                return true
+            } else {
+                if(Object.keys(this.purchasing_type).length) {
+                    if(this.purchasing_type.photo == null) {
+                        return true
+                    } else {
+                        return false
+                    }
+                }
+            }
+        },
         initialize: function() {
             if (this.basis != "purchasing") {
                 this.getProductTypes()
             } else {
                 this.base_product_type = this.product_type
             }
+        },
+        getProductTypes: function() {
+            axios.get("/admin/products/get-all-product-types").then(res => {
+                this.product_types = res.data.product_types
+            })
         },
         getPurchasing: function() {
             axios.get("/admin/purchasing/get-purchasing-type/" + this.purchasing_type_id).then(res => {
@@ -154,7 +210,13 @@ export default {
         createValidationPhoto: function() {
             var validations = {}
 
-            if (this.purchasing_type.photo == null) {
+            if (this.basis == "purchasing") {
+                if (this.purchasing_type.photo == null) {
+                    validations = {
+                        required
+                    }
+                }
+            } else {
                 validations = {
                     required
                 }
@@ -164,20 +226,22 @@ export default {
         },
         createValidation: function() {
             var validations = {}
-            this.base_product_type.product_attributes.map(column => {
-                this.item_data.details = {
-                    ...this.item_data.details,
-                    [column.product_column_name]: ""
-                }
-                if (column.product_column_is_required) {
-                    validations = {
-                        ...validations,
-                        [column.product_column_name]: {
-                            required
+            if (Object.keys(this.base_product_type).length) {
+                this.base_product_type.product_attributes.map(column => {
+                    this.item_data.details = {
+                        ...this.item_data.details,
+                        [column.product_column_name]: ""
+                    }
+                    if (column.product_column_is_required) {
+                        validations = {
+                            ...validations,
+                            [column.product_column_name]: {
+                                required
+                            }
                         }
                     }
-                }
-            })
+                })
+            }
 
             return validations
         },

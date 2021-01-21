@@ -16,16 +16,6 @@
         <div class="col-md-12">
             <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#exampleModal"><i class="fa fa-upload"></i> Upload File</button>
         </div>
-        <div class="col-md-12 mt-4 mb-5">
-            <h4 v-if="purchasing_type.photo == null">* Product Photo</h4>
-            <div v-if="purchasing_type.photo == null" class="row">
-                <div class="form-group col-md-4">
-                    <label for="">Choose file</label>
-                    <input id="upload-photo" ref="uploadPhoto" @change="parseFilePhoto($event)" type="file" class="form-control form-control-sm" :class="{ 'is-invalid': $v.photo.$error }" />
-                    <div class="invalid-feedback" v-if="$v.photo.$error">This photo is required</div>
-                </div>
-            </div>
-        </div>
         <div class="modal fade" id="exampleModal" tabindex="-1" data-backdrop="static" data-keyboard="false" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <form method="POST" enctype="multipart/form-data" @submit.prevent="uploadItems">
@@ -38,9 +28,27 @@
                         </div>
                         <div class="modal-body">
                             <div class="row">
+                                <div v-if="basis != 'purchasing' && product_types.length" class="col-12">
+                                    <h4>* Select Product Type</h4>
+                                    <select class="custom-select custom-select-sm" v-model="selected_product_type">
+                                        <option v-for="(product_type, i) in product_types" v-bind:key="i" :value="i">-- {{ product_type.product_name }} --</option>
+                                    </select>
+                                </div>
+                                <div v-if="willShow()" class="col-md-12">
+                                    <h4>* Product Photo</h4>
+                                    <div class="row">
+                                        <div class="form-group col-md-12">
+                                            <label for="">Choose file</label>
+                                            <input id="upload-photo" ref="uploadPhoto" @change="parseFilePhoto($event)" type="file" class="form-control form-control-sm" :class="{ 'is-invalid': $v.photo.$error }" />
+                                            <div class="invalid-feedback" v-if="$v.photo.$error">This photo is required</div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="col-md-12">
+                                    <h4>* File To Upload</h4>
                                     <label for="">Choose file</label>
-                                    <input id="upload-file" ref="uploadFile" @change="parseFile($event)" type="file" class="form-control form-control-sm" />
+                                    <input id="upload-file" ref="uploadFile" @change="parseFile($event)" type="file" class="form-control form-control-sm" :class="{ 'is-invalid': $v.photo.$error }" />
+                                    <div class="invalid-feedback" v-if="$v.file.$error">This file is required</div>
                                 </div>
                             </div>
                             <div v-if="saving" class="row mt-1 mb-1">
@@ -65,7 +73,24 @@
 <script>
 import { required } from "vuelidate/lib/validators"
 export default {
-    props: ["basis", "product_type", "purchasing_type_id", "transaction_id"],
+    props: {
+        basis: {
+            type: String,
+            required: true
+        },
+        product_type: {
+            type: Object,
+            default: null
+        },
+        purchasing_type_id: {
+            type: Number,
+            default: null
+        },
+        transaction_id: {
+            type: Number,
+            default: null
+        }
+    },
     created() {
         this.initialize()
         this.getPurchasing()
@@ -78,16 +103,44 @@ export default {
             fileName: "",
             base_product_type: {},
             purchasing_type: {},
-            photo: ""
+            photo: "",
+            product_types: [],
+            selected_product_type: ""
+        }
+    },
+    watch: {
+        product_types: function() {
+            this.selected_product_type = 0
+        },
+        selected_product_type: function(newVal, oldVal) {
+            this.base_product_type = this.product_types[newVal]
         }
     },
     methods: {
+        willShow: function() {
+            if (this.basis != "purchasing") {
+                return true
+            } else {
+                if (Object.keys(this.purchasing_type).length) {
+                    if (this.purchasing_type.photo == null) {
+                        return true
+                    } else {
+                        return false
+                    }
+                }
+            }
+        },
         initialize: function() {
             if (this.basis == "purchasing") {
                 this.base_product_type = this.product_type
             } else {
                 this.getProductTypes()
             }
+        },
+        getProductTypes: function() {
+            axios.get("/admin/products/get-all-product-types").then(res => {
+                this.product_types = res.data.product_types
+            })
         },
         getPurchasing: function() {
             axios.get("/admin/purchasing/get-purchasing-type/" + this.purchasing_type_id).then(res => {
@@ -144,7 +197,13 @@ export default {
         createValidationPhoto: function() {
             var validations = {}
 
-            if (this.purchasing_type.photo == null) {
+            if (this.basis == "purchasing") {
+                if (this.purchasing_type.photo == null) {
+                    validations = {
+                        required
+                    }
+                }
+            } else {
                 validations = {
                     required
                 }

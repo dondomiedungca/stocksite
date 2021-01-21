@@ -52,6 +52,7 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::get('/', [ProductsController::class, 'index']);
         Route::get('/add-product-type', [ProductsController::class, 'productTypes']);
         Route::get('/product-list', [ProductsController::class, 'productList']);
+        Route::get('/product-import', [ProductsController::class, 'productImport']);
     });
 
     Route::prefix('admin/reports')->group(function () {

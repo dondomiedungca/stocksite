@@ -192,6 +192,7 @@ export default {
             this.$refs.validate.validate()
         },
         removeAttempt: function(product) {
+            var self = this
             swal.queue([
                 {
                     title: "Remove " + product.stock_number,
@@ -214,6 +215,7 @@ export default {
                                     text: response.data.message,
                                     icon: response.data.isSuccess ? "success" : "error"
                                 })
+                                self.getProducts(self.products.current_page)
                             })
                     }
                 }

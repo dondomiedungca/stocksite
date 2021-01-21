@@ -61,6 +61,7 @@ Vue.component("import-manual", require("./components/Admin/products/ImportManual
 Vue.component("import-file", require("./components/Admin/products/ImportFile.vue").default)
 Vue.component("product-details", require("./components/Admin/products/product_list/Details.vue").default)
 Vue.component("edit-product", require("./components/Admin/products/product_list/EditProduct.vue").default)
+Vue.component("product-import", require("./components/Admin/products/product_list/ProductImport.vue").default)
 
 Vue.component("reports-index", require("./components/Admin/reports/Index.vue").default)
 Vue.component("queue-monitoring-index", require("./components/Admin/reports/QueueMonitoring.vue").default)
