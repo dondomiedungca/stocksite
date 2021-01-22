@@ -1,0 +1,25 @@
+html {
+    overflow-y: auto;
+}
+
+.main-container {
+    margin-left: 250px;
+}
+
+.app-bar-container {
+    margin-left: 250px;
+}
+
+@media (max-width: 670px) {
+    .sidebar-container {
+        display: none;
+    }
+
+    .main-container {
+        margin-left: 0;
+    }
+
+    .app-bar-container {
+        margin-left: 0;
+    }
+}
