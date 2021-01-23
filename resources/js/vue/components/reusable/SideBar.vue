@@ -1,5 +1,5 @@
 <template>
-    <v-card class="sidebar-container" style="position: fixed; left: 0; top: 0;" height="100vh" width="250">
+    <v-card class="sidebar-container" height="100vh" width="250">
         <v-navigation-drawer absolute permanent left>
             <v-list-item>
                 <v-list-item-content>
@@ -15,7 +15,7 @@
                 <v-list-item v-for="item in items" :key="item.title" :to="item.url">
                     <template>
                         <v-list-item-icon>
-                            <v-icon>{{ item.icon }}</v-icon>
+                            <v-icon color="primary">{{ item.icon }}</v-icon>
                         </v-list-item-icon>
 
                         <v-list-item-content>
@@ -33,13 +33,13 @@ export default {
     data: () => {
         return {
             items: [
-                { title: "Dashboard", icon: "mdi-view-dashboard", url: "/admin/dashboard" },
-                { title: "Purchase Order", icon: "mdi-image", url: "/admin/purchasing" },
-                { title: "Sales Transaction", icon: "mdi-help-box", url: "/admin/sales" },
-                { title: "Products", icon: "mdi-help-box", url: "/admin/products" },
-                { title: "Customers", icon: "mdi-help-box", url: "/admin/customers" },
-                { title: "Reports", icon: "mdi-help-box", url: "/admin/reports" },
-                { title: "Settings", icon: "mdi-help-box", url: "/admin/settings" }
+                { title: "Dashboard", icon: "mdi-chart-bar", url: "/admin/dashboard" },
+                { title: "Purchase Order", icon: "mdi-receipt", url: "/admin/purchasing" },
+                { title: "Sales Transaction", icon: "mdi-cash-multiple", url: "/admin/sales" },
+                { title: "Products", icon: "mdi-warehouse", url: "/admin/products" },
+                { title: "Customers", icon: "mdi-account-group-outline", url: "/admin/customers" },
+                { title: "Reports", icon: "mdi-file-chart", url: "/admin/reports" },
+                { title: "Settings", icon: "mdi-cogs", url: "/admin/settings" }
             ]
         }
     }

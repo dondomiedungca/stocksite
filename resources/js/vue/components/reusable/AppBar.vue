@@ -1,47 +1,63 @@
 <template>
     <div class="app-bar-container overflow-hidden">
-        <v-app-bar height="50">
-            <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
+        <v-app-bar flat fixed height="50">
+            <v-app-bar-nav-icon class="appbar-toggle" @click="drawer = true"></v-app-bar-nav-icon>
 
             <v-spacer></v-spacer>
 
             <v-btn icon>
-                <v-icon>mdi-heart</v-icon>
-            </v-btn>
-
-            <v-btn icon>
-                <v-icon>mdi-magnify</v-icon>
+                <v-badge left color="primary" content="6">
+                    <v-icon>mdi-bell</v-icon>
+                </v-badge>
             </v-btn>
 
             <v-menu left bottom>
                 <template v-slot:activator="{ on, attrs }">
                     <v-btn icon v-bind="attrs" v-on="on">
-                        <v-icon>mdi-dots-vertical</v-icon>
+                        <v-icon>mdi-account-details</v-icon>
                     </v-btn>
                 </template>
 
                 <v-list>
-                    <v-list-item v-for="n in 5" :key="n" @click="() => {}">
-                        <v-list-item-title>Option {{ n }}</v-list-item-title>
+                    <v-list-item v-for="(navigation, i) in navs" :key="i" :to="navigation.url">
+                        <v-list-item-icon>
+                            <v-icon size="20">{{ navigation.icon }}</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-title>{{ navigation.title }}</v-list-item-title>
+                    </v-list-item>
+                    <v-list-item class="tile" style="cursor: pointer;">
+                        <v-list-item-icon>
+                            <v-icon size="20">mdi-logout</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                            <v-list-item-title>Logout</v-list-item-title>
+                        </v-list-item-content>
                     </v-list-item>
                 </v-list>
             </v-menu>
         </v-app-bar>
-        <v-navigation-drawer v-model="drawer" absolute temporary>
+        <v-navigation-drawer v-model="drawer" fixed temporary>
+            <v-list-item>
+                <v-list-item-content>
+                    <v-list-item-title class="title">
+                        Pro Prints Enterprise
+                    </v-list-item-title>
+                </v-list-item-content>
+            </v-list-item>
+
+            <v-divider></v-divider>
             <v-list nav dense>
                 <v-list-item-group v-model="group" active-class="deep-purple--text text--accent-4">
-                    <v-list-item>
-                        <v-list-item-icon>
-                            <v-icon>mdi-home</v-icon>
-                        </v-list-item-icon>
-                        <v-list-item-title>Home</v-list-item-title>
-                    </v-list-item>
+                    <v-list-item v-for="item in items" :key="item.title" :to="item.url">
+                        <template>
+                            <v-list-item-icon>
+                                <v-icon color="primary">{{ item.icon }}</v-icon>
+                            </v-list-item-icon>
 
-                    <v-list-item>
-                        <v-list-item-icon>
-                            <v-icon>mdi-account</v-icon>
-                        </v-list-item-icon>
-                        <v-list-item-title>Account</v-list-item-title>
+                            <v-list-item-content>
+                                <v-list-item-title>{{ item.title }}</v-list-item-title>
+                            </v-list-item-content>
+                        </template>
                     </v-list-item>
                 </v-list-item-group>
             </v-list>
@@ -54,7 +70,24 @@ export default {
     data: () => {
         return {
             drawer: false,
-            group: null
+            group: null,
+            navs: [
+                {
+                    title: "Account Details",
+                    icon: "mdi-cogs",
+                    url: "/admin/account",
+                    isLogout: false
+                }
+            ],
+            items: [
+                { title: "Dashboard", icon: "mdi-chart-bar", url: "/admin/dashboard" },
+                { title: "Purchase Order", icon: "mdi-receipt", url: "/admin/purchasing" },
+                { title: "Sales Transaction", icon: "mdi-cash-multiple", url: "/admin/sales" },
+                { title: "Products", icon: "mdi-warehouse", url: "/admin/products" },
+                { title: "Customers", icon: "mdi-account-group-outline", url: "/admin/customers" },
+                { title: "Reports", icon: "mdi-file-chart", url: "/admin/reports" },
+                { title: "Settings", icon: "mdi-cogs", url: "/admin/settings" }
+            ]
         }
     }
 }

@@ -34,18 +34,17 @@ Route::get('/admin/signin', function () {
 })->name('signin');
 
 Route::group(['middleware' => 'adminRoute'], function () {
-    Route::get('/admin', function () {
-        return view('admin.index');
+
+    Route::prefix('/admin')->group(function () {
+        Route::fallback(function() {
+            return view('admin.index');
+        });
     });
 
     Route::post('/admin/logout', function() {
         Auth::logout();
         return redirect('/admin/signin');
     })->name('admin.logout');
-
-    Route::fallback(function() {
-        return view('admin.index');
-    });
 });
 
 // APIS

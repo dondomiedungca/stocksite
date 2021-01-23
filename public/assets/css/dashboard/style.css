@@ -3,11 +3,19 @@ html {
 }
 
 .main-container {
+    margin-top: 50px;
     margin-left: 250px;
 }
 
-.app-bar-container {
-    margin-left: 250px;
+.sidebar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 6;
+}
+
+.appbar-toggle {
+    display: none;
 }
 
 @media (max-width: 670px) {
@@ -19,7 +27,7 @@ html {
         margin-left: 0;
     }
 
-    .app-bar-container {
-        margin-left: 0;
+    .appbar-toggle {
+        display: inline;
     }
 }
