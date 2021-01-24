@@ -2,9 +2,15 @@ html {
     overflow-y: auto;
 }
 
-.main-container {
+.v-main {
+    width: calc((100vw - 250px) - 24px);
     margin-top: 50px;
     margin-left: 250px;
+}
+
+.container {
+    width: 100%;
+    margin-left: 12px;
 }
 
 .sidebar-container {
@@ -23,7 +29,8 @@ html {
         display: none;
     }
 
-    .main-container {
+    .v-main {
+        width: calc(100vw - 24px);
         margin-left: 0;
     }
 
