@@ -35,7 +35,7 @@ Route::get('/admin/signin', function () {
 
 Route::group(['middleware' => 'adminRoute'], function () {
 
-    Route::prefix('/admin')->group(function () {
+    Route::prefix('admin')->group(function () {
         Route::fallback(function() {
             return view('admin.index');
         });

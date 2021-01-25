@@ -3,29 +3,17 @@
         <v-main>
             <breadcrumbs-vue :items="items"></breadcrumbs-vue>
             <v-container>
-                <v-stepper v-model="e1">
-                    <v-stepper-header>
-                        <template v-for="step in steps">
-                            <v-stepper-step :key="`${step.level}-step`" :complete="e1 > step.level" :step="step.level" editable> {{ step.step }} </v-stepper-step>
-
-                            <v-divider v-if="step.level !== steps.length" :key="step.level"></v-divider>
-                        </template>
-                    </v-stepper-header>
-
-                    <v-stepper-items>
-                        <v-stepper-content v-for="step in steps" :key="`${step.level}-content`" :step="step.level">
-                            <v-card class="mb-12" color="grey lighten-1" height="200px"></v-card>
-
-                            <v-btn small :disabled="step.level == steps.length" color="primary" @click="nextStep(step.level)">
-                                Continue
-                            </v-btn>
-
-                            <v-btn small :disabled="step.level == 1" @click="nextStep(step.level - 1)">
-                                Cancel
-                            </v-btn>
-                        </v-stepper-content>
-                    </v-stepper-items>
-                </v-stepper>
+                <stepper-vue :step_count="3" :headers="headers">
+                    <template v-slot:step_content_1>
+                        <h1>Hello 1</h1>
+                    </template>
+                    <template v-slot:step_content_2>
+                        <h1>Hello 2</h1>
+                    </template>
+                    <template v-slot:step_content_3>
+                        <h1>Hello 3</h1>
+                    </template>
+                </stepper-vue>
             </v-container>
         </v-main>
     </div>
@@ -35,19 +23,18 @@
 export default {
     data: () => {
         return {
-            e1: 1,
-            steps: [
+            headers: [
                 {
-                    step: "Product Type",
-                    level: 1
+                    step_name: "Product Type",
+                    step_level: 1
                 },
                 {
-                    step: "Manage Column(s)",
-                    level: 2
+                    step_name: "Manage Column(s)",
+                    step_level: 2
                 },
                 {
-                    step: "Verify",
-                    level: 3
+                    step_name: "Verify",
+                    step_level: 3
                 }
             ],
             items: [
