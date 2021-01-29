@@ -88,7 +88,6 @@ class ImportItemFile implements ShouldQueue
             }
         }
 
-        Log::info($csv_data);
         foreach ($csv_data as $key => $row) {
             $data = array_combine($this->header, $row);
             $checked_data = isNotEmpty($this->product_type_id, $data);
@@ -98,6 +97,7 @@ class ImportItemFile implements ShouldQueue
             } else {
                 $this->batch()->cancel();
                 $line = (((int) $this->chunk_position) * (int) $this->chunk_count) + ($key + 1);
+                // this is important to indicate the reason of failing jobs when showing queuing reports
                 throw new Exception($this->filename." file has a row that don't have a required fields, first appearance at row ".$line.". </br></br> fields that no data are \"<b>".implode($checked_data['no_data'], ",")."</b>\". </br></br> Try to upload again with a correct file. |");
             }
         }
@@ -106,7 +106,8 @@ class ImportItemFile implements ShouldQueue
 
     public function failed(\Exception $e) {
         $batch = BatchHelpers::getBatch($this->batch()->id);
-
+        // this will only run in RETRY mode and if the job is failed, the error message will not get
+        // unless the jobs is cancelled
         if($this->batch()->cancelled() && $batch->retry == 1) {
             broadcast(new QueueProcessing("failed", $batch));
             BatchHelpers::removeFromProcessing($this->batch()->id);

@@ -38,7 +38,9 @@ class AppServiceProvider extends ServiceProvider
 
             $result = BatchHelpers::willBroadcastProcess($batch->batchId);
         });
-
+        
+        // This is to make sure that the retry batch will send an event when finished, because the 'finally' callback in products controller
+        // will only run at fresh batch created and after running all jobs
         Queue::after(function (JobProcessed $event) {
             $payload = $event->job->payload();
             $batch = unserialize($payload['data']['command']);

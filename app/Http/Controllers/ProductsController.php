@@ -269,13 +269,16 @@ class ProductsController extends Controller
         $batch = Bus::batch($jobs)->then(function (Batch $batch){
             // All jobs completed successfully...
         })->catch(function (Batch $batch, Throwable $e) {
-            // First batch job failure detected...
+            // Only First batch job failure detected...
             $batch->cancel();
         })->finally(function (Batch $batch) use ($directory) {
             // The batch has finished executing...
+            // I putted here the event calling as failed because the error message will only get if the batch was cancelled,
+            // the batch will continue to finish other jobs even the previous jobs are failed
             if($batch->cancelled()) {
                 broadcast(new QueueProcessing("failed", BatchHelpers::getBatch($batch->id)));
             }
+            // This only run at fresh batch, not when retry
             if((int) $batch->progress() == 100) {
                 BatchHelpers::generateDuration($batch->id);
                 BatchHelpers::importMessage($batch->id, "File content was successfully inserted to database.");

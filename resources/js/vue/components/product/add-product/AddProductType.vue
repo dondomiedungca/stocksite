@@ -1,66 +1,46 @@
 <template>
-    <div>
-        <v-main>
-            <breadcrumbs-vue :items="items"></breadcrumbs-vue>
-            <v-container>
-                <stepper-vue :step_count="3" :headers="headers">
-                    <template v-slot:step_content_1>
-                        <h1>Hello 1</h1>
-                    </template>
-                    <template v-slot:step_content_2>
-                        <h1>Hello 2</h1>
-                    </template>
-                    <template v-slot:step_content_3>
-                        <h1>Hello 3</h1>
-                    </template>
-                </stepper-vue>
-            </v-container>
-        </v-main>
-    </div>
+    <v-row>
+        <v-col lg="6" md="6">
+            <v-form v-model="valid">
+                <v-text-field dense class="mt-3 mb-3" :rules="productNameRules" :hint="'Kind of product that you want to create (ex: Clothing, Computers, Mobile, Laptops, etc.)'" :label="'Product Type Name'" outlined v-model="product_name" type="text"></v-text-field>
+            </v-form>
+        </v-col>
+    </v-row>
 </template>
 
 <script>
+import { mapGetters } from "vuex"
+import { mapMutations } from "vuex"
+import { mapActions } from "vuex"
+
 export default {
-    data: () => {
-        return {
-            headers: [
-                {
-                    step_name: "Product Type",
-                    step_level: 1
-                },
-                {
-                    step_name: "Manage Column(s)",
-                    step_level: 2
-                },
-                {
-                    step_name: "Verify",
-                    step_level: 3
-                }
-            ],
-            items: [
-                {
-                    text: "Products",
-                    disabled: false,
-                    exact: true,
-                    to: "/admin/products"
-                },
-                {
-                    text: "Add Product Type",
-                    disabled: true,
-                    to: "add-product-type"
-                }
-            ]
-        }
+    computed: {
+        ...mapGetters(["getProductName"])
     },
     methods: {
-        nextStep(n) {
-            if (n === this.steps.length) {
-                this.e1 = 1
-            } else if (n < this.e1 && n != 0) {
-                this.e1 = n
+        ...mapMutations(["setProductName", "setStepper"]),
+        testProductName(val) {
+            if (val) {
+                this.setStepper({
+                    canContinue: true
+                })
             } else {
-                this.e1 = n + 1
+                this.setStepper({
+                    canContinue: false
+                })
             }
+        }
+    },
+    watch: {
+        valid: function(newVal, oldVal) {
+            this.testProductName(newVal)
+        }
+    },
+    data: () => {
+        return {
+            valid: false,
+            product_name: "",
+            productNameRules: [value => !!value || "This is required", value => value.length >= 5 || "At least 5 characters"]
         }
     }
 }
