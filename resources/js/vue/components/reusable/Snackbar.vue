@@ -1,9 +1,9 @@
 <template>
-    <v-snackbar v-model="getSnackbar.isVisible" bottom :timeout="getSnackbar.timeout">
+    <v-snackbar :color="getSnackbar.color" v-model="getSnackbar.isVisible" bottom :timeout="getSnackbar.timeout">
         {{ getSnackbar.text }}
 
         <template v-slot:action="{ attrs }">
-            <v-btn color="blue" text v-bind="attrs" @click="close">
+            <v-btn color="white" text v-bind="attrs" @click="close">
                 Close
             </v-btn>
         </template>
@@ -38,7 +38,8 @@ export default {
         close: function() {
             this.setSnackbar({
                 text: "",
-                isVisible: false
+                isVisible: false,
+                color: "#5cb85c"
             })
         }
     }

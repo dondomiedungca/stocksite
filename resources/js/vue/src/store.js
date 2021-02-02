@@ -12,7 +12,8 @@ const store = new Vuex.Store({
         snackbar: {
             timeout: 2500,
             isVisible: false,
-            text: ""
+            text: "",
+            color: "#5cb85c"
         },
         ...local_product_state
     },

@@ -38,3 +38,12 @@ html {
         display: inline;
     }
 }
+
+.v-stepper__wrapper {
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.card-container {
+    margin-left: 0;
+}
