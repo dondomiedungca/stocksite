@@ -2,7 +2,7 @@
     <v-row>
         <v-col lg="6" md="6">
             <v-form v-model="valid">
-                <v-text-field dense class="mt-3 mb-3" :rules="productNameRules" :hint="'Kind of product that you want to create (ex: Clothing, Computers, Mobile, Laptops, etc.)'" :label="'Product Type Name'" outlined v-model="product_name" type="text"></v-text-field>
+                <v-text-field dense class="mt-3 mb-3" :rules="productNameRules" @blur="setProductname" :hint="'Kind of product that you want to create (ex: Clothing, Computers, Mobile, Laptops, etc.)'" :label="'Product Type Name'" outlined v-model="product_name" type="text"></v-text-field>
             </v-form>
         </v-col>
     </v-row>
@@ -29,7 +29,13 @@ export default {
                     canContinue: false
                 })
             }
+        },
+        setProductname: function() {
+            this.setProductName(this.product_name)
         }
+    },
+    created() {
+        this.product_name = this.getProductName
     },
     watch: {
         valid: function(newVal, oldVal) {
@@ -40,7 +46,7 @@ export default {
         return {
             valid: false,
             product_name: "",
-            productNameRules: [value => !!value || "This is required", value => value.length >= 5 || "At least 5 characters"]
+            productNameRules: [value => !!value || "This is required", value => value.length >= 5 || "At least 5 characters", value => /^[a-zA-Z][A-Za-z0-9_]*$/im.test(value) || "Only alphanumeric and underscore is allowed"]
         }
     }
 }

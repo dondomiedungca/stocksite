@@ -22,12 +22,18 @@
                             </v-col>
                             <v-col lg="12" md="12" sm="12">
                                 <v-radio-group row v-model="isRequired" mandatory>
+                                    <template v-slot:label>
+                                        <div><strong>Required</strong></div>
+                                    </template>
                                     <v-radio label="Yes" :value="1"></v-radio>
                                     <v-radio label="No" :value="0"></v-radio>
                                 </v-radio-group>
                             </v-col>
                             <v-col lg="12" md="12" sm="12" v-if="dataType != 'DATE'">
                                 <v-radio-group row v-model="inputType" mandatory>
+                                    <template v-slot:label>
+                                        <div><strong>Input Value Type</strong></div>
+                                    </template>
                                     <v-radio label="INPUT" :value="1"></v-radio>
                                     <v-radio label="SELECTION" :value="0"></v-radio>
                                 </v-radio-group>
@@ -63,7 +69,29 @@
         </v-form>
         <v-row class="mt-3 mb-3">
             <v-col class="" lg="12" md="12" sm="12">
-                <v-data-table :no-data-text="'No Columns Found'" :headers="headers" :items="getColumns" :items-per-page="5" class="elevation-1"></v-data-table>
+                <v-data-table :loading="loading" :no-data-text="'No Columns Found'" :headers="headers" :items="getColumns" :items-per-page="5" class="elevation-1">
+                    <template v-slot:item.actions="{ item }">
+                        <v-btn @click="dialogDelete(item)" icon>
+                            <v-icon small>
+                                mdi-delete
+                            </v-icon>
+                        </v-btn>
+                        <v-dialog v-model="deleteDialogIsOpen" persistent max-width="350px">
+                            <v-card style="width: 100%;">
+                                <v-card-title>Do you want to remove {{ candidateItem.column_name }}?</v-card-title>
+                                <v-card-actions>
+                                    <v-spacer></v-spacer>
+                                    <v-btn color="gray darken-1" text @click="deleteDialogIsOpen = false">
+                                        close
+                                    </v-btn>
+                                    <v-btn color="green darken-1" text @click="removeColumn">
+                                        Remove
+                                    </v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </v-dialog>
+                    </template>
+                </v-data-table>
             </v-col>
         </v-row>
     </div>
@@ -72,12 +100,23 @@
 <script>
 import { mapGetters } from "vuex"
 import { mapMutations } from "vuex"
+import { mapActions } from "vuex"
 
 export default {
     data() {
         return {
+            loading: false,
             dialog: false,
+            deleteDialogIsOpen: false,
+            candidateItem: {},
             headers: [
+                {
+                    text: "Remove",
+                    align: "start",
+                    sortable: false,
+                    value: "actions",
+                    class: "primary white--text"
+                },
                 {
                     text: "Column Name",
                     align: "start",
@@ -92,7 +131,7 @@ export default {
             ],
             items: this.getColumns,
             valid: false,
-            columnNameRules: [value => !!value || "This is required", value => this.getColumnNames.indexOf(value) == -1 || "Column name is already exists"],
+            columnNameRules: [value => !!value || "This is required", value => this.getColumnNames.indexOf(value) == -1 || "Column name is already exists", value => /^[a-zA-Z][A-Za-z0-9_]*$/im.test(value) || "Only alphanumeric and underscore is allowed"],
             selectionRules: [value => !!this.selections.length || "This is required, add a selection(s) and click the plus button or press enter"],
             columnName: "",
             dataType: "",
@@ -108,18 +147,19 @@ export default {
     },
     methods: {
         ...mapMutations(["setStepper", "setSnackbar", "addToColumns"]),
+        ...mapActions(["updateColumns"]),
         testProductName(val) {
             if (val) {
                 this.setStepper({
-                    canContinue: true
+                    canFinish: true
                 })
             } else if (this.getColumns.length) {
                 this.setStepper({
-                    canContinue: true
+                    canFinish: true
                 })
             } else {
                 this.setStepper({
-                    canContinue: false
+                    canFinish: false
                 })
             }
         },
@@ -133,6 +173,17 @@ export default {
                     text: "New selection added!"
                 })
             }
+        },
+        dialogDelete: function(item) {
+            this.candidateItem = item
+            this.deleteDialogIsOpen = true
+        },
+        removeColumn: async function() {
+            this.deleteDialogIsOpen = false
+            this.loading = true
+            var setting = this.updateColumns(this.candidateItem)
+            await setting
+            this.loading = false
         },
         importToColums: function() {
             // create column candidate

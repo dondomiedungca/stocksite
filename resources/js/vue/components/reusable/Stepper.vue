@@ -16,9 +16,7 @@
                     Continue
                 </v-btn>
 
-                <v-btn v-else small :disabled="!getStepper.canFinish" color="primary">
-                    Finish
-                </v-btn>
+                <slot v-else name="finish_button"> </slot>
 
                 <v-btn small :disabled="step == 1" @click="nextStep(step - 1)">
                     Cancel
@@ -54,7 +52,7 @@ export default {
     },
     data() {
         return {
-            e1: 2,
+            e1: 1,
             isFinal: false
         }
     },

@@ -1,6 +1,6 @@
 import Vuex from "vuex"
 
-import { state as local_product_state, getters as local_product_getters, mutations as local_product_setters } from "../components/product/add-product/local_state"
+import { state as local_product_state, getters as local_product_getters, mutations as local_product_setters, actions as local_product_actions } from "../components/product/add-product/local_state"
 
 const store = new Vuex.Store({
     state: {
@@ -40,6 +40,9 @@ const store = new Vuex.Store({
             return state.snackbar
         },
         ...local_product_getters
+    },
+    actions: {
+        ...local_product_actions
     }
 })
 

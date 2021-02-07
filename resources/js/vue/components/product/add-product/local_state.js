@@ -19,7 +19,23 @@ const mutations = {
     },
     addToColumns(state, payload) {
         state.columns.push(payload)
+    },
+    setColumns(state, payload) {
+        state.columns.splice(payload, 1)
     }
 }
 
-export { state, getters, mutations }
+const actions = {
+    updateColumns({ commit, state }, candidate) {
+        let i = state.columns.findIndex(v => v.column_name == candidate.column_name)
+        commit("setColumns", i)
+        if (!state.columns.length) {
+            commit("setStepper", {
+                canFinish: false
+            })
+        }
+    },
+    saveNewProductType({ commit, state }) {}
+}
+
+export { state, getters, mutations, actions }

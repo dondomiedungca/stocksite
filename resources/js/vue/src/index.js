@@ -1,3 +1,4 @@
+require("./../../bootstrap")
 import Vue from "vue"
 import vuetify from "../plugins"
 import VueRouter from "vue-router"
@@ -13,6 +14,7 @@ Vue.component("snackbar-vue", require("./../components/reusable/Snackbar.vue").d
 
 import ProductIndex from "./../components/product/Index.vue"
 import AddProduct from "./../components/product/add-product/Index.vue"
+import ProductLists from "./../components/product/product-list/Index.vue"
 
 const routes = [
     { path: "/admin/products", component: ProductIndex },
@@ -22,7 +24,7 @@ const routes = [
     },
     {
         path: "/admin/products/product-list",
-        component: AddProduct
+        component: ProductLists
     },
     {
         path: "/admin/products/product-import",
