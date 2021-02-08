@@ -5,7 +5,18 @@
             <v-container fluid>
                 <v-row>
                     <v-col lg="12">
-                        <v-data-table :headers="headers" :items="products.data" :page.sync="page" :items-per-page="itemsPerPage" hide-default-footer class="elevation-1" @page-count="pageCount = $event">
+                        <v-data-table :options.sync="options" disable-pagination :loading="loading" :server-items-length="products.total" :headers="headers" :items="products.data" :page.sync="page" :items-per-page="itemsPerPage" hide-default-footer class="elevation-1" @page-count="pageCount = $event">
+                            <template v-slot:item.actions="{ item }">
+                                <v-btn icon>
+                                    <v-icon>mdi-trash-can</v-icon>
+                                </v-btn>
+                                <v-btn @click="editProduct(item)" icon>
+                                    <v-icon>mdi-pencil</v-icon>
+                                </v-btn>
+                                <v-btn icon>
+                                    <v-icon>mdi-eye</v-icon>
+                                </v-btn>
+                            </template>
                             <template v-slot:item.product_type="{ item }">
                                 <small>
                                     {{ item.product_type.product_name }}
@@ -27,9 +38,10 @@
                                 </small>
                             </template>
                         </v-data-table>
-                        <div class="text-left pt-2">
-                            <v-pagination v-model="page" :length="pageCount"></v-pagination>
-                        </div>
+                        <v-layout class="d-flex justify-space-between align-center pt-3">
+                            <v-pagination :total-visible="7" v-model="page" :length="pageCount"></v-pagination>
+                        </v-layout>
+                        <edit-dialog @close="isEditOpen = !isEditOpen" :isEditOpen="isEditOpen"></edit-dialog>
                     </v-col>
                 </v-row>
             </v-container>
@@ -38,7 +50,13 @@
 </template>
 
 <script>
+import EditDialog from "./EditDialog"
+import { mapMutations, mapActions, mapGetters, mapState } from "vuex"
+
 export default {
+    components: {
+        EditDialog
+    },
     created() {
         this.getProductTypes()
         this.getProducts()
@@ -46,6 +64,9 @@ export default {
     watch: {
         selected_product_type_id: function(newVal, oldVal) {
             this.getProducts(1)
+        },
+        options() {
+            this.getProducts()
         }
     },
     data() {
@@ -66,7 +87,7 @@ export default {
             headers: [
                 {
                     text: "Actions",
-                    align: "start",
+                    align: "center",
                     sortable: false,
                     value: "actions",
                     class: "primary white--text"
@@ -98,10 +119,16 @@ export default {
             details: {},
             itemsPerPage: 10,
             page: 1,
-            pageCount: 0
+            pageCount: 0,
+            loading: true,
+            options: {},
+            //
+            isEditOpen: false,
+            forEdit: {}
         }
     },
     methods: {
+        ...mapMutations(["setEditOpen"]),
         numberWithCommas: function(x) {
             if (x == "" || x == null) {
                 return 0
@@ -117,14 +144,17 @@ export default {
                 this.product_type_list = res.data.product_types
             })
         },
-        getProducts: function(page) {
-            if (typeof page === "undefined") {
-                page = 1
-            }
+        getProducts: function() {
+            this.loading = true
+            let { sortBy, sortDesc, page, itemsPerPage } = this.options
+
             var url = "/admin/products/get-products-via-product-types/" + this.selected_product_type_id + "/" + JSON.stringify(this.searches)
-            axios.get(url + "?page=" + page).then(response => {
-                this.products = response.data
-            })
+            axios
+                .get(url + "?page=" + page)
+                .then(response => {
+                    this.products = response.data
+                })
+                .then(() => (this.loading = false))
         },
         renderDetails: function(name, details) {
             this.title = name
@@ -132,10 +162,8 @@ export default {
             this.$refs.details.trigger()
         },
         editProduct: function(product) {
-            this.title = product.stock_number
+            this.isEditOpen = !this.isEditOpen
             this.forEdit = product
-            this.product_type = product.product_type
-            this.$refs.edit.trigger()
         },
         validateThenSAve: function() {
             this.$refs.validate.validate()

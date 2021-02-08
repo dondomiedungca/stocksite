@@ -4,7 +4,7 @@
             <breadcrumbs-vue :items="items"></breadcrumbs-vue>
             <v-container fluid>
                 <v-row>
-                    <v-col lg="12">
+                    <v-col lg="9">
                         <stepper-vue :step_count="2" :headers="headers">
                             <template v-slot:step_content_1>
                                 <add-product-type></add-product-type>
