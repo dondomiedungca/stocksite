@@ -2,6 +2,7 @@
     <div class="app-bar-container overflow-hidden">
         <v-app-bar flat fixed height="50">
             <v-app-bar-nav-icon class="appbar-toggle" @click="drawer = true"></v-app-bar-nav-icon>
+            <v-app-bar-nav-icon id="appbar-toggle-default" class="appbar-toggle-default" @click="toggleDefault"></v-app-bar-nav-icon>
 
             <v-spacer></v-spacer>
 
@@ -40,7 +41,7 @@
             <v-list-item>
                 <v-list-item-content>
                     <v-list-item-title class="title">
-                        Pro Prints Enterprise
+                        Company Name
                     </v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
@@ -67,6 +68,11 @@
 
 <script>
 export default {
+    watch: {
+        $route(to, from) {
+            this.checkIfToggled()
+        }
+    },
     data: () => {
         return {
             drawer: false,
@@ -88,6 +94,23 @@ export default {
                 { title: "Reports", icon: "mdi-file-chart", url: "/admin/reports" },
                 { title: "Settings", icon: "mdi-cogs", url: "/admin/settings" }
             ]
+        }
+    },
+    methods: {
+        toggleDefault() {
+            var element = document.getElementById("sidebar") // this id is from Sidebar.vue to toggle close the sidebar
+            var toggler = document.getElementById("appbar-toggle-default")
+            var v_main = document.getElementById("v-main")
+            element.classList.toggle("sidebar-close-default")
+            toggler.classList.toggle("toggler-sidebar-close-default")
+            v_main.classList.toggle("v_main-sidebar-close-default")
+        },
+        checkIfToggled() {
+            var toggler = document.getElementById("appbar-toggle-default")
+            if (toggler.classList.contains("toggler-sidebar-close-default")) {
+                var v_main = document.getElementById("v-main")
+                v_main.classList.toggle("v_main-sidebar-close-default")
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-main>
+        <v-main id="v-main">
             <breadcrumbs-vue :items="items"></breadcrumbs-vue>
             <v-container fluid>
                 <v-row>

@@ -1,10 +1,10 @@
 <template>
-    <v-card class="sidebar-container" height="100vh" width="250">
+    <v-card id="sidebar" class="sidebar-container">
         <v-navigation-drawer absolute permanent left>
             <v-list-item>
                 <v-list-item-content>
                     <v-list-item-title class="title">
-                        Pro Prints Enterprise
+                        Company Name
                     </v-list-item-title>
                 </v-list-item-content>
             </v-list-item>

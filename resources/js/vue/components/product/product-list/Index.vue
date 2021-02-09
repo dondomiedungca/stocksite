@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-main>
+        <v-main id="v-main">
             <breadcrumbs-vue :items="items"></breadcrumbs-vue>
             <v-container fluid>
                 <v-row>
@@ -41,7 +41,7 @@
                         <v-layout class="d-flex justify-space-between align-center pt-3">
                             <v-pagination :total-visible="7" v-model="page" :length="pageCount"></v-pagination>
                         </v-layout>
-                        <edit-dialog @close="isEditOpen = !isEditOpen" :isEditOpen="isEditOpen"></edit-dialog>
+                        <edit-dialog :cosmetics="cosmetics" :statuses="statuses" :forEdit="forEdit" @close="isEditOpen = !isEditOpen" :isEditOpen="isEditOpen"></edit-dialog>
                     </v-col>
                 </v-row>
             </v-container>
@@ -60,6 +60,8 @@ export default {
     created() {
         this.getProductTypes()
         this.getProducts()
+        this.getCosmetics()
+        this.getStatuses()
     },
     watch: {
         selected_product_type_id: function(newVal, oldVal) {
@@ -124,7 +126,9 @@ export default {
             options: {},
             //
             isEditOpen: false,
-            forEdit: {}
+            forEdit: {},
+            cosmetics: [],
+            statuses: []
         }
     },
     methods: {
@@ -144,6 +148,16 @@ export default {
                 this.product_type_list = res.data.product_types
             })
         },
+        getCosmetics: function() {
+            axios.get("/admin/products/get-cosmetics").then(res => {
+                this.cosmetics = res.data.cosmetics
+            })
+        },
+        getStatuses: function() {
+            axios.get("/admin/products/get-item-statuses").then(res => {
+                this.statuses = res.data.statuses
+            })
+        },
         getProducts: function() {
             this.loading = true
             let { sortBy, sortDesc, page, itemsPerPage } = this.options
@@ -156,17 +170,9 @@ export default {
                 })
                 .then(() => (this.loading = false))
         },
-        renderDetails: function(name, details) {
-            this.title = name
-            this.details = details
-            this.$refs.details.trigger()
-        },
         editProduct: function(product) {
             this.isEditOpen = !this.isEditOpen
             this.forEdit = product
-        },
-        validateThenSAve: function() {
-            this.$refs.validate.validate()
         },
         removeAttempt: function(product) {
             var self = this
