@@ -41,7 +41,7 @@
                         <v-layout class="d-flex justify-space-between align-center pt-3">
                             <v-pagination :total-visible="7" v-model="page" :length="pageCount"></v-pagination>
                         </v-layout>
-                        <edit-dialog :cosmetics="cosmetics" :statuses="statuses" :forEdit="forEdit" @close="isEditOpen = !isEditOpen" :isEditOpen="isEditOpen"></edit-dialog>
+                        <edit-dialog :product_type="product_type" :cosmetics="cosmetics" :statuses="statuses" :forEdit="forEdit" @close="isEditOpen = !isEditOpen" :isEditOpen="isEditOpen"></edit-dialog>
                     </v-col>
                 </v-row>
             </v-container>
@@ -57,11 +57,14 @@ export default {
     components: {
         EditDialog
     },
-    created() {
+    async created() {
         this.getProductTypes()
-        this.getProducts()
-        this.getCosmetics()
-        this.getStatuses()
+        await this.getProducts()
+        await this.getCosmetics()
+        await this.getStatuses()
+        if (this.products.data.length) {
+            this.product_type = this.products.data[0].product_type
+        }
     },
     watch: {
         selected_product_type_id: function(newVal, oldVal) {
@@ -114,7 +117,6 @@ export default {
             product_type_list: [],
             products: {},
             searches: {},
-            selected_product_type_id: 1,
             forEdit: {},
             product_type: {},
             title: "",
@@ -128,7 +130,8 @@ export default {
             isEditOpen: false,
             forEdit: {},
             cosmetics: [],
-            statuses: []
+            statuses: [],
+            selected_product_type_id: 1
         }
     },
     methods: {
@@ -144,17 +147,17 @@ export default {
             return moment(date).format("MMMM DD, YYYY")
         },
         getProductTypes: function() {
-            axios.get("/admin/products/get-all-product-types").then(res => {
+            return axios.get("/admin/products/get-all-product-types").then(res => {
                 this.product_type_list = res.data.product_types
             })
         },
         getCosmetics: function() {
-            axios.get("/admin/products/get-cosmetics").then(res => {
+            return axios.get("/admin/products/get-cosmetics").then(res => {
                 this.cosmetics = res.data.cosmetics
             })
         },
         getStatuses: function() {
-            axios.get("/admin/products/get-item-statuses").then(res => {
+            return axios.get("/admin/products/get-item-statuses").then(res => {
                 this.statuses = res.data.statuses
             })
         },
@@ -163,7 +166,7 @@ export default {
             let { sortBy, sortDesc, page, itemsPerPage } = this.options
 
             var url = "/admin/products/get-products-via-product-types/" + this.selected_product_type_id + "/" + JSON.stringify(this.searches)
-            axios
+            return axios
                 .get(url + "?page=" + page)
                 .then(response => {
                     this.products = response.data
