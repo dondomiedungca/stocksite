@@ -90,7 +90,7 @@ class ProductsController extends Controller
 
     public function getAllProductTypes() {
         $product_types = ProductTypes::with('user', 'product_attributes', 'product_attributes.column_selections')
-                                        ->orderBy("created_at", "DESC")
+                                        ->orderBy("created_at", "ASC")
                                         ->get();
         $data['product_types'] = $product_types;
         

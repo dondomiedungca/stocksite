@@ -15,6 +15,7 @@ Vue.component("snackbar-vue", require("./../components/reusable/Snackbar.vue").d
 import ProductIndex from "./../components/product/Index.vue"
 import AddProduct from "./../components/product/add-product/Index.vue"
 import ProductLists from "./../components/product/product-list/Index.vue"
+import ImportProduct from "./../components/product/import-product/Index.vue"
 
 const routes = [
     { path: "/admin/products", component: ProductIndex },
@@ -28,7 +29,7 @@ const routes = [
     },
     {
         path: "/admin/products/product-import",
-        component: AddProduct
+        component: ImportProduct
     }
 ]
 

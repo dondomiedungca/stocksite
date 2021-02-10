@@ -48,7 +48,7 @@ export default {
                     text: "Are you sure? All details is correct?",
                     icon: "info",
                     showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
+                    confirmButtonColor: "#42d1f5",
                     cancelButtonColor: "#d33",
                     confirmButtonText: "Yes, save it",
                     showLoaderOnConfirm: true,

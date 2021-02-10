@@ -4,16 +4,21 @@
             <breadcrumbs-vue :items="items"></breadcrumbs-vue>
             <v-container fluid>
                 <v-row>
+                    <v-col lg="3">
+                        <v-select outlined :items="product_type_selections" v-model="selected_product_type_id" label="Inventory Type" dense></v-select>
+                    </v-col>
+                </v-row>
+                <v-row>
                     <v-col lg="12">
                         <v-data-table :options.sync="options" disable-pagination :loading="loading" :server-items-length="products.total" :headers="headers" :items="products.data" :page.sync="page" :items-per-page="itemsPerPage" hide-default-footer class="elevation-1" @page-count="pageCount = $event">
                             <template v-slot:item.actions="{ item }">
-                                <v-btn icon>
+                                <v-btn @click="removeAttempt(item)" icon>
                                     <v-icon>mdi-trash-can</v-icon>
                                 </v-btn>
                                 <v-btn @click="editProduct(item)" icon>
                                     <v-icon>mdi-pencil</v-icon>
                                 </v-btn>
-                                <v-btn icon>
+                                <v-btn @click="renderDetails(item.details)" icon>
                                     <v-icon>mdi-eye</v-icon>
                                 </v-btn>
                             </template>
@@ -42,6 +47,7 @@
                             <v-pagination :total-visible="7" v-model="page" :length="pageCount"></v-pagination>
                         </v-layout>
                         <edit-dialog :product_type="product_type" :cosmetics="cosmetics" :statuses="statuses" :forEdit="forEdit" @close="isEditOpen = !isEditOpen" :isEditOpen="isEditOpen"></edit-dialog>
+                        <view-specs :details="details" @close="isViewOpen = !isViewOpen" :isViewOpen="isViewOpen"></view-specs>
                     </v-col>
                 </v-row>
             </v-container>
@@ -51,11 +57,13 @@
 
 <script>
 import EditDialog from "./EditDialog"
+import ViewSpecs from "./ViewSpecs"
 import { mapMutations, mapActions, mapGetters, mapState } from "vuex"
 
 export default {
     components: {
-        EditDialog
+        EditDialog,
+        ViewSpecs
     },
     async created() {
         this.getProductTypes()
@@ -69,6 +77,7 @@ export default {
     watch: {
         selected_product_type_id: function(newVal, oldVal) {
             this.getProducts(1)
+            this.product_type = this.product_types.find(pt => newVal == pt.id)
         },
         options() {
             this.getProducts()
@@ -119,6 +128,7 @@ export default {
             searches: {},
             forEdit: {},
             product_type: {},
+            product_types: [],
             title: "",
             details: {},
             itemsPerPage: 10,
@@ -128,10 +138,12 @@ export default {
             options: {},
             //
             isEditOpen: false,
+            isViewOpen: false,
             forEdit: {},
             cosmetics: [],
             statuses: [],
-            selected_product_type_id: 1
+            selected_product_type_id: 1,
+            product_type_selections: []
         }
     },
     methods: {
@@ -148,7 +160,13 @@ export default {
         },
         getProductTypes: function() {
             return axios.get("/admin/products/get-all-product-types").then(res => {
-                this.product_type_list = res.data.product_types
+                this.product_types = res.data.product_types
+                this.product_type_selections = res.data.product_types.map(product_type => {
+                    return {
+                        text: product_type.product_name,
+                        value: product_type.id
+                    }
+                })
             })
         },
         getCosmetics: function() {
@@ -174,8 +192,12 @@ export default {
                 .then(() => (this.loading = false))
         },
         editProduct: function(product) {
-            this.isEditOpen = !this.isEditOpen
             this.forEdit = product
+            this.isEditOpen = !this.isEditOpen
+        },
+        renderDetails: function(details) {
+            this.details = details
+            this.isViewOpen = !this.isViewOpen
         },
         removeAttempt: function(product) {
             var self = this

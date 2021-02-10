@@ -33,29 +33,44 @@
                     </v-col>
                     <template v-if="Object.keys(product_type).length">
                         <v-col lg="4" md="4" sm="6" xs="12" v-for="(product_attribute, i) in product_type.product_attributes" v-bind:key="i" class="col-4 mb-3">
-                            <label><span v-if="product_attribute.product_column_is_required" style="color: red;">* </span>{{ product_attribute.product_column_name }}</label>
                             <div v-if="product_attribute.product_column_input_type == 'INPUT'">
                                 <div v-if="product_attribute.product_column_data_type == 'STRING'">
-                                    <input type="text" class="form-control form-control-sm" :class="{ 'is-invalid': $v.product.details[product_attribute.product_column_name].$error }" name v-model="$v.product.details[product_attribute.product_column_name].$model" @change="product.details[product_attribute.product_column_name] = $event.target.value" />
-                                    <div class="invalid-feedback" v-if="$v.product.details[product_attribute.product_column_name].$error">This field is required</div>
-                                </div>
-                                <div v-else-if="product_attribute.product_column_data_type == 'INTEGER'">
-                                    <input type="number" class="form-control form-control-sm" :class="{ 'is-invalid': $v.product.details[product_attribute.product_column_name].$error }" name v-model="$v.product.details[product_attribute.product_column_name].$model" @change="product.details[product_attribute.product_column_name] = $event.target.value" />
-                                    <div class="invalid-feedback" v-if="$v.product.details[product_attribute.product_column_name].$error">This field is required</div>
+                                    <v-text-field :error-messages="customErrors[product_attribute.product_column_name]" @blur="$v.forEdit.details[product_attribute.product_column_name].$touch()" dense :label="product_attribute.product_column_name" outlined v-model="forEdit.details[product_attribute.product_column_name]" type="text"></v-text-field>
                                 </div>
                                 <div v-else>
-                                    <input type="date" class="form-control form-control-sm" :class="{ 'is-invalid': $v.product.details[product_attribute.product_column_name].$error }" name v-model="$v.product.details[product_attribute.product_column_name].$model" @change="product.details[product_attribute.product_column_name] = $event.target.value" />
-                                    <div class="invalid-feedback" v-if="$v.product.details[product_attribute.product_column_name].$error">This field is required</div>
+                                    <!-- <v-dialog ref="dialog" v-model="modal" :return-value.sync="date" persistent width="290px">
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-text-field :error-messages="customErrors[product_attribute.product_column_name]" @blur="$v.forEdit.details[product_attribute.product_column_name].$touch()" v-model="forEdit.details[product_attribute.product_column_name]" :label="product_attribute.product_column_name" prepend-icon="mdi-calendar" outlined dense readonly v-bind="attrs" v-on="on"></v-text-field>
+                                        </template>
+                                        <v-date-picker v-model="forEdit.details[product_attribute.product_column_name]" scrollable>
+                                            <v-spacer></v-spacer>
+                                            <v-btn text color="primary" @click="modal = false">
+                                                Cancel
+                                            </v-btn>
+                                            <v-btn text color="primary" @click="$refs.dialog.save(forEdit.details[product_attribute.product_column_name])">
+                                                OK
+                                            </v-btn>
+                                        </v-date-picker>
+                                    </v-dialog> -->
+                                    <v-text-field @click="setPropertyNameForDate(product_attribute.product_column_name)" :error-messages="customErrors[product_attribute.product_column_name]" @blur="$v.forEdit.details[product_attribute.product_column_name].$touch()" v-model="forEdit.details[product_attribute.product_column_name]" :label="product_attribute.product_column_name" prepend-icon="mdi-calendar" outlined dense readonly></v-text-field>
                                 </div>
                             </div>
                             <div v-else>
-                                <select class="custom-select custom-select-sm" :class="{ 'is-invalid': $v.product.details[product_attribute.product_column_name].$error }" name v-model="$v.product.details[product_attribute.product_column_name].$model" @change="product.details[product_attribute.product_column_name] = $event.target.value">
-                                    <option v-for="(selection, i) in product_attribute.column_selections" v-bind:key="i" :value="selection.selection_name">-- {{ selection.selection_name }} --</option>
-                                </select>
-                                <div class="invalid-feedback" v-if="$v.product.details[product_attribute.product_column_name].$error">This field is required</div>
+                                <v-select outlined :error-messages="customErrors[product_attribute.product_column_name]" :items="customSelections(product_attribute.column_selections)" v-model="forEdit.details[product_attribute.product_column_name]" :label="product_attribute.product_column_name" dense></v-select>
                             </div>
                         </v-col>
                     </template>
+                    <v-dialog v-model="dateDialog" ref="dialog" :return-value.sync="forEdit.details[date_modal_property_name]" persistent width="290px">
+                        <v-date-picker v-model="forEdit.details[date_modal_property_name]" scrollable>
+                            <v-spacer></v-spacer>
+                            <v-btn text @click="dateDialog = false" color="primary">
+                                Cancel
+                            </v-btn>
+                            <v-btn text color="primary" @click="$refs.dialog.save(forEdit.details[date_modal_property_name])">
+                                OK
+                            </v-btn>
+                        </v-date-picker>
+                    </v-dialog>
                 </v-row>
             </div>
             <v-card-actions>
@@ -102,27 +117,95 @@ export default {
         return {
             isOpen: false,
             status_selections: [],
-            cosmetic_selections: []
+            cosmetic_selections: [],
+            modal: false,
+            dateDialog: false,
+            date_modal_property_name: ""
         }
     },
     methods: {
-        updateItem: function() {},
+        updateItem: function() {
+            this.$v.$touch()
+            if (!this.$v.$invalid) {
+                var self = this
+                swal.queue([
+                    {
+                        title: "Update This Product",
+                        text: "Save changes in this item now?",
+                        icon: "info",
+                        showCancelButton: true,
+                        cancelButtonColor: "#d33",
+                        confirmButtonColor: "#42d1f5",
+                        confirmButtonText: "Yes, update now",
+                        showLoaderOnConfirm: true,
+                        preConfirm: () => {
+                            return axios
+                                .post("/admin/products/update-product", {
+                                    inventory: self.forEdit
+                                })
+                                .then(response => {
+                                    swal.fire({
+                                        title: response.data.heading,
+                                        text: response.data.message,
+                                        icon: response.data.isSuccess ? "success" : "error"
+                                    })
+                                })
+                        }
+                    }
+                ])
+            }
+        },
+        setPropertyNameForDate: function(name) {
+            this.date_modal_property_name = name
+            this.dateDialog = true
+        },
         close: function() {
-            ;(this.isOpen = !this.isOpen), this.$emit("close")
+            this.isOpen = !this.isOpen
+            this.$emit("close")
+        },
+        customSelections(data) {
+            return data.map(selection => selection.selection_name)
+        },
+        createValidationForDetails() {
+            var validations = {}
+            this.product_type.product_attributes.map(column => {
+                if (column.product_column_is_required) {
+                    validations = {
+                        ...validations,
+                        [column.product_column_name]: {
+                            required
+                        }
+                    }
+                }
+                if (column.product_column_data_type == "INTEGER") {
+                    validations = {
+                        ...validations,
+                        [column.product_column_name]: {
+                            ...validations[column.product_column_name],
+                            numeric
+                        }
+                    }
+                }
+            })
+
+            return validations
         }
     },
-    validations: {
-        forEdit: {
-            origin_price: {
-                required,
-                numeric
-            },
-            selling_price: {
-                required,
-                numeric
-            },
-            discount_percentage: {
-                numeric
+    validations() {
+        return {
+            forEdit: {
+                origin_price: {
+                    required,
+                    numeric
+                },
+                selling_price: {
+                    required,
+                    numeric
+                },
+                discount_percentage: {
+                    numeric
+                },
+                details: this.createValidationForDetails()
             }
         }
     },
@@ -146,6 +229,23 @@ export default {
             if (!this.$v.forEdit.discount_percentage.$dirty) return errors
             !this.$v.forEdit.discount_percentage.numeric && errors.push("Only digit is allowed")
             return errors
+        },
+        customErrors() {
+            var error_by_property_name = {}
+            this.product_type.product_attributes.map(property_name => {
+                var errors = []
+                if (!this.$v.forEdit.details[property_name.product_column_name].$dirty) return (errors = [])
+                !this.$v.forEdit.details[property_name.product_column_name].required && errors.push(`${property_name.product_column_name} field is required`)
+                if (Object.prototype.hasOwnProperty.call(this.$v.forEdit.details[property_name.product_column_name], "numeric")) {
+                    !this.$v.forEdit.details[property_name.product_column_name].numeric && errors.push("Only digit is allowed")
+                }
+                error_by_property_name = {
+                    ...error_by_property_name,
+                    [property_name.product_column_name]: errors
+                }
+            })
+
+            return error_by_property_name
         }
     }
 }
