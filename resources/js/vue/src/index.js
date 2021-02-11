@@ -17,6 +17,10 @@ import AddProduct from "./../components/product/add-product/Index.vue"
 import ProductLists from "./../components/product/product-list/Index.vue"
 import ImportProduct from "./../components/product/import-product/Index.vue"
 
+import PurchasingIndex from "./../components/purchasing/Index.vue"
+import CreatePurchasing from "./../components/purchasing/create-purchasing/CreatePurchasing.vue"
+import PurchasingList from "./../components/purchasing/purchasing-list/PurchasingList.vue"
+
 const routes = [
     { path: "/admin/products", component: ProductIndex },
     {
@@ -30,6 +34,15 @@ const routes = [
     {
         path: "/admin/products/product-import",
         component: ImportProduct
+    },
+    { path: "/admin/purchasing", component: PurchasingIndex },
+    {
+        path: "/admin/purchasing/purchasing-order",
+        component: CreatePurchasing
+    },
+    {
+        path: "/admin/purchasing/purchasing-list",
+        component: PurchasingList
     }
 ]
 

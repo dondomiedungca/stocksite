@@ -1,19 +1,75 @@
 <template>
     <v-container>
         <v-row class="mt-5">
+            <v-col lg="3" md="3" sm="12" xs="12">
+                <v-select outlined dense :items="product_types_selection" v-model="selected_product_type" label="Inventory Type"></v-select>
+            </v-col>
+        </v-row>
+        <v-row>
             <v-col lg="12" md="12" sm="12" xs="12">
                 <h5>Required Headers (base on your product type)</h5>
                 <small>Note: Please make sure that the header was exactly the same as your fields</small>
             </v-col>
         </v-row>
         <v-row>
-            <v-col lg="4" md="4" sm="6" xs="12"> </v-col>
+            <v-col lg="12" md="12" sm="12" xs="12">
+                <v-simple-table v-if="Object.keys(base_product_type).length">
+                    <template v-slot:default>
+                        <thead>
+                            <tr>
+                                <th v-for="(productType, i) in base_product_type.product_attributes" v-bind:key="i" class="text-left">
+                                    {{ productType.product_column_name }}
+                                </th>
+                            </tr>
+                        </thead>
+                    </template>
+                </v-simple-table>
+            </v-col>
+        </v-row>
+        <v-row>
+            <v-col lg="3" md="3" sm="6" xs="12">
+                <v-btn @click="dialog = true" color="primary"><v-icon>mdi-file-upload</v-icon> Upload File</v-btn>
+            </v-col>
+            <v-dialog v-model="dialog" width="600">
+                <v-card>
+                    <v-card-title>
+                        Upload File
+                    </v-card-title>
+
+                    <div>
+                        <v-row class="form-row">
+                            <v-col v-if="willShow()" lg="12" md="12" sm="12" xs="12">
+                                <v-file-input :error-messages="photoErrors" id="upload-photo" ref="uploadPhoto" small-chips accept="image/*" v-model="photo" show-size counter label="Product Photo" outlined dense></v-file-input>
+                            </v-col>
+                            <v-col lg="12" md="12" sm="12" xs="12">
+                                <v-file-input :error-messages="fileErrors" id="upload-file" ref="uploadFile" small-chips accept=".csv, .xlsx" v-model="file" show-size counter label="File To Upload" outlined dense></v-file-input>
+                                <v-progress-linear v-if="loaded" v-model="loaded" height="25">
+                                    <strong>{{ loaded }}%</strong>
+                                </v-progress-linear>
+                            </v-col>
+                        </v-row>
+                    </div>
+
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn small color="secondary" @click="dialog = false">Close</v-btn>
+                        <v-btn small color="primary" class="ma-2 white--text" @click="uploadItems" fab>
+                            <v-icon dark>
+                                mdi-cloud-upload
+                            </v-icon>
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
         </v-row>
     </v-container>
 </template>
 
 <script>
+import { validationMixin } from "vuelidate"
+import { required, numeric } from "vuelidate/lib/validators"
 export default {
+    mixins: [validationMixin],
     props: {
         basis: {
             type: String,
@@ -39,14 +95,14 @@ export default {
     data() {
         return {
             date: "",
-            modal: false,
+            dialog: false,
             saving: false,
             loaded: 0,
-            file: "",
+            file: [],
             fileName: "",
             base_product_type: {},
             purchasing_type: {},
-            photo: "",
+            photo: [],
             product_types: [],
             selected_product_type: "",
             product_types_selection: []
@@ -54,10 +110,29 @@ export default {
     },
     watch: {
         product_types: function() {
-            this.selected_product_type = 0
+            this.selected_product_type = 1
         },
         selected_product_type: function(newVal, oldVal) {
-            this.base_product_type = this.product_types[newVal]
+            this.base_product_type = this.product_types.find(pt => newVal == pt.id)
+        },
+        file(data) {
+            let last_dot = data.name.lastIndexOf(".")
+            let name = data.name.slice(0, last_dot)
+            this.fileName = name
+        }
+    },
+    computed: {
+        photoErrors() {
+            const errors = []
+            if (!this.$v.photo.$dirty) return errors
+            !this.$v.photo.required && errors.push("Product Photo is required")
+            return errors
+        },
+        fileErrors() {
+            const errors = []
+            if (!this.$v.file.$dirty) return errors
+            !this.$v.file.required && errors.push("File to upload field is required")
+            return errors
         }
     },
     methods: {
@@ -87,7 +162,7 @@ export default {
                 this.product_types_selection = res.data.product_types.map((product_type, i) => {
                     return {
                         text: product_type.product_name,
-                        value: i
+                        value: product_type.id
                     }
                 })
             })
@@ -160,10 +235,6 @@ export default {
             }
 
             return validations
-        },
-        parseFilePhoto: function() {
-            let uploadFiles = document.getElementById("upload-photo")
-            this.photo = this.$refs.uploadPhoto.files[0]
         }
     },
     validations() {
@@ -177,4 +248,8 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+.form-row {
+    margin: 7px 1%;
+}
+</style>

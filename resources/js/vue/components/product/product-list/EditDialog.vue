@@ -38,21 +38,7 @@
                                     <v-text-field :error-messages="customErrors[product_attribute.product_column_name]" @blur="$v.forEdit.details[product_attribute.product_column_name].$touch()" dense :label="product_attribute.product_column_name" outlined v-model="forEdit.details[product_attribute.product_column_name]" type="text"></v-text-field>
                                 </div>
                                 <div v-else>
-                                    <!-- <v-dialog ref="dialog" v-model="modal" :return-value.sync="date" persistent width="290px">
-                                        <template v-slot:activator="{ on, attrs }">
-                                            <v-text-field :error-messages="customErrors[product_attribute.product_column_name]" @blur="$v.forEdit.details[product_attribute.product_column_name].$touch()" v-model="forEdit.details[product_attribute.product_column_name]" :label="product_attribute.product_column_name" prepend-icon="mdi-calendar" outlined dense readonly v-bind="attrs" v-on="on"></v-text-field>
-                                        </template>
-                                        <v-date-picker v-model="forEdit.details[product_attribute.product_column_name]" scrollable>
-                                            <v-spacer></v-spacer>
-                                            <v-btn text color="primary" @click="modal = false">
-                                                Cancel
-                                            </v-btn>
-                                            <v-btn text color="primary" @click="$refs.dialog.save(forEdit.details[product_attribute.product_column_name])">
-                                                OK
-                                            </v-btn>
-                                        </v-date-picker>
-                                    </v-dialog> -->
-                                    <v-text-field @click="setPropertyNameForDate(product_attribute.product_column_name)" :error-messages="customErrors[product_attribute.product_column_name]" @blur="$v.forEdit.details[product_attribute.product_column_name].$touch()" v-model="forEdit.details[product_attribute.product_column_name]" :label="product_attribute.product_column_name" prepend-icon="mdi-calendar" outlined dense readonly></v-text-field>
+                                    <v-text-field style="cursor: pointer;" @click="setPropertyNameForDate(product_attribute.product_column_name)" :error-messages="customErrors[product_attribute.product_column_name]" @blur="$v.forEdit.details[product_attribute.product_column_name].$touch()" v-model="forEdit.details[product_attribute.product_column_name]" :label="product_attribute.product_column_name" prepend-icon="mdi-calendar" outlined dense readonly></v-text-field>
                                 </div>
                             </div>
                             <div v-else>
@@ -63,7 +49,7 @@
                     <v-dialog v-model="dateDialog" ref="dialog" :return-value.sync="forEdit.details[date_modal_property_name]" persistent width="290px">
                         <v-date-picker v-model="forEdit.details[date_modal_property_name]" scrollable>
                             <v-spacer></v-spacer>
-                            <v-btn text @click="dateDialog = false" color="primary">
+                            <v-btn text @click="dateDialog = false" color="secondary">
                                 Cancel
                             </v-btn>
                             <v-btn text color="primary" @click="$refs.dialog.save(forEdit.details[date_modal_property_name])">

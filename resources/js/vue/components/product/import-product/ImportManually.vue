@@ -22,10 +22,10 @@
                 <v-select outlined :items="cosmetics" v-model="item_data.item_cosmetic_id" label="Inventory Cosmetic" dense></v-select>
             </v-col>
             <v-col lg="3" md="3" sm="6" xs="12">
-                <v-text-field :error-messages="originPriceErrors" @blur="$v.item_data.selling_price.$touch()" outlined v-model="item_data.origin_price" label="Origin Price" dense></v-text-field>
+                <v-text-field :error-messages="originPriceErrors" @blur="$v.item_data.origin_price.$touch()" outlined v-model="item_data.origin_price" label="Origin Price" dense></v-text-field>
             </v-col>
             <v-col lg="3" md="3" sm="6" xs="12">
-                <v-text-field :error-messages="sellingPriceErrors" @blur="$v.item_data.origin_price.$touch()" outlined v-model="item_data.selling_price" label="Selling Price" dense></v-text-field>
+                <v-text-field :error-messages="sellingPriceErrors" @blur="$v.item_data.selling_price.$touch()" outlined v-model="item_data.selling_price" label="Selling Price" dense></v-text-field>
             </v-col>
             <v-col lg="3" md="3" sm="6" xs="12">
                 <v-text-field :error-messages="discountPercentageErrors" @blur="$v.item_data.discount_percentage.$touch()" outlined v-model="item_data.discount_percentage" label="Discount Percentage" dense></v-text-field>
@@ -49,7 +49,7 @@
                         <v-text-field :error-messages="customErrors[column.product_column_name]" type="text" @blur="$v.item_data.details[column.product_column_name].$touch()" outlined v-model="item_data.details[column.product_column_name]" :label="column.product_column_name" dense></v-text-field>
                     </div>
                     <div v-else>
-                        <v-text-field @click="setPropertyNameForDate(column.product_column_name)" :error-messages="customErrors[column.product_column_name]" @blur="$v.item_data.details[column.product_column_name].$touch()" v-model="item_data.details[column.product_column_name]" :label="column.product_column_name" prepend-icon="mdi-calendar" outlined dense readonly></v-text-field>
+                        <v-text-field style="cursor: pointer;" @click="setPropertyNameForDate(column.product_column_name)" :error-messages="customErrors[column.product_column_name]" @blur="$v.item_data.details[column.product_column_name].$touch()" v-model="item_data.details[column.product_column_name]" :label="column.product_column_name" prepend-icon="mdi-calendar" outlined dense readonly></v-text-field>
                     </div>
                 </div>
                 <div v-else>
@@ -59,7 +59,7 @@
             <v-dialog v-model="dateDialog" ref="dialog" :return-value.sync="item_data.details[date_modal_property_name]" persistent width="290px">
                 <v-date-picker v-model="item_data.details[date_modal_property_name]" scrollable>
                     <v-spacer></v-spacer>
-                    <v-btn text @click="dateDialog = false" color="primary">
+                    <v-btn text @click="dateDialog = false" color="secondary">
                         Cancel
                     </v-btn>
                     <v-btn text color="primary" @click="$refs.dialog.save(item_data.details[date_modal_property_name])">

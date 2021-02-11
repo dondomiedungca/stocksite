@@ -56,10 +56,10 @@
                     </v-container>
                     <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn color="gray darken-1" text @click="dialog = false">
+                        <v-btn color="secondary" text @click="dialog = false">
                             close
                         </v-btn>
-                        <v-btn :disabled="!valid" color="green darken-1" text @click="importToColums">
+                        <v-btn :disabled="!valid" color="primary" text @click="importToColums">
                             Save
                         </v-btn>
                     </v-card-actions>
@@ -81,10 +81,10 @@
                                 <v-card-title>Do you want to remove {{ candidateItem.column_name }}?</v-card-title>
                                 <v-card-actions>
                                     <v-spacer></v-spacer>
-                                    <v-btn color="gray darken-1" text @click="deleteDialogIsOpen = false">
+                                    <v-btn color="secondary" text @click="deleteDialogIsOpen = false">
                                         close
                                     </v-btn>
-                                    <v-btn color="green darken-1" text @click="removeColumn">
+                                    <v-btn color="primary" text @click="removeColumn">
                                         Remove
                                     </v-btn>
                                 </v-card-actions>
