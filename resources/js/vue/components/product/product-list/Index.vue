@@ -11,36 +11,55 @@
                 <v-row>
                     <v-col lg="12">
                         <v-data-table :options.sync="options" disable-pagination :loading="loading" :server-items-length="products.total" :headers="headers" :items="products.data" :page.sync="page" :items-per-page="itemsPerPage" hide-default-footer class="elevation-1" @page-count="pageCount = $event">
-                            <template v-slot:item.actions="{ item }">
-                                <v-btn @click="removeAttempt(item)" icon>
-                                    <v-icon>mdi-trash-can</v-icon>
-                                </v-btn>
-                                <v-btn @click="editProduct(item)" icon>
-                                    <v-icon>mdi-pencil</v-icon>
-                                </v-btn>
-                                <v-btn @click="renderDetails(item.details)" icon>
-                                    <v-icon>mdi-eye</v-icon>
-                                </v-btn>
-                            </template>
-                            <template v-slot:item.product_type="{ item }">
-                                <small>
-                                    {{ item.product_type.product_name }}
-                                </small>
-                            </template>
-                            <template v-slot:item.cosmetic="{ item }">
-                                <small>
-                                    {{ item.cosmetic.name }}
-                                </small>
-                            </template>
-                            <template v-slot:item.status="{ item }">
-                                <small>
-                                    {{ item.status.name }}
-                                </small>
-                            </template>
-                            <template v-slot:item.date_created="{ item }">
-                                <small>
-                                    {{ item.date_created }}
-                                </small>
+                            <template v-slot:item="{ index, item }">
+                                <tr>
+                                    <td align="center">
+                                        <small># {{ index + 1 }}</small>
+                                    </td>
+                                    <td align="center">
+                                        <small
+                                            ><v-btn @click="removeAttempt(item)" icon>
+                                                <v-icon>mdi-trash-can</v-icon>
+                                            </v-btn>
+                                            <v-btn @click="editProduct(item)" icon>
+                                                <v-icon>mdi-pencil</v-icon>
+                                            </v-btn>
+                                            <v-btn @click="renderDetails(item.details)" icon>
+                                                <v-icon>mdi-eye</v-icon>
+                                            </v-btn></small
+                                        >
+                                    </td>
+                                    <td align="center">
+                                        <small>{{ item.stock_number }}</small>
+                                    </td>
+                                    <td align="center">
+                                        <small>{{ item.product_type.product_name }}</small>
+                                    </td>
+                                    <td align="center">
+                                        <small>{{ item.status.name }}</small>
+                                    </td>
+                                    <td align="center">
+                                        <small>{{ item.cosmetic.name }}</small>
+                                    </td>
+                                    <td align="center">
+                                        <small>{{ item.item_cosmetic_description }}</small>
+                                    </td>
+                                    <td align="center">
+                                        <small>{{ item.item_description }}</small>
+                                    </td>
+                                    <td align="center">
+                                        <small><span v-html="currency.symbol"></span> {{ numberWithCommas(item.origin_price) }}</small>
+                                    </td>
+                                    <td align="center">
+                                        <small><span v-html="currency.symbol"></span> {{ numberWithCommas(item.selling_price) }}</small>
+                                    </td>
+                                    <td align="center">
+                                        <small>{{ item.discount_percentage }}</small>
+                                    </td>
+                                    <td align="center">
+                                        <small>{{ item.date_created }}</small>
+                                    </td>
+                                </tr>
                             </template>
                         </v-data-table>
                         <v-layout class="d-flex justify-space-between align-center pt-3">
@@ -70,6 +89,7 @@ export default {
         await this.getProducts()
         await this.getCosmetics()
         await this.getStatuses()
+        await this.getCurrency()
         if (this.products.data.length) {
             this.product_type = this.products.data[0].product_type
         }
@@ -100,6 +120,13 @@ export default {
             ],
             headers: [
                 {
+                    text: "#",
+                    align: "center",
+                    sortable: false,
+                    value: "index",
+                    class: "primary white--text"
+                },
+                {
                     text: "Actions",
                     align: "center",
                     sortable: false,
@@ -123,14 +150,6 @@ export default {
                 { text: "Discout Percentage", value: "discount_percentage", align: "start", sortable: false, class: "primary white--text" },
                 { text: "Date Added", value: "date_created", align: "start", sortable: false, class: "primary white--text" }
             ],
-            product_type_list: [],
-            products: {},
-            searches: {},
-            forEdit: {},
-            product_type: {},
-            product_types: [],
-            title: "",
-            details: {},
             itemsPerPage: 10,
             page: 1,
             pageCount: 0,
@@ -143,7 +162,16 @@ export default {
             cosmetics: [],
             statuses: [],
             selected_product_type_id: 1,
-            product_type_selections: []
+            product_type_selections: [],
+            product_type_list: [],
+            products: {},
+            searches: {},
+            forEdit: {},
+            product_type: {},
+            product_types: [],
+            title: "",
+            details: {},
+            currency: {}
         }
     },
     methods: {
@@ -154,6 +182,11 @@ export default {
             } else {
                 return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             }
+        },
+        getCurrency: function() {
+            axios.get("/admin/currency/get-currency").then(result => {
+                this.currency = result.data
+            })
         },
         date_format: function(date) {
             return moment(date).format("MMMM DD, YYYY")

@@ -7,7 +7,7 @@
                     <v-col lg="6" md="6">
                         <v-row>
                             <v-col lg="6" md="6" sm="6" xs="12">
-                                <v-select :items="supplier_selections" label="Select Supplier" v-model="selected_supplier" outlined dense></v-select>
+                                <v-select :error-messages="supplier_errors" :items="supplier_selections" label="Select Supplier" v-model="selected_supplier" outlined dense></v-select>
                             </v-col>
                         </v-row>
                         <v-row>
@@ -65,7 +65,7 @@
                     <v-col lg="6" md="6">
                         <v-row>
                             <v-col lg="6" md="6" sm="6" xs="12">
-                                <v-select :items="receiver_selections" label="Select Receiver" v-model="selected_receiver" outlined dense></v-select>
+                                <v-select :error-messages="receiver_errors" :items="receiver_selections" label="Select Receiver" v-model="selected_receiver" outlined dense></v-select>
                             </v-col>
                         </v-row>
                         <v-row>
@@ -113,7 +113,11 @@
                     </v-col>
                 </v-row>
                 <v-row class="mt-5">
-                    <v-col lg="12" md="12" sm="12" xs="12">
+                    <v-col class="d-flex justify-space-between">
+                        <v-btn @click="moreItems" color="primary"> <v-icon>mdi-plus</v-icon> Add Inventory </v-btn>
+                        <v-btn @click="createPurchaseOrder" color="primary"> <v-icon>mdi-check</v-icon> Create Purchasing </v-btn>
+                    </v-col>
+                    <v-col class="mb-5" lg="12" md="12" sm="12" xs="12">
                         <div style="overflow-x:auto;">
                             <table class="table-simple">
                                 <thead>
@@ -129,7 +133,7 @@
                                 <tbody>
                                     <tr v-for="(inventory, i) in inventories" v-bind:key="i">
                                         <td align="center">
-                                            <v-btn @click="removeInventory(i)" icon color="red darken-1">
+                                            <v-btn :disabled="!i" @click="removeInventory(i)" icon color="red darken-1">
                                                 <v-icon>mdi-delete</v-icon>
                                             </v-btn>
                                         </td>
@@ -163,7 +167,7 @@
                                         </td>
                                         <td>
                                             <!-- <input type="number" :class="{ 'is-invalid': $v.additional_cost.$error }" name v-model="$v.additional_cost.$model" @change="additional_cost = $event.target.value" class="form-control form-control-sm" /> -->
-                                            <v-text-field class="mt-5" :error-messages="additional_costs" type="text" @blur="$v.additional_costs.$touch()" outlined v-model="inventories[i].inventory_unit_amount" label="Inventory Unit Amount" dense></v-text-field>
+                                            <v-text-field class="mt-5" :error-messages="additional_cost_errors" type="text" @blur="$v.additional_cost.$touch()" outlined v-model="additional_cost" label="Additional Cost" dense></v-text-field>
                                         </td>
                                         <td align="right">
                                             <b>Total</b>
@@ -217,8 +221,8 @@ export default {
                 {
                     inventory_type: "",
                     inventory_description: "",
-                    inventory_quantity: 0,
-                    inventory_unit_amount: 0,
+                    inventory_quantity: 1,
+                    inventory_unit_amount: 1,
                     inventory_total_price: ""
                 }
             ],
@@ -234,26 +238,6 @@ export default {
         this.getCurrency()
     },
     computed: {
-        // customErrors() {
-        //     var self = this
-        //     var error_by_inventory = []
-        //     // this.inventories.map((inventory, i) => {
-        //     //     var index_to_string = String(i)
-        //     //     var inventory_errors = {}
-        //     //     var property_names = Object.keys(inventory)
-        //     //     property_names.map(property_name => {
-        //     //         var errors = []
-        //     //         if (!self.$v.inventories.$each[index_to_string][property_name].$dirty) return (errors = [])
-        //     //         !self.$v.inventories.$each[index_to_string][property_name].required && errors.push(`${property_name} field is required`)
-        //     //         inventory_errors = {
-        //     //             ...inventory_errors,
-        //     //             [property_name]: errors
-        //     //         }
-        //     //     })
-        //     //     error_by_inventory.push(inventory_errors)
-        //     // })
-        //     return error_by_inventory
-        // },
         subtotal_price: function() {
             var inventories = this.inventories
             var subTotals = []
@@ -284,6 +268,24 @@ export default {
             })
             var grand_total = Number(this.additional_cost) + Number(subTotals)
             return grand_total.toFixed(2)
+        },
+        additional_cost_errors() {
+            const errors = []
+            if (!this.$v.additional_cost.$dirty) return errors
+            !this.$v.additional_cost.numeric && errors.push("Only digit is allowed")
+            return errors
+        },
+        supplier_errors() {
+            const errors = []
+            if (!this.$v.selected_supplier.$dirty) return errors
+            !this.$v.selected_supplier.required && errors.push("This field is required")
+            return errors
+        },
+        receiver_errors() {
+            const errors = []
+            if (!this.$v.selected_receiver.$dirty) return errors
+            !this.$v.selected_receiver.required && errors.push("This field is required")
+            return errors
         }
     },
     methods: {
@@ -291,6 +293,9 @@ export default {
             var errors = []
             if (!this.$v.inventories.$each[index.toString()][property_name].$dirty) return (errors = [])
             !this.$v.inventories.$each[index.toString()][property_name].required && errors.push(`${property_name} field is required`)
+            if (property_name == "inventory_unit_amount" || property_name == "inventory_quantity") {
+                !this.$v.inventories.$each[index.toString()][property_name].greater && errors.push(`${property_name} field required value is more than 0`)
+            }
 
             return errors
         },
@@ -352,8 +357,8 @@ export default {
                 {
                     inventory_type: "",
                     inventory_description: "",
-                    inventory_quantity: 0,
-                    inventory_unit_amount: 0,
+                    inventory_quantity: 1,
+                    inventory_unit_amount: 1,
                     inventory_total_price: ""
                 }
             ]
@@ -419,7 +424,7 @@ export default {
             required
         },
         additional_cost: {
-            decimal
+            numeric
         },
         inventories: {
             $each: {
@@ -466,6 +471,6 @@ export default {
 }
 
 .tables-margin {
-    margin-top: -20px;
+    margin-top: -15px;
 }
 </style>
