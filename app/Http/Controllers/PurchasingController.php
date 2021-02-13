@@ -106,7 +106,9 @@ class PurchasingController extends Controller
                                             'purchase_orders.purchase_order_types.product_types.product_attributes.column_selections'
                                         )->first();
 
-        return view('admin.purchasing.purchase_order_detail', ['purchase_order' => $purchaseOrder]);
+        $data['purchase_order'] = $purchaseOrder;
+
+        return response()->json($data);
     }
 
     public function getPurchaseOrderData($id) {

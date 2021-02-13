@@ -81,10 +81,10 @@
                                 <v-card-title>Do you want to remove {{ candidateItem.column_name }}?</v-card-title>
                                 <v-card-actions>
                                     <v-spacer></v-spacer>
-                                    <v-btn color="secondary" text @click="deleteDialogIsOpen = false">
+                                    <v-btn color="secondary" small @click="deleteDialogIsOpen = false">
                                         close
                                     </v-btn>
-                                    <v-btn color="primary" text @click="removeColumn">
+                                    <v-btn color="primary" small @click="removeColumn">
                                         Remove
                                     </v-btn>
                                 </v-card-actions>

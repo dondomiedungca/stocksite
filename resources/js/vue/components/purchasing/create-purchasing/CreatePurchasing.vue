@@ -456,8 +456,8 @@ export default {
     border: 1px solid #404040;
 }
 .table-simple > thead {
-    background: #2196f3;
-    color: #fff;
+    background: transparent;
+    color: #404040;
 }
 .table-simple > thead > tr > th {
     padding: 5px 10px;

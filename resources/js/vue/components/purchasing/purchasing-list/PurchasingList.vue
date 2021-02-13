@@ -120,6 +120,11 @@ export default {
             ]
         }
     },
+    watch: {
+        options() {
+            this.getList()
+        }
+    },
     created() {
         this.getList()
         this.getCurrency()
@@ -135,11 +140,10 @@ export default {
         date_format: function(date) {
             return moment(date).format("MMMM DD, YYYY")
         },
-        getList: function(page) {
+        getList: function() {
             this.loading = true
-            if (typeof page === "undefined") {
-                page = 1
-            }
+            let { sortBy, sortDesc, page = 1, itemsPerPage } = this.options
+
             var url = "/admin/purchasing/purchasing-all-list"
             axios
                 .get(url + "?page=" + page)

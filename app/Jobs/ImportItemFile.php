@@ -20,6 +20,7 @@ use App\Events\QueueProcessing;
 use App\Http\helpers\BatchHelpers;
 use App\Http\helpers\Products;
 use App\Http\helpers\PhotoHelpers;
+use App\Http\helpers\TransactionHelpers;
 
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -94,6 +95,7 @@ class ImportItemFile implements ShouldQueue
 
             if($checked_data['isValid']) {
                 Products::importItems($this->photo_path, $this->photo_name, $this->product_type_id, $this->purchasing_type_id, $data);
+                TransactionHelpers::manageStatus($this->transactio_id);
             } else {
                 $this->batch()->cancel();
                 $line = (((int) $this->chunk_position) * (int) $this->chunk_count) + ($key + 1);

@@ -68,7 +68,7 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::post('/save-file', [ProductsController::class, 'saveFile']);
         Route::post('/update-product', [ProductsController::class, 'updateProduct']);
         Route::post('/remove-product', [ProductsController::class, 'removeProduct']);
-        Route::get('/get-products-via-product-types/{product_type_id}/{searches}', [ProductsController::class, 'getProductsViaProductType']);
+        Route::post('/get-products-via-product-types', [ProductsController::class, 'getProductsViaProductType']);
     });
 
     Route::prefix('admin/supplier')->group(function () {
@@ -96,6 +96,7 @@ Route::group(['middleware' => 'adminRoute'], function () {
     Route::prefix('admin/purchasing')->group(function () {
         Route::post('/create', [PurchasingController::class, 'store']);
         Route::get('/purchasing-all-list', [PurchasingController::class, 'getAllPurchaseOrders']);
+        Route::get('/purchasing-get-details/{id}', [PurchasingController::class, 'getPurchaseOrder']);
         Route::get('/get-purchasing-type/{id}', [PurchasingController::class, 'getPurchasingType']);
         Route::get('/remove-purchasing/{id}', [PurchasingController::class, 'removePurchasing']);
     });

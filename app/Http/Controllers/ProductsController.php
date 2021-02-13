@@ -308,18 +308,58 @@ class ProductsController extends Controller
         return $data;
     }
 
-    public function getProductsViaProductType($product_type_id = NULL, $searches = NULL) {
-        $searches = json_decode($searches);
+    public function getProductsViaProductType(Request $request) {
         $products = Inventory::query();
+        $product_type_id = $request->selected_product_type_id;
+        $search = $request['search'];
 
         $products->select(
                     "inventories.*",
-                    DB::raw("case when item_cosmetic_description != NULL then item_cosmetic_description else 'No Cosmetic Description' end as item_cosmetic_description"),
-                    DB::raw("case when item_description != NULL then item_description else 'No Description' end as item_description"),
+                    DB::raw("case when (item_cosmetic_description != NULL OR item_cosmetic_description != '') then item_cosmetic_description else 'No Cosmetic Description' end as item_cosmetic_description"),
+                    DB::raw("case when (item_description != NULL OR item_description != '') then item_description else 'No Description' end as item_description"),
                     DB::raw('DATE_FORMAT(created_at, "%M %d, %Y") as date_created')
                     )
                 ->with('product_type.product_attributes.column_selections', 'status', 'cosmetic');
         $products->where('product_type_id', $product_type_id);
+
+        if(!empty($search)) {
+            // $products->where(function ($query) use ($search){
+            //     $query->when($search['stock_number'] != "", function ($q) use ($search) {
+            //         return $q->orWhere('stock_number', 'like', '%'.$search['stock_number'].'%');
+            //     });
+            //     $query->when($search['inventory_status_id'] != 0, function ($q) use ($search) {
+            //         return $q->orWhere('inventory_status_id', $search['inventory_status_id']);
+            //     });
+            //     $query->when($search['inventory_cosmetic_id'] != 0, function ($q) use ($search) {
+            //         return $q->orWhere('inventory_cosmetic_id', $search['inventory_cosmetic_id']);
+            //     });
+            //     $query->orWhereBetween('origin_price', [$search['origin_price'][0], $search['origin_price'][1]]);
+            //     $query->orWhereBetween('selling_price', [$search['selling_price'][0], $search['selling_price'][1]]);
+
+            //     foreach ($search['details'] as $key => $value) {
+            //         $query->when($search['details'][$key] != "", function ($q) use ($search, $key){
+            //             return $q->orWhere("details->$key", "like", "%".$search['details'][$key]."%");
+            //         });
+            //     }
+            // });
+            $products->when($search['stock_number'] != "", function ($q) use ($search) {
+                return $q->where('stock_number', 'like', '%'.$search['stock_number'].'%');
+            });
+            $products->when($search['inventory_status_id'] != 0, function ($q) use ($search) {
+                return $q->where('inventory_status_id', $search['inventory_status_id']);
+            });
+            $products->when($search['inventory_cosmetic_id'] != 0, function ($q) use ($search) {
+                return $q->where('inventory_cosmetic_id', $search['inventory_cosmetic_id']);
+            });
+            $products->whereBetween('origin_price', [$search['origin_price'][0], $search['origin_price'][1]]);
+            $products->whereBetween('selling_price', [$search['selling_price'][0], $search['selling_price'][1]]);
+
+            foreach ($search['details'] as $key => $value) {
+                $products->when($search['details'][$key] != "", function ($q) use ($search, $key){
+                    return $q->where("details->$key", "like", "%".$search['details'][$key]."%");
+                });
+            }
+        }
 
         $products = $products->paginate(10);
 

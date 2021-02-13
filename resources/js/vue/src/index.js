@@ -20,6 +20,7 @@ import ImportProduct from "./../components/product/import-product/Index.vue"
 import PurchasingIndex from "./../components/purchasing/Index.vue"
 import CreatePurchasing from "./../components/purchasing/create-purchasing/CreatePurchasing.vue"
 import PurchasingList from "./../components/purchasing/purchasing-list/PurchasingList.vue"
+import PurchasingDetails from "./../components/purchasing/purchasing-list/PurchasingDetails.vue"
 
 const routes = [
     { path: "/admin/products", component: ProductIndex },
@@ -43,6 +44,10 @@ const routes = [
     {
         path: "/admin/purchasing/purchasing-list",
         component: PurchasingList
+    },
+    {
+        path: "/admin/purchasing/purchase-order/:transaction_id",
+        component: PurchasingDetails
     }
 ]
 

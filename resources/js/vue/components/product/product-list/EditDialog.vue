@@ -61,10 +61,10 @@
             </div>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="gray darken-1" text @click="close">
+                <v-btn color="secondary" small @click="close">
                     close
                 </v-btn>
-                <v-btn color="green darken-1" text @click="updateItem">
+                <v-btn color="primary" small @click="updateItem">
                     Save
                 </v-btn>
             </v-card-actions>

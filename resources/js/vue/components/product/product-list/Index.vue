@@ -7,9 +7,14 @@
                     <v-col lg="3">
                         <v-select outlined :items="product_type_selections" v-model="selected_product_type_id" label="Inventory Type" dense></v-select>
                     </v-col>
+                    <v-col lg="3">
+                        <v-btn color="primary" @click="isSearchOpen = true"> <v-icon>mdi-feature-search-outline</v-icon> Advance Search </v-btn>
+                        <search-dialog @search="search" :currency="currency" :inventory_status_selections="inventory_status_selections" :inventory_cosmetic_selections="inventory_cosmetic_selections" :product_type="product_type" :isOpen="isSearchOpen" @close="isSearchOpen = false"></search-dialog>
+                    </v-col>
                 </v-row>
                 <v-row>
                     <v-col lg="12">
+                        <p v-if="Object.keys(products).length">{{ products.from }} to {{ products.to }} of {{ products.total }} records</p>
                         <v-data-table :options.sync="options" disable-pagination :loading="loading" :server-items-length="products.total" :headers="headers" :items="products.data" :page.sync="page" :items-per-page="itemsPerPage" hide-default-footer class="elevation-1" @page-count="pageCount = $event">
                             <template v-slot:item="{ index, item }">
                                 <tr>
@@ -42,16 +47,22 @@
                                         <small>{{ item.cosmetic.name }}</small>
                                     </td>
                                     <td align="center">
-                                        <small>{{ item.item_cosmetic_description }}</small>
+                                        <small v-if="item.item_cosmetic_description.length <= 30">{{ item.item_cosmetic_description }}</small>
+                                        <small v-else>
+                                            <v-btn @click="showDescription(item.item_cosmetic_description, item.stock_number, 'item_cosmetic_description')" color="primary" text small>{{ item.item_cosmetic_description.substring(0, 10) }}...</v-btn>
+                                        </small>
                                     </td>
                                     <td align="center">
-                                        <small>{{ item.item_description }}</small>
+                                        <small v-if="item.item_description.length <= 30">{{ item.item_description }}</small>
+                                        <small v-else>
+                                            <v-btn @click="showDescription(item.item_description, item.stock_number, 'item_description')" color="primary" text small>{{ item.item_description.substring(0, 10) }}...</v-btn>
+                                        </small>
                                     </td>
                                     <td align="center">
-                                        <small><span v-html="currency.symbol"></span> {{ numberWithCommas(item.origin_price) }}</small>
+                                        <small><span v-html="currency.symbol"></span> {{ numberWithCommas(item.origin_price.toFixed(2)) }}</small>
                                     </td>
                                     <td align="center">
-                                        <small><span v-html="currency.symbol"></span> {{ numberWithCommas(item.selling_price) }}</small>
+                                        <small><span v-html="currency.symbol"></span> {{ numberWithCommas(item.selling_price.toFixed(2)) }}</small>
                                     </td>
                                     <td align="center">
                                         <small>{{ item.discount_percentage }}</small>
@@ -67,6 +78,23 @@
                         </v-layout>
                         <edit-dialog :product_type="product_type" :cosmetics="cosmetics" :statuses="statuses" :forEdit="forEdit" @close="isEditOpen = !isEditOpen" :isEditOpen="isEditOpen"></edit-dialog>
                         <view-specs :details="details" @close="isViewOpen = !isViewOpen" :isViewOpen="isViewOpen"></view-specs>
+                        <v-dialog v-model="isShowDescription" width="500">
+                            <v-card>
+                                <v-card-title class="headline grey lighten-2"> {{ item_all_description.item_name }} - {{ item_all_description.item_column_name }} </v-card-title>
+                                <v-card-text class="mt-3">
+                                    {{ item_all_description.description }}
+                                </v-card-text>
+
+                                <v-divider></v-divider>
+
+                                <v-card-actions>
+                                    <v-spacer></v-spacer>
+                                    <v-btn color="secondary" @click="isShowDescription = false">
+                                        Close
+                                    </v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </v-dialog>
                     </v-col>
                 </v-row>
             </v-container>
@@ -76,13 +104,15 @@
 
 <script>
 import EditDialog from "./EditDialog"
+import SearchDialog from "./SearchDialog"
 import ViewSpecs from "./ViewSpecs"
 import { mapMutations, mapActions, mapGetters, mapState } from "vuex"
 
 export default {
     components: {
         EditDialog,
-        ViewSpecs
+        ViewSpecs,
+        SearchDialog
     },
     async created() {
         this.getProductTypes()
@@ -105,6 +135,7 @@ export default {
     },
     data() {
         return {
+            isSearchOpen: false,
             items: [
                 {
                     text: "Products",
@@ -171,7 +202,15 @@ export default {
             product_types: [],
             title: "",
             details: {},
-            currency: {}
+            currency: {},
+            inventory_cosmetic_selections: [],
+            inventory_status_selections: [],
+            isShowDescription: false,
+            item_all_description: {
+                description: "",
+                item_name: "",
+                item_column_name: ""
+            }
         }
     },
     methods: {
@@ -202,27 +241,53 @@ export default {
                 })
             })
         },
+        showDescription(desc, item_name, item_column_name) {
+            this.item_all_description.description = desc
+            this.item_all_description.item_name = item_name
+            this.item_all_description.item_column_name = item_column_name
+            this.isShowDescription = true
+        },
         getCosmetics: function() {
             return axios.get("/admin/products/get-cosmetics").then(res => {
                 this.cosmetics = res.data.cosmetics
+                this.inventory_cosmetic_selections = res.data.cosmetics.map(cosmetic => {
+                    return {
+                        text: cosmetic.name,
+                        value: cosmetic.id
+                    }
+                })
             })
         },
         getStatuses: function() {
             return axios.get("/admin/products/get-item-statuses").then(res => {
                 this.statuses = res.data.statuses
+                this.inventory_status_selections = res.data.statuses.map(status => {
+                    return {
+                        text: status.name,
+                        value: status.id
+                    }
+                })
             })
         },
-        getProducts: function() {
+        getProducts: function(page_continue) {
             this.loading = true
-            let { sortBy, sortDesc, page, itemsPerPage } = this.options
+            let { sortBy, sortDesc, page = 1, itemsPerPage } = this.options
 
-            var url = "/admin/products/get-products-via-product-types/" + this.selected_product_type_id + "/" + JSON.stringify(this.searches)
+            var url = "/admin/products/get-products-via-product-types"
             return axios
-                .get(url + "?page=" + page)
+                .post(url, {
+                    page: typeof page_continue == "undefined" ? page : 1,
+                    selected_product_type_id: this.selected_product_type_id,
+                    search: this.searches
+                })
                 .then(response => {
                     this.products = response.data
                 })
                 .then(() => (this.loading = false))
+        },
+        search(searchData) {
+            this.searches = searchData
+            this.getProducts(1)
         },
         editProduct: function(product) {
             this.forEdit = product
