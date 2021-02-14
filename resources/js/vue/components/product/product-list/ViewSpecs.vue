@@ -23,7 +23,7 @@
             </div>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="secondary" text @click="close">
+                <v-btn color="secondary" small @click="close">
                     close
                 </v-btn>
             </v-card-actions>

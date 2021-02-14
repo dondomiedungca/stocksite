@@ -74,10 +74,15 @@ Route::group(['middleware' => 'adminRoute'], function () {
     Route::prefix('admin/supplier')->group(function () {
         Route::post('/add-supplier', [SuppliersController::class, 'addSupplier']);
         Route::get('/get-suppliers', [SuppliersController::class, 'getSuppliers']);
+        Route::post('/get-paginate-suppliers', [SuppliersController::class, 'getPaginateSuppliers']);
     });
 
     Route::prefix('admin/address')->group(function () {
         Route::get('/get-address-type', [AddressTypesController::class, 'getAddressTypes']);
+    });
+
+    Route::prefix('admin/countries')->group(function () {
+        Route::get('/get-countries', [SuppliersController::class, 'getCountries']);
     });
 
     Route::prefix('admin/manufacturer')->group(function () {

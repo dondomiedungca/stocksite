@@ -123,19 +123,19 @@
                                 </tbody>
                             </table>
                         </div>
-                        <v-tabs fixed-tabs color="primary">
+                        <v-tabs class="mt-5" background-color="blue lighten-2" color="#000" align-with-title fixed-tabs slider-color="secondary">
                             <v-tab href="#hello">
                                 Import Manually
                             </v-tab>
                             <v-tab href="#world">
                                 Import Via CSV / XLSX
                             </v-tab>
-                            <v-tab-item id="hello">
+                            <v-tab-item class="mt-5" id="hello">
                                 <v-card color="basil" flat>
                                     <import-manually :basis="'purchasing'" @update_purchasing="updatePurchasing" :transaction_id="purchase_order_details.id" :purchasing_type_id="forReceive.id" :product_type="forReceive.product_types"></import-manually>
                                 </v-card>
                             </v-tab-item>
-                            <v-tab-item id="world">
+                            <v-tab-item class="mt-5" id="world">
                                 <v-card color="basil" flat>
                                     <import-via-file :basis="'purchasing'" :transaction_id="purchase_order_details.id" :purchasing_type_id="forReceive.id" :product_type="forReceive.product_types"></import-via-file>
                                 </v-card>

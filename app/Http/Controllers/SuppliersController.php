@@ -9,6 +9,8 @@ use App\Models\Addresses;
 use App\Models\AddressTypes;
 use App\Models\Manufacturer;
 
+use Illuminate\Support\Facades\DB;
+
 class SuppliersController extends Controller
 {
     public function addSupplier(Request $request) {
@@ -44,6 +46,22 @@ class SuppliersController extends Controller
         $suppliers = Suppliers::with('address', 'address.address_type', 'manufacturer')->get();
 
         $data['suppliers'] = $suppliers;
+
+        return response()->json($data);
+    }
+
+    public function getPaginateSuppliers(Request $request) {
+        $suppliers = Suppliers::with('address', 'address.address_type', 'manufacturer')->paginate(10);
+
+        $data['suppliers'] = $suppliers;
+
+        return response()->json($data);
+    }
+
+    public function getCountries() {
+        $countries = DB::table('countries')->get();
+
+        $data['countries'] = $countries;
 
         return response()->json($data);
     }

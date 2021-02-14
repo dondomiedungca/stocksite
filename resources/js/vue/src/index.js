@@ -11,6 +11,7 @@ Vue.component("appbar-vue", require("./../components/reusable/AppBar.vue").defau
 Vue.component("menucard-vue", require("./../components/reusable/MenuCard.vue").default)
 Vue.component("stepper-vue", require("./../components/reusable/Stepper.vue").default)
 Vue.component("snackbar-vue", require("./../components/reusable/Snackbar.vue").default)
+Vue.component("address-details", require("./../components/reusable/AddressDetails.vue").default)
 
 import ProductIndex from "./../components/product/Index.vue"
 import AddProduct from "./../components/product/add-product/Index.vue"
@@ -21,6 +22,8 @@ import PurchasingIndex from "./../components/purchasing/Index.vue"
 import CreatePurchasing from "./../components/purchasing/create-purchasing/CreatePurchasing.vue"
 import PurchasingList from "./../components/purchasing/purchasing-list/PurchasingList.vue"
 import PurchasingDetails from "./../components/purchasing/purchasing-list/PurchasingDetails.vue"
+
+import SupplierReceiverList from "./../components/supplier/SupplierReceiverList.vue"
 
 const routes = [
     { path: "/admin/products", component: ProductIndex },
@@ -48,6 +51,10 @@ const routes = [
     {
         path: "/admin/purchasing/purchase-order/:transaction_id",
         component: PurchasingDetails
+    },
+    {
+        path: "/admin/supplier-and-receiver-list",
+        component: SupplierReceiverList
     }
 ]
 

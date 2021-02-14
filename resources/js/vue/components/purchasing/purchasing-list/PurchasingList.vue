@@ -104,19 +104,19 @@ export default {
                 },
                 {
                     text: "Purchase Order #",
-                    align: "start",
+                    align: "center",
                     sortable: false,
                     class: "primary white--text"
                 },
-                { text: "Transaction Status", align: "start", sortable: false, class: "primary white--text" },
-                { text: "Delivery Status", align: "start", sortable: false, class: "primary white--text" },
-                { text: "Item(s) Status", align: "start", sortable: false, class: "primary white--text" },
-                { text: "Supplier", align: "start", sortable: false, class: "primary white--text" },
-                { text: "Receiver", align: "start", sortable: false, class: "primary white--text" },
-                { text: "No. of Inventory", align: "start", sortable: false, class: "primary white--text" },
-                { text: "Total Cost", align: "start", sortable: false, class: "primary white--text" },
-                { text: "Created By", align: "start", sortable: false, class: "primary white--text" },
-                { text: "Date Created", align: "start", sortable: false, class: "primary white--text" }
+                { text: "Transaction Status", align: "center", sortable: false, class: "primary white--text" },
+                { text: "Delivery Status", align: "center", sortable: false, class: "primary white--text" },
+                { text: "Item(s) Status", align: "center", sortable: false, class: "primary white--text" },
+                { text: "Supplier", align: "center", sortable: false, class: "primary white--text" },
+                { text: "Receiver", align: "center", sortable: false, class: "primary white--text" },
+                { text: "No. of Inventory", align: "center", sortable: false, class: "primary white--text" },
+                { text: "Total Cost", align: "center", sortable: false, class: "primary white--text" },
+                { text: "Created By", align: "center", sortable: false, class: "primary white--text" },
+                { text: "Date Created", align: "center", sortable: false, class: "primary white--text" }
             ]
         }
     },

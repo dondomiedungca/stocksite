@@ -1,5 +1,5 @@
 <template>
-    <v-container fluid>
+    <v-container fluid style="margin-left: 0;">
         <v-row v-if="basis != 'purchasing' && product_types_selection.length" class="mt-5">
             <v-col lg="6" md="6" sm="6" xs="12">
                 <v-select outlined :items="product_types_selection" v-model="selected_product_type" label="Inventory Type" dense></v-select>
