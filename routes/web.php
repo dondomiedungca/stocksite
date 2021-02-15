@@ -75,6 +75,8 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::post('/add-supplier', [SuppliersController::class, 'addSupplier']);
         Route::get('/get-suppliers', [SuppliersController::class, 'getSuppliers']);
         Route::post('/get-paginate-suppliers', [SuppliersController::class, 'getPaginateSuppliers']);
+        Route::post('/update-supplier', [SuppliersController::class, 'updateSupplier']);
+        Route::post('/remove-supplier', [SuppliersController::class, 'removeSupplier']);
     });
 
     Route::prefix('admin/address')->group(function () {
@@ -92,6 +94,9 @@ Route::group(['middleware' => 'adminRoute'], function () {
     Route::prefix('admin/receiver')->group(function () {
         Route::post('/add-receiver', [ReceiverController::class, 'addReceiver']);
         Route::get('/get-receivers', [ReceiverController::class, 'getReceivers']);
+        Route::post('/get-paginate-receivers', [ReceiverController::class, 'getReceiverPaginate']);
+        Route::post('/update-receiver', [ReceiverController::class, 'updateReceiver']);
+        Route::post('/remove-receiver', [ReceiverController::class, 'removeReceiver']);
     });
 
     Route::prefix('admin/currency')->group(function () {

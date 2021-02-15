@@ -25,6 +25,9 @@ import PurchasingDetails from "./../components/purchasing/purchasing-list/Purcha
 
 import SupplierReceiverList from "./../components/supplier/SupplierReceiverList.vue"
 
+import ReportIndex from "./../components/reports/ReportIndex.vue"
+import QueueMonitoring from "./../components/reports/queue/QueueMonitoring.vue"
+
 const routes = [
     { path: "/admin/products", component: ProductIndex },
     {
@@ -55,6 +58,14 @@ const routes = [
     {
         path: "/admin/supplier-and-receiver-list",
         component: SupplierReceiverList
+    },
+    {
+        path: "/admin/reports",
+        component: ReportIndex
+    },
+    {
+        path: "/admin/reports/queue-management",
+        component: QueueMonitoring
     }
 ]
 

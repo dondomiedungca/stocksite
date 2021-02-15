@@ -116,9 +116,11 @@ export default {
             this.base_product_type = this.product_types.find(pt => newVal == pt.id)
         },
         file(data) {
-            let last_dot = data.name.lastIndexOf(".")
-            let name = data.name.slice(0, last_dot)
-            this.fileName = name
+            if (data) {
+                let last_dot = data.name.lastIndexOf(".")
+                let name = data.name.slice(0, last_dot)
+                this.fileName = name
+            }
         }
     },
     computed: {
@@ -188,6 +190,7 @@ export default {
                 formData.append("product_type_id", this.base_product_type.id)
                 formData.append("basis", this.basis)
                 formData.append("purchasing_type_id", this.purchasing_type_id)
+                formData.append("transaction_id", this.transaction_id)
 
                 var vm = this
                 this.saving = true
@@ -210,9 +213,7 @@ export default {
                             swal.fire({ title: response.data.heading, icon: response.data.success ? "success" : "error", html: response.data.message })
                             document.getElementById("upload-file").value = ""
                             vm.loaded = 0
-                            vm.file = ""
-                            vm.fileName = ""
-                        }, 1000)
+                        }, 1500)
                     })
                     .catch(error => {
                         swal.fire("Something went wrong", "Something error occured while uploading", "error")

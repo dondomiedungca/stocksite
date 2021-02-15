@@ -5,6 +5,9 @@
             <v-container fluid>
                 <v-row>
                     <v-col lg="12">
+                        <span v-if="Object.keys(purchaseOrders).length">
+                            <p v-if="purchaseOrders.total">{{ purchaseOrders.from }} to {{ purchaseOrders.to }} of {{ purchaseOrders.total }} purchasing</p>
+                        </span>
                         <v-data-table :options.sync="options" disable-pagination :loading="loading" :server-items-length="purchaseOrders.total" :headers="headers" :items="purchaseOrders.data" :page.sync="page" :items-per-page="itemsPerPage" hide-default-footer class="elevation-1" @page-count="pageCount = $event">
                             <template v-slot:item="{ index, item }">
                                 <tr>

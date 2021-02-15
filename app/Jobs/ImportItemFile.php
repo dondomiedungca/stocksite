@@ -61,7 +61,7 @@ class ImportItemFile implements ShouldQueue
         $this->chunk_directory = $chunk_directory;
         $this->product_type_id = $product_type_id;
         $this->user_id = $user_id;
-        $this->transactio_id = $transaction_id;
+        $this->transaction_id = $transaction_id;
         $this->purchasing_type_id = $purchasing_type_id;
         $this->basis = $basis;
     }
@@ -95,7 +95,14 @@ class ImportItemFile implements ShouldQueue
 
             if($checked_data['isValid']) {
                 Products::importItems($this->photo_path, $this->photo_name, $this->product_type_id, $this->purchasing_type_id, $data);
-                TransactionHelpers::manageStatus($this->transactio_id);
+                if($this->transaction_id != "" && $this->transaction_id != NULL) {
+                    try {
+                        TransactionHelpers::manageStatus($this->transaction_id);
+                    } catch (Exception $e) {
+                        $this->batch()->cancel();
+                        throw new Exception($e->getMessage()." |");
+                    }
+                }
             } else {
                 $this->batch()->cancel();
                 $line = (((int) $this->chunk_position) * (int) $this->chunk_count) + ($key + 1);

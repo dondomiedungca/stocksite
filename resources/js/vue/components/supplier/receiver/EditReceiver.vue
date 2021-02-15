@@ -1,23 +1,26 @@
 <template>
     <v-dialog v-model="isOpen" persistent max-width="850px">
         <v-card v-if="Object.keys(forEdit).length" style="width: 100%;">
-            <v-card-title>Edit - {{ forEdit.supplier_name }}</v-card-title>
+            <v-card-title>Edit - {{ forEdit.receiver_last_name }} {{ forEdit.receiver_first_name }}</v-card-title>
             <div>
                 <v-row class="form-row">
                     <v-col lg="12" md="12" sm="12" xs="12">
                         <h4>Primary Details</h4>
                     </v-col>
                     <v-col lg="3" md="3" sm="6" xs="12">
-                        <v-text-field :error-messages="customErrors('primary', 'supplier_name')" @blur="$v.forEdit.supplier_name.$touch()" dense label="Supplier Name" outlined v-model="forEdit.supplier_name" type="text"></v-text-field>
+                        <v-text-field :error-messages="customErrors('primary', 'receiver_first_name')" @blur="$v.forEdit.receiver_first_name.$touch()" dense label="Receiver First Name" outlined v-model="forEdit.receiver_first_name" type="text"></v-text-field>
                     </v-col>
                     <v-col lg="3" md="3" sm="6" xs="12">
-                        <v-text-field :error-messages="customErrors('primary', 'supplier_email')" @blur="$v.forEdit.supplier_email.$touch()" dense label="Supplier Email" outlined v-model="forEdit.supplier_email" type="text"></v-text-field>
+                        <v-text-field dense label="Receiver Middle Name" outlined v-model="forEdit.receiver_middle_name" type="text"></v-text-field>
                     </v-col>
                     <v-col lg="3" md="3" sm="6" xs="12">
-                        <v-text-field :error-messages="customErrors('primary', 'supplier_phone_number')" @blur="$v.forEdit.supplier_phone_number.$touch()" dense label="Supplier Phone Number" outlined v-model="forEdit.supplier_phone_number" type="text"></v-text-field>
+                        <v-text-field :error-messages="customErrors('primary', 'receiver_last_name')" @blur="$v.forEdit.receiver_last_name.$touch()" dense label="Receiver Last Name" outlined v-model="forEdit.receiver_last_name" type="text"></v-text-field>
                     </v-col>
                     <v-col lg="3" md="3" sm="6" xs="12">
-                        <v-select outlined :items="manufacturer_types" v-model="forEdit.manufacturer_id" label="Manufacturer Type" dense></v-select>
+                        <v-text-field :error-messages="customErrors('primary', 'receiver_phone')" @blur="$v.forEdit.receiver_phone.$touch()" dense label="Receiver Phone Number" outlined v-model="forEdit.receiver_phone" type="text"></v-text-field>
+                    </v-col>
+                    <v-col lg="3" md="3" sm="6" xs="12">
+                        <v-text-field :error-messages="customErrors('primary', 'receiver_email')" @blur="$v.forEdit.receiver_email.$touch()" dense label="Receiver Email" outlined v-model="forEdit.receiver_email" type="text"></v-text-field>
                     </v-col>
                     <v-col lg="12" md="12" sm="12" xs="12">
                         <h4>Address Details</h4>
@@ -50,7 +53,7 @@
                 <v-btn color="secondary" small @click="close">
                     close
                 </v-btn>
-                <v-btn color="primary" small @click="updateSupplier">
+                <v-btn color="primary" small @click="updateReceiver">
                     Save
                 </v-btn>
             </v-card-actions>
@@ -66,7 +69,7 @@ const isPhone = value => /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,
 
 export default {
     mixins: [validationMixin],
-    props: ["isEditOpen", "forEdit", "countries", "address_types", "manufacturer_types"],
+    props: ["isEditOpen", "forEdit", "countries", "address_types"],
     watch: {
         isEditOpen(data) {
             this.isOpen = data
@@ -83,14 +86,14 @@ export default {
             this.isOpen = !this.isOpen
             this.$emit("close")
         },
-        updateSupplier() {
+        updateReceiver() {
             this.$v.$touch()
             if (!this.$v.$invalid) {
                 var self = this
                 swal.queue([
                     {
-                        title: "Update This Supplier",
-                        text: "Save changes in this supplier now?",
+                        title: "Update This Receiver",
+                        text: "Save changes in this receiver now?",
                         icon: "info",
                         showCancelButton: true,
                         cancelButtonColor: "#d33",
@@ -99,8 +102,8 @@ export default {
                         showLoaderOnConfirm: true,
                         preConfirm: () => {
                             return axios
-                                .post("/admin/supplier/update-supplier", {
-                                    supplier: self.forEdit
+                                .post("/admin/receiver/update-receiver", {
+                                    receiver: self.forEdit
                                 })
                                 .then(response => {
                                     swal.fire({
@@ -137,14 +140,17 @@ export default {
     },
     validations: {
         forEdit: {
-            supplier_name: {
+            receiver_first_name: {
                 required
             },
-            supplier_phone_number: {
+            receiver_last_name: {
+                required
+            },
+            receiver_phone: {
                 required,
                 phoneValid: isPhone
             },
-            supplier_email: {
+            receiver_email: {
                 required,
                 email
             },
