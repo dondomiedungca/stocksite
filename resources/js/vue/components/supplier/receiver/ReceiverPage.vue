@@ -2,9 +2,9 @@
     <v-container fluid style="margin-left: 0;">
         <v-row>
             <v-col lg="12">
-                <div class="d-flex justify-space-between mb-6">
+                <div class="d-flex justify-space-between mb-2">
                     <span v-if="Object.keys(receivers).length">
-                        <p v-if="receivers.total">{{ receivers.from }} to {{ receivers.to }} of {{ receivers.total }} records</p>
+                        <small v-if="receivers.total">{{ receivers.from }} - {{ receivers.to }} of {{ receivers.total }} records</small>
                     </span>
                     <v-btn small @click="isAddOpen = true" color="primary"> <v-icon>mdi-pencil</v-icon> Add Receiver </v-btn>
                 </div>

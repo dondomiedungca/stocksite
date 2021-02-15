@@ -11,6 +11,7 @@ use App\Http\Controllers\ReceiverController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\TransactionsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -87,6 +88,18 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::get('/get-countries', [SuppliersController::class, 'getCountries']);
     });
 
+    Route::prefix('admin/currency')->group(function () {
+        Route::get('/get-currency', [CurrencyController::class, 'getCurrency']);
+    });
+
+    Route::prefix('admin/delivery')->group(function () {
+        Route::get('/get-delivery-statuses', [TransactionsController::class, 'getDeliveries']);
+    });
+
+    Route::prefix('admin/item')->group(function () {
+        Route::get('/get-item-statuses', [TransactionsController::class, 'getItemStatuses']);
+    });
+
     Route::prefix('admin/manufacturer')->group(function () {
         Route::get('/get-manufacturer-types', [ManufacturerController::class, 'getManufacturerTypes']);
     });
@@ -99,8 +112,8 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::post('/remove-receiver', [ReceiverController::class, 'removeReceiver']);
     });
 
-    Route::prefix('admin/currency')->group(function () {
-        Route::get('/get-currency', [CurrencyController::class, 'getCurrency']);
+    Route::prefix('admin/payment')->group(function () {
+        Route::get('/get-payment-statuses', [TransactionsController::class, 'getPayments']);
     });
 
     Route::prefix('admin/purchasing')->group(function () {
@@ -117,6 +130,10 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::get('/get-queue-batches-completed', [ReportsController::class, 'getBatchesCompleted']);
         Route::get('/get-current-queue-processing', [ReportsController::class, 'getCurrent']);
         Route::get('/queue-retry/{id}', [ReportsController::class, 'queueRetry']);
+    });
+
+    Route::prefix('admin/transactions')->group(function () {
+        Route::get('/get-transaction-statuses', [TransactionsController::class, 'getTransactionStatuses']);
     });
 
 });

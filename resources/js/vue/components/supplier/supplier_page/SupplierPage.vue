@@ -2,9 +2,9 @@
     <v-container fluid style="margin-left: 0;">
         <v-row>
             <v-col lg="12">
-                <div class="d-flex justify-space-between mb-6">
+                <div class="d-flex justify-space-between mb-2">
                     <span v-if="Object.keys(suppliers).length">
-                        <p v-if="suppliers.total">{{ suppliers.from }} to {{ suppliers.to }} of {{ suppliers.total }} records</p>
+                        <small v-if="suppliers.total">{{ suppliers.from }} - {{ suppliers.to }} of {{ suppliers.total }} records</small>
                     </span>
                     <v-btn small @click="isAddOpen = true" color="primary"> <v-icon>mdi-pencil</v-icon> Add Supplier </v-btn>
                 </div>

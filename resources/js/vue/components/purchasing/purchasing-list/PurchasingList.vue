@@ -5,9 +5,13 @@
             <v-container fluid>
                 <v-row>
                     <v-col lg="12">
-                        <span v-if="Object.keys(purchaseOrders).length">
-                            <p v-if="purchaseOrders.total">{{ purchaseOrders.from }} to {{ purchaseOrders.to }} of {{ purchaseOrders.total }} purchasing</p>
-                        </span>
+                        <div class="d-flex justify-space-between mb-2">
+                            <span v-if="Object.keys(purchaseOrders).length">
+                                <small v-if="purchaseOrders.total">{{ purchaseOrders.from }} - {{ purchaseOrders.to }} of {{ purchaseOrders.total }} purchasing</small>
+                            </span>
+                            <v-btn small color="primary" @click="isSearchOpen = true"> <v-icon>mdi-feature-search-outline</v-icon> Advance Search </v-btn>
+                        </div>
+                        <search-dialog :delivery_statuses="delivery_statuses" :item_statuses="item_statuses" :payment_statuses="payment_statuses" :transaction_statuses="transaction_statuses" @search="search" :currency="currency" :isOpen="isSearchOpen" @close="isSearchOpen = false"></search-dialog>
                         <v-data-table :options.sync="options" disable-pagination :loading="loading" :server-items-length="purchaseOrders.total" :headers="headers" :items="purchaseOrders.data" :page.sync="page" :items-per-page="itemsPerPage" hide-default-footer class="elevation-1" @page-count="pageCount = $event">
                             <template v-slot:item="{ index, item }">
                                 <tr>
@@ -68,7 +72,11 @@
 
 <script>
 import moment from "moment"
+import SearchDialog from "./SearchDialog.vue"
 export default {
+    components: {
+        SearchDialog
+    },
     data() {
         return {
             items: [
@@ -91,6 +99,7 @@ export default {
             options: {},
             //
             purchaseOrders: {},
+            isSearchOpen: false,
             currency: {},
             headers: [
                 {
@@ -120,7 +129,12 @@ export default {
                 { text: "Total Cost", align: "center", sortable: false, class: "primary white--text" },
                 { text: "Created By", align: "center", sortable: false, class: "primary white--text" },
                 { text: "Date Created", align: "center", sortable: false, class: "primary white--text" }
-            ]
+            ],
+            delivery_statuses: [],
+            item_statuses: [],
+            transaction_statuses: [],
+            payment_statuses: [],
+            searchFields: {}
         }
     },
     watch: {
@@ -131,8 +145,15 @@ export default {
     created() {
         this.getList()
         this.getCurrency()
+        this.getDeliveryStatuses()
+        this.getItemStatuses()
+        this.getTransactionStatuses()
+        this.getPaymentStatuses()
     },
     methods: {
+        search(data) {
+            this.searchFields = data
+        },
         numberWithCommas: function(x) {
             if (x == "" || x == null) {
                 return 0
@@ -185,6 +206,62 @@ export default {
                     }
                 }
             ])
+        },
+        getDeliveryStatuses() {
+            axios.get("/admin/delivery/get-delivery-statuses").then(res => {
+                this.delivery_statuses = res.data.map(r => {
+                    return {
+                        text: r.name,
+                        value: r.id
+                    }
+                })
+                this.delivery_statuses.push({
+                    text: "All",
+                    value: 0
+                })
+            })
+        },
+        getItemStatuses() {
+            axios.get("/admin/item/get-item-statuses").then(res => {
+                this.item_statuses = res.data.map(r => {
+                    return {
+                        text: r.name,
+                        value: r.id
+                    }
+                })
+                this.item_statuses.push({
+                    text: "All",
+                    value: 0
+                })
+            })
+        },
+        getTransactionStatuses() {
+            axios.get("/admin/transactions/get-transaction-statuses").then(res => {
+                this.transaction_statuses = res.data.map(r => {
+                    return {
+                        text: r.transaction_status_name,
+                        value: r.id
+                    }
+                })
+                this.transaction_statuses.push({
+                    text: "All",
+                    value: 0
+                })
+            })
+        },
+        getPaymentStatuses() {
+            axios.get("/admin/payment/get-payment-statuses").then(res => {
+                this.payment_statuses = res.data.map(r => {
+                    return {
+                        text: r.payment_status_name,
+                        value: r.id
+                    }
+                })
+                this.payment_statuses.push({
+                    text: "All",
+                    value: 0
+                })
+            })
         }
     }
 }

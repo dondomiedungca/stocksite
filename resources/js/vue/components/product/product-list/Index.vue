@@ -15,7 +15,7 @@
                 <v-row>
                     <v-col lg="12">
                         <span v-if="Object.keys(products).length">
-                            <p v-if="products.total">{{ products.from }} to {{ products.to }} of {{ products.total }} records</p>
+                            <small v-if="products.total">{{ products.from }} - {{ products.to }} of {{ products.total }} records</small>
                         </span>
                         <v-data-table :options.sync="options" disable-pagination :loading="loading" :server-items-length="products.total" :headers="headers" :items="products.data" :page.sync="page" :items-per-page="itemsPerPage" hide-default-footer class="elevation-1" @page-count="pageCount = $event">
                             <template v-slot:item="{ index, item }">
