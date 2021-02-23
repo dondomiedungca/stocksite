@@ -58,14 +58,6 @@ const routes = [
     {
         path: "/admin/supplier-and-receiver-list",
         component: SupplierReceiverList
-    },
-    {
-        path: "/admin/reports",
-        component: ReportIndex
-    },
-    {
-        path: "/admin/reports/queue-management",
-        component: QueueMonitoring
     }
 ]
 
