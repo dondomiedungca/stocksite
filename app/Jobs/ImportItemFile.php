@@ -20,6 +20,7 @@ use App\Events\QueueProcessing;
 use App\Http\helpers\BatchHelpers;
 use App\Http\helpers\Products;
 use App\Http\helpers\PhotoHelpers;
+use App\Http\helpers\TransactionHelpers;
 
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -60,7 +61,7 @@ class ImportItemFile implements ShouldQueue
         $this->chunk_directory = $chunk_directory;
         $this->product_type_id = $product_type_id;
         $this->user_id = $user_id;
-        $this->transactio_id = $transaction_id;
+        $this->transaction_id = $transaction_id;
         $this->purchasing_type_id = $purchasing_type_id;
         $this->basis = $basis;
     }
@@ -88,16 +89,24 @@ class ImportItemFile implements ShouldQueue
             }
         }
 
-        Log::info($csv_data);
         foreach ($csv_data as $key => $row) {
             $data = array_combine($this->header, $row);
             $checked_data = isNotEmpty($this->product_type_id, $data);
 
             if($checked_data['isValid']) {
                 Products::importItems($this->photo_path, $this->photo_name, $this->product_type_id, $this->purchasing_type_id, $data);
+                if($this->transaction_id != "" && $this->transaction_id != NULL) {
+                    try {
+                        TransactionHelpers::manageStatus($this->transaction_id);
+                    } catch (Exception $e) {
+                        $this->batch()->cancel();
+                        throw new Exception($e->getMessage()." |");
+                    }
+                }
             } else {
                 $this->batch()->cancel();
                 $line = (((int) $this->chunk_position) * (int) $this->chunk_count) + ($key + 1);
+                // this is important to indicate the reason of failing jobs when showing queuing reports
                 throw new Exception($this->filename." file has a row that don't have a required fields, first appearance at row ".$line.". </br></br> fields that no data are \"<b>".implode($checked_data['no_data'], ",")."</b>\". </br></br> Try to upload again with a correct file. |");
             }
         }
@@ -106,7 +115,8 @@ class ImportItemFile implements ShouldQueue
 
     public function failed(\Exception $e) {
         $batch = BatchHelpers::getBatch($this->batch()->id);
-
+        // this will only run in RETRY mode and if the job is failed, the error message will not get
+        // unless the jobs is cancelled
         if($this->batch()->cancelled() && $batch->retry == 1) {
             broadcast(new QueueProcessing("failed", $batch));
             BatchHelpers::removeFromProcessing($this->batch()->id);

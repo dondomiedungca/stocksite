@@ -11,6 +11,7 @@ use App\Http\Controllers\ReceiverController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\TransactionsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,37 +35,17 @@ Route::get('/admin/signin', function () {
 })->name('signin');
 
 Route::group(['middleware' => 'adminRoute'], function () {
-    Route::prefix('admin/dashboard')->group(function () {
-        Route::get('/', function () {
-            return view('admin.dashboard.index');
+
+    Route::prefix('admin')->group(function () {
+        Route::fallback(function() {
+            return view('admin.index');
         });
-    });
-
-    Route::prefix('admin/purchasing')->group(function () {
-        Route::get('/', [PurchasingController::class, 'index']);
-        Route::get('/purchasing-order', [PurchasingController::class, 'purchaseOrder']);
-        Route::get('/purchasing-list', [PurchasingController::class, 'getPurchaseOrders']);
-        Route::get('/purchase-order/{id}', [PurchasingController::class, 'getPurchaseOrder']);
-        Route::get('/purchase-order-data/{id}', [PurchasingController::class, 'getPurchaseOrderData']);
-    });
-
-    Route::prefix('admin/products')->group(function () {
-        Route::get('/', [ProductsController::class, 'index']);
-        Route::get('/add-product-type', [ProductsController::class, 'productTypes']);
-        Route::get('/product-list', [ProductsController::class, 'productList']);
-        Route::get('/product-import', [ProductsController::class, 'productImport']);
-    });
-
-    Route::prefix('admin/reports')->group(function () {
-        Route::get('/', [ReportsController::class, 'index']);
-        Route::get('/queue-management', [ReportsController::class, 'showQueues']);
     });
 
     Route::post('/admin/logout', function() {
         Auth::logout();
         return redirect('/admin/signin');
     })->name('admin.logout');
-
 });
 
 // APIS
@@ -88,16 +69,35 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::post('/save-file', [ProductsController::class, 'saveFile']);
         Route::post('/update-product', [ProductsController::class, 'updateProduct']);
         Route::post('/remove-product', [ProductsController::class, 'removeProduct']);
-        Route::get('/get-products-via-product-types/{product_type_id}/{searches}', [ProductsController::class, 'getProductsViaProductType']);
+        Route::post('/get-products-via-product-types', [ProductsController::class, 'getProductsViaProductType']);
     });
 
     Route::prefix('admin/supplier')->group(function () {
         Route::post('/add-supplier', [SuppliersController::class, 'addSupplier']);
         Route::get('/get-suppliers', [SuppliersController::class, 'getSuppliers']);
+        Route::post('/get-paginate-suppliers', [SuppliersController::class, 'getPaginateSuppliers']);
+        Route::post('/update-supplier', [SuppliersController::class, 'updateSupplier']);
+        Route::post('/remove-supplier', [SuppliersController::class, 'removeSupplier']);
     });
 
     Route::prefix('admin/address')->group(function () {
         Route::get('/get-address-type', [AddressTypesController::class, 'getAddressTypes']);
+    });
+
+    Route::prefix('admin/countries')->group(function () {
+        Route::get('/get-countries', [SuppliersController::class, 'getCountries']);
+    });
+
+    Route::prefix('admin/currency')->group(function () {
+        Route::get('/get-currency', [CurrencyController::class, 'getCurrency']);
+    });
+
+    Route::prefix('admin/delivery')->group(function () {
+        Route::get('/get-delivery-statuses', [TransactionsController::class, 'getDeliveries']);
+    });
+
+    Route::prefix('admin/item')->group(function () {
+        Route::get('/get-item-statuses', [TransactionsController::class, 'getItemStatuses']);
     });
 
     Route::prefix('admin/manufacturer')->group(function () {
@@ -107,15 +107,19 @@ Route::group(['middleware' => 'adminRoute'], function () {
     Route::prefix('admin/receiver')->group(function () {
         Route::post('/add-receiver', [ReceiverController::class, 'addReceiver']);
         Route::get('/get-receivers', [ReceiverController::class, 'getReceivers']);
+        Route::post('/get-paginate-receivers', [ReceiverController::class, 'getReceiverPaginate']);
+        Route::post('/update-receiver', [ReceiverController::class, 'updateReceiver']);
+        Route::post('/remove-receiver', [ReceiverController::class, 'removeReceiver']);
     });
 
-    Route::prefix('admin/currency')->group(function () {
-        Route::get('/get-currency', [CurrencyController::class, 'getCurrency']);
+    Route::prefix('admin/payment')->group(function () {
+        Route::get('/get-payment-statuses', [TransactionsController::class, 'getPayments']);
     });
 
     Route::prefix('admin/purchasing')->group(function () {
         Route::post('/create', [PurchasingController::class, 'store']);
         Route::get('/purchasing-all-list', [PurchasingController::class, 'getAllPurchaseOrders']);
+        Route::get('/purchasing-get-details/{id}', [PurchasingController::class, 'getPurchaseOrder']);
         Route::get('/get-purchasing-type/{id}', [PurchasingController::class, 'getPurchasingType']);
         Route::get('/remove-purchasing/{id}', [PurchasingController::class, 'removePurchasing']);
     });
@@ -126,6 +130,10 @@ Route::group(['middleware' => 'adminRoute'], function () {
         Route::get('/get-queue-batches-completed', [ReportsController::class, 'getBatchesCompleted']);
         Route::get('/get-current-queue-processing', [ReportsController::class, 'getCurrent']);
         Route::get('/queue-retry/{id}', [ReportsController::class, 'queueRetry']);
+    });
+
+    Route::prefix('admin/transactions')->group(function () {
+        Route::get('/get-transaction-statuses', [TransactionsController::class, 'getTransactionStatuses']);
     });
 
 });

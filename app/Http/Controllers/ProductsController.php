@@ -8,6 +8,7 @@ use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
 use Throwable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 use App\Http\helpers\TransactionHelpers;
 use App\Http\helpers\FileUpload;
@@ -56,15 +57,14 @@ class ProductsController extends Controller
         foreach ($request['columns'] as $key => $value) {
             $product_attribute = new ProductAttributes();
             $product_attribute->product_column_name = $value['column_name'];
-            $product_attribute->product_column_is_required = $value['required'] == "YES" ? 1 : 0;
-            $product_attribute->product_column_manual_fillable = $value['manual'] == "YES" ? 1 : 0;
+            $product_attribute->product_column_is_required = $value['is_required'];
             $product_attribute->product_column_data_type = $value['data_type'];
-            $product_attribute->product_column_input_type = $value['input_type'];
+            $product_attribute->product_column_input_type = $value['value_type'] == 1 ? "INPUT" : "SELECTION";
             $product_attribute->product_type()->associate($product_type);
             $product_attribute->save();
 
-            if($value['data_type'] != "DATE" && $value['input_type'] == "SELECTION") {
-                foreach ($value['selection'] as $key => $val) {
+            if($value['data_type'] != "DATE" && $value['value_type'] == 0) {
+                foreach ($value['selections'] as $key => $val) {
                     $column_selection = new ColumnSelection();
                     $column_selection->selection_name = $val;
                     $column_selection->column_name()->associate($product_attribute);
@@ -90,7 +90,7 @@ class ProductsController extends Controller
 
     public function getAllProductTypes() {
         $product_types = ProductTypes::with('user', 'product_attributes', 'product_attributes.column_selections')
-                                        ->orderBy("created_at", "DESC")
+                                        ->orderBy("created_at", "ASC")
                                         ->get();
         $data['product_types'] = $product_types;
         
@@ -269,13 +269,16 @@ class ProductsController extends Controller
         $batch = Bus::batch($jobs)->then(function (Batch $batch){
             // All jobs completed successfully...
         })->catch(function (Batch $batch, Throwable $e) {
-            // First batch job failure detected...
+            // Only First batch job failure detected...
             $batch->cancel();
         })->finally(function (Batch $batch) use ($directory) {
             // The batch has finished executing...
+            // I putted here the event calling as failed because the error message will only get if the batch was cancelled,
+            // the batch will continue to finish other jobs even the previous jobs are failed
             if($batch->cancelled()) {
                 broadcast(new QueueProcessing("failed", BatchHelpers::getBatch($batch->id)));
             }
+            // This only run at fresh batch, not when retry
             if((int) $batch->progress() == 100) {
                 BatchHelpers::generateDuration($batch->id);
                 BatchHelpers::importMessage($batch->id, "File content was successfully inserted to database.");
@@ -305,12 +308,58 @@ class ProductsController extends Controller
         return $data;
     }
 
-    public function getProductsViaProductType($product_type_id = NULL, $searches = NULL) {
-        $searches = json_decode($searches);
+    public function getProductsViaProductType(Request $request) {
         $products = Inventory::query();
+        $product_type_id = $request->selected_product_type_id;
+        $search = $request['search'];
 
-        $products->with('product_type.product_attributes.column_selections', 'status', 'cosmetic');
+        $products->select(
+                    "inventories.*",
+                    DB::raw("case when (item_cosmetic_description != NULL OR item_cosmetic_description != '') then item_cosmetic_description else 'No Cosmetic Description' end as item_cosmetic_description"),
+                    DB::raw("case when (item_description != NULL OR item_description != '') then item_description else 'No Description' end as item_description"),
+                    DB::raw('DATE_FORMAT(created_at, "%M %d, %Y") as date_created')
+                    )
+                ->with('product_type.product_attributes.column_selections', 'status', 'cosmetic');
         $products->where('product_type_id', $product_type_id);
+
+        if(!empty($search)) {
+            // $products->where(function ($query) use ($search){
+            //     $query->when($search['stock_number'] != "", function ($q) use ($search) {
+            //         return $q->orWhere('stock_number', 'like', '%'.$search['stock_number'].'%');
+            //     });
+            //     $query->when($search['inventory_status_id'] != 0, function ($q) use ($search) {
+            //         return $q->orWhere('inventory_status_id', $search['inventory_status_id']);
+            //     });
+            //     $query->when($search['inventory_cosmetic_id'] != 0, function ($q) use ($search) {
+            //         return $q->orWhere('inventory_cosmetic_id', $search['inventory_cosmetic_id']);
+            //     });
+            //     $query->orWhereBetween('origin_price', [$search['origin_price'][0], $search['origin_price'][1]]);
+            //     $query->orWhereBetween('selling_price', [$search['selling_price'][0], $search['selling_price'][1]]);
+
+            //     foreach ($search['details'] as $key => $value) {
+            //         $query->when($search['details'][$key] != "", function ($q) use ($search, $key){
+            //             return $q->orWhere("details->$key", "like", "%".$search['details'][$key]."%");
+            //         });
+            //     }
+            // });
+            $products->when($search['stock_number'] != "", function ($q) use ($search) {
+                return $q->where('stock_number', 'like', '%'.$search['stock_number'].'%');
+            });
+            $products->when($search['inventory_status_id'] != 0, function ($q) use ($search) {
+                return $q->where('inventory_status_id', $search['inventory_status_id']);
+            });
+            $products->when($search['inventory_cosmetic_id'] != 0, function ($q) use ($search) {
+                return $q->where('inventory_cosmetic_id', $search['inventory_cosmetic_id']);
+            });
+            $products->whereBetween('origin_price', [$search['origin_price'][0], $search['origin_price'][1]]);
+            $products->whereBetween('selling_price', [$search['selling_price'][0], $search['selling_price'][1]]);
+
+            foreach ($search['details'] as $key => $value) {
+                $products->when($search['details'][$key] != "", function ($q) use ($search, $key){
+                    return $q->where("details->$key", "like", "%".$search['details'][$key]."%");
+                });
+            }
+        }
 
         $products = $products->paginate(10);
 

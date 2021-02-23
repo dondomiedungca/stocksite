@@ -18,7 +18,6 @@ class CreateProductAttributesTable extends Migration
             $table->unsignedBigInteger('product_type_id');
             $table->string('product_column_name');
             $table->integer('product_column_is_required');
-            $table->integer('product_column_manual_fillable');
             $table->enum('product_column_data_type', ['STRING', 'INTEGER', 'DATE']);
             $table->timestamps();
 

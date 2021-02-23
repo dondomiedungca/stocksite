@@ -34,5 +34,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ItemStatusSeeder::class);
         $this->call(InventoryStatusSeeder::class);
         $this->call(InventoryCosmeticSeeder::class);
+        $this->call(CountrySeeder::class);
     }
 }

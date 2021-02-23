@@ -183,7 +183,7 @@ export default {
                 {
                     name: "Purchasing Details",
                     active: false
-                },
+                }
             ],
             currency: {},
             forReceive: {},
