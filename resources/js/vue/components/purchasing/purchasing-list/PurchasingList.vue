@@ -84,12 +84,14 @@ export default {
                     text: "Purchasing",
                     disabled: false,
                     exact: true,
-                    to: "/admin/purchasing"
+                    to: "/admin/purchasing",
+                    icon: "mdi-receipt"
                 },
                 {
                     text: "Create Purchasing",
                     disabled: true,
-                    to: "add-product-type"
+                    to: "add-product-type",
+                    icon: "mdi-view-list"
                 }
             ],
             itemsPerPage: 10,

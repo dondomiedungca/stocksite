@@ -5,7 +5,7 @@
             <v-container fluid>
                 <v-row>
                     <v-col lg="12">
-                        <v-tabs background-color="blue lighten-2" color="#000" align-with-title fixed-tabs slider-color="secondary">
+                        <v-tabs color="#000" slider-size="4" align-with-title fixed-tabs slider-color="blue accent-3">
                             <v-tab href="#hello">
                                 Import Manually
                             </v-tab>
@@ -47,12 +47,14 @@ export default {
                     text: "Products",
                     disabled: false,
                     exact: true,
-                    to: "/admin/products"
+                    to: "/admin/products",
+                    icon: "mdi-warehouse"
                 },
                 {
                     text: "Import Product",
                     disabled: true,
-                    to: "import-product"
+                    to: "import-product",
+                    icon: "mdi-file-import"
                 }
             ],
             tab: null

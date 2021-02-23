@@ -142,11 +142,14 @@ export default {
                 {
                     text: "Reports",
                     disabled: false,
-                    to: "/admin/reports"
+                    exact: true,
+                    to: "/admin/reports",
+                    icon: "mdi-newspaper"
                 },
                 {
                     text: "Queue Monitoring",
-                    disabled: true
+                    disabled: true,
+                    icon: "mdi-tray-full"
                 }
             ],
             onProcess: [],

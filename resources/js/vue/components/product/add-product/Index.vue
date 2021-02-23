@@ -79,12 +79,14 @@ export default {
                     text: "Products",
                     disabled: false,
                     exact: true,
-                    to: "/admin/products"
+                    to: "/admin/products",
+                    icon: "mdi-warehouse"
                 },
                 {
                     text: "Add Product Type",
                     disabled: true,
-                    to: "add-product-type"
+                    to: "add-product-type",
+                    icon: "mdi-group"
                 }
             ]
         }

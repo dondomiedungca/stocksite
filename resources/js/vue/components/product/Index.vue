@@ -1,9 +1,9 @@
 <template>
     <v-main id="v-main">
         <breadcrumbs-vue :items="items"></breadcrumbs-vue>
-        <v-container>
+        <v-container fluid>
             <v-row>
-                <v-col v-for="(menu, i) in menus" :key="i" lg="4" md="6" sm="12" xs="12">
+                <v-col v-for="(menu, i) in menus" :key="i" lg="3" md="4" sm="12" xs="12">
                     <menucard-vue :url="menu.url" :icon="menu.icon" :title="menu.title" :description="menu.description"></menucard-vue>
                 </v-col>
             </v-row>
@@ -18,7 +18,8 @@ export default {
             items: [
                 {
                     text: "Product",
-                    disabled: true
+                    disabled: true,
+                    icon: "mdi-warehouse"
                 }
             ],
             menus: [

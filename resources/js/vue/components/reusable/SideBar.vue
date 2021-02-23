@@ -38,6 +38,7 @@ export default {
                 { title: "Sales Transaction", icon: "mdi-cash-multiple", url: "/admin/sales" },
                 { title: "Products", icon: "mdi-warehouse", url: "/admin/products" },
                 { title: "Suppliers & Receivers", icon: "mdi-account-group", url: "/admin/supplier-and-receiver-list" },
+                { title: "Reports", icon: "mdi-tray-full", url: "/admin/reports" },
                 { title: "Settings", icon: "mdi-cogs", url: "/admin/settings" }
             ]
         }

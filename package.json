@@ -27,6 +27,7 @@
     "dependencies": {
         "izitoast": "^1.4.0",
         "moment": "^2.29.1",
+        "socket.io-client": "^3.1.1",
         "sweetalert2": "^10.11.1",
         "vue-fragment": "^1.5.1",
         "vue-notifications": "^1.0.2",

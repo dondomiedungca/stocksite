@@ -5,7 +5,7 @@
             <v-container fluid>
                 <v-row>
                     <v-col lg="12">
-                        <v-tabs background-color="blue lighten-2" color="#000" align-with-title fixed-tabs slider-color="secondary">
+                        <v-tabs color="#000" slider-size="4" align-with-title fixed-tabs slider-color="blue accent-3">
                             <v-tab href="#hello">
                                 Supplier Page
                             </v-tab>
@@ -43,7 +43,8 @@ export default {
             items: [
                 {
                     text: "Supplier Receiver Lists",
-                    disabled: true
+                    disabled: true,
+                    icon: "mdi-account-group-outline"
                 }
             ]
         }

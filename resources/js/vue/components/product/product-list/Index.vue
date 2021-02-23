@@ -143,12 +143,14 @@ export default {
                     text: "Products",
                     disabled: false,
                     exact: true,
-                    to: "/admin/products"
+                    to: "/admin/products",
+                    icon: "mdi-warehouse"
                 },
                 {
                     text: "Product Lists",
                     disabled: true,
-                    to: "product-list"
+                    to: "product-list",
+                    icon: "mdi-view-list"
                 }
             ],
             headers: [
