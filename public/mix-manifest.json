@@ -1,3 +1,4 @@
 {
-    "/js/app.js": "/js/app.js"
+    "/js/app.js": "/js/app.js",
+    "/js/vue/components/product/src/index.js": "/js/vue/components/product/src/index.js"
 }
