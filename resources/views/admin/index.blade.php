@@ -5,7 +5,7 @@
       <v-app>
         <appbar-vue></appbar-vue>
         <sidebar-vue height="100"></sidebar-vue>
-        <router-view></router-view>
+        @yield('body')
       </v-app>
     </div>
 @endsection

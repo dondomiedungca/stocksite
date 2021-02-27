@@ -123,7 +123,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <v-tabs class="mt-5" background-color="blue lighten-2" color="#000" align-with-title fixed-tabs slider-color="secondary">
+                        <v-tabs class="mt-5" color="#000" align-with-title fixed-tabs slider-size="3" slider-color="blue accent-3">
                             <v-tab href="#hello">
                                 Import Manually
                             </v-tab>
@@ -153,6 +153,7 @@ import moment from "moment"
 import ImportManually from "./../../product/import-product/ImportManually.vue"
 import ImportViaFile from "./../../product/import-product/ImportViaFile.vue"
 export default {
+    props: ["purchase_order_details"],
     components: {
         ImportManually,
         ImportViaFile
@@ -179,20 +180,13 @@ export default {
             ],
             currency: {},
             forReceive: {},
-            willReceive: false,
-            purchase_order_details: {}
+            willReceive: false
         }
     },
     created() {
         this.getCurrency()
-        this.getDetails()
     },
     methods: {
-        getDetails() {
-            axios.get(`/admin/purchasing/purchasing-get-details/${this.$route.params.transaction_id}`).then(res => {
-                this.purchase_order_details = res.data.purchase_order
-            })
-        },
         numberWithCommas: function(x) {
             if (x == "" || x == null) {
                 return 0

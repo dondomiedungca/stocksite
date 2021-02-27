@@ -27,7 +27,7 @@
                                     </td>
                                     <td align="center">
                                         <small>
-                                            <router-link :to="'/admin/purchasing/purchase-order/' + item.id">{{ item.transaction_code }}</router-link>
+                                            <a :href="'/admin/purchasing/purchase-order/' + item.id">{{ item.transaction_code }}</a>
                                         </small>
                                     </td>
                                     <td align="center">
@@ -155,6 +155,7 @@ export default {
     methods: {
         search(data) {
             this.searchFields = data
+            this.getList(1)
         },
         numberWithCommas: function(x) {
             if (x == "" || x == null) {
@@ -172,7 +173,10 @@ export default {
 
             var url = "/admin/purchasing/purchasing-all-list"
             axios
-                .get(url + "?page=" + page)
+                .get(url, {
+                    page: typeof page_continue == "undefined" ? page : 1,
+                    search: this.searchFields
+                })
                 .then(response => {
                     this.purchaseOrders = response.data
                 })

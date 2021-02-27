@@ -49,7 +49,7 @@
             <v-divider></v-divider>
             <v-list nav dense>
                 <v-list-item-group v-model="group" active-class="deep-purple--text text--accent-4">
-                    <v-list-item v-for="item in items" :key="item.title" :to="item.url">
+                    <v-list-item v-for="item in items" :key="item.title" :href="item.url">
                         <template>
                             <v-list-item-icon>
                                 <v-icon color="primary">{{ item.icon }}</v-icon>

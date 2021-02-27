@@ -36,10 +36,32 @@ Route::get('/admin/signin', function () {
 
 Route::group(['middleware' => 'adminRoute'], function () {
 
-    Route::prefix('admin')->group(function () {
-        Route::fallback(function() {
-            return view('admin.index');
+    Route::prefix('admin/dashboard')->group(function () {
+        Route::get('/', function () {
+            return view('admin.dashboard.index');
         });
+    });
+
+    Route::prefix('admin/purchasing')->group(function () {
+        Route::get('/', [PurchasingController::class, 'index']);
+        Route::get('/purchasing-order', [PurchasingController::class, 'purchaseOrder']);
+        Route::get('/purchasing-list', [PurchasingController::class, 'getPurchaseOrders']);
+        Route::get('/purchase-order/{id}', [PurchasingController::class, 'getPurchaseOrder']);
+        Route::get('/purchase-order-data/{id}', [PurchasingController::class, 'getPurchaseOrderData']);
+    });
+
+    Route::prefix('admin/products')->group(function () {
+        Route::get('/', [ProductsController::class, 'index']);
+        Route::get('/add-product-type', [ProductsController::class, 'productTypes']);
+        Route::get('/product-list', [ProductsController::class, 'productList']);
+        Route::get('/product-import', [ProductsController::class, 'productImport']);
+    });
+
+    Route::get('/admin/supplier-and-receiver-list', [SuppliersController::class, 'supplierReceiverLists']);
+
+    Route::prefix('admin/reports')->group(function () {
+        Route::get('/', [ReportsController::class, 'index']);
+        Route::get('/queue-management', [ReportsController::class, 'showQueues']);
     });
 
     Route::post('/admin/logout', function() {

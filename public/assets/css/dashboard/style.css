@@ -75,3 +75,11 @@ html {
     width: calc(100vw - 24px);
     margin-left: 0;
 }
+
+a.v-tab {
+    margin-left: 0px !important;
+}
+
+.active-site {
+    background: #e0e0e0;
+}

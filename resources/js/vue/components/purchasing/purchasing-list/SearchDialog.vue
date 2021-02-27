@@ -68,12 +68,13 @@ export default {
         },
         search() {
             var fields = {
-                search_word,
-                total_price,
-                payment_statuses,
-                item_statuses,
-                delivery_statuses,
-                transaction_statuses
+                transaction_code: this.transaction_code,
+                supplier_name: this.supplier_name,
+                total_price: this.total_price,
+                payment_status: this.payment_status,
+                item_status: this.item_status,
+                delivery_status: this.delivery_status,
+                transaction_status: this.transaction_status
             }
             this.$emit("search", fields)
             this.close()

@@ -82,9 +82,21 @@ class PurchasingController extends Controller
                                             'purchase_orders.user', 
                                             'purchase_orders.purchase_order_types',
                                             'purchase_orders.purchase_order_types.product_types'
-                                        )
-                                        ->latest()
-                                        ->paginate($perPage);
+                                        );
+
+        $purchaseOrders->when($search['transaction_code'] != "", function ($q) use ($search) {
+            return $q->where('transaction_code', 'like', '%'.$search['transaction_code'].'%');
+        });
+        $purchaseOrders->when($search['inventory_status_id'] != 0, function ($q) use ($search) {
+            return $q->where('inventory_status_id', $search['inventory_status_id']);
+        });
+        $purchaseOrders->when($search['inventory_cosmetic_id'] != 0, function ($q) use ($search) {
+            return $q->where('inventory_cosmetic_id', $search['inventory_cosmetic_id']);
+        });
+        $purchaseOrders->whereBetween('origin_price', [$search['origin_price'][0], $search['origin_price'][1]]);
+        $purchaseOrders->whereBetween('selling_price', [$search['selling_price'][0], $search['selling_price'][1]]);
+
+        $purchaseOrders = $purchaseOrders->latest()->paginate(10);
 
         return response()->json($purchaseOrders);
     }
@@ -106,9 +118,7 @@ class PurchasingController extends Controller
                                             'purchase_orders.purchase_order_types.product_types.product_attributes.column_selections'
                                         )->first();
 
-        $data['purchase_order'] = $purchaseOrder;
-
-        return response()->json($data);
+        return view('admin.purchasing.purchase_order_detail', ['purchase_order' => $purchaseOrder]);
     }
 
     public function getPurchaseOrderData($id) {

@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class SuppliersController extends Controller
 {
+    public function supplierReceiverLists() {
+        return view('admin.suppliers.list');
+    }
+
     public function addSupplier(Request $request) {
         $address_type = AddressTypes::find($request['address']['address_type']);
         $manufacturer = Manufacturer::find($request['manufacturer']);

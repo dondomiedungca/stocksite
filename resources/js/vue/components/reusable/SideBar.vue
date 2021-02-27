@@ -12,7 +12,7 @@
             <v-divider></v-divider>
 
             <v-list dense nav>
-                <v-list-item v-for="item in items" :key="item.title" :to="item.url">
+                <v-list-item :class="activePage(item.url) ? 'active-site' : ''" v-for="item in items" :key="item.title" :href="item.url">
                     <template>
                         <v-list-item-icon>
                             <v-icon color="primary">{{ item.icon }}</v-icon>
@@ -41,6 +41,17 @@ export default {
                 { title: "Reports", icon: "mdi-tray-full", url: "/admin/reports" },
                 { title: "Settings", icon: "mdi-cogs", url: "/admin/settings" }
             ]
+        }
+    },
+    mounted() {
+        this.activePage()
+    },
+    methods: {
+        activePage(url) {
+            if (window.location.pathname.indexOf(url) != -1) {
+                return true
+            }
+            return false
         }
     }
 }

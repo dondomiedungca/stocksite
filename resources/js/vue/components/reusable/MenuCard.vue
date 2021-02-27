@@ -2,7 +2,7 @@
     <v-tooltip bottom>
         <template v-slot:activator="{ on, attrs }">
             <v-card v-bind="attrs" v-on="on" elevation="2">
-                <v-list-item :to="url">
+                <v-list-item :href="url">
                     <v-list-item-icon>
                         <v-icon color="#000" v-text="icon"></v-icon>
                     </v-list-item-icon>
