@@ -69,7 +69,9 @@ class PurchasingController extends Controller
         return response()->json($data);
     }
 
-    public function getAllPurchaseOrders($perPage = 10) {
+    public function getAllPurchaseOrders(Request $request) {
+        $search = $request['search'];
+
         $purchaseOrders = Transactions::where('transaction_type_id', 1)
                                         ->with(
                                             'transaction_status',
@@ -83,18 +85,30 @@ class PurchasingController extends Controller
                                             'purchase_orders.purchase_order_types',
                                             'purchase_orders.purchase_order_types.product_types'
                                         );
-
-        $purchaseOrders->when($search['transaction_code'] != "", function ($q) use ($search) {
-            return $q->where('transaction_code', 'like', '%'.$search['transaction_code'].'%');
-        });
-        $purchaseOrders->when($search['inventory_status_id'] != 0, function ($q) use ($search) {
-            return $q->where('inventory_status_id', $search['inventory_status_id']);
-        });
-        $purchaseOrders->when($search['inventory_cosmetic_id'] != 0, function ($q) use ($search) {
-            return $q->where('inventory_cosmetic_id', $search['inventory_cosmetic_id']);
-        });
-        $purchaseOrders->whereBetween('origin_price', [$search['origin_price'][0], $search['origin_price'][1]]);
-        $purchaseOrders->whereBetween('selling_price', [$search['selling_price'][0], $search['selling_price'][1]]);
+        if(!empty($search)) {
+            $purchaseOrders->when($search['transaction_code'] != "", function ($q) use ($search) {
+                return $q->where('transaction_code', 'like', '%'.$search['transaction_code'].'%');
+            });
+            $purchaseOrders->when($search['supplier_name'] != "", function ($q) use ($search) {
+                return $q->whereHas('supplier', function($q) use ($search){
+                    $q->where('supplier_name',  'like', '%'.$search['supplier_name'].'%')
+                    ->orWhere('supplier_email', 'like', '%'.$search['supplier_name'].'%');
+                });
+            });
+            $purchaseOrders->when($search['delivery_status'] != 0, function ($q) use ($search) {
+                return $q->where('delivery_status_id', $search['delivery_status']);
+            });
+            $purchaseOrders->when($search['item_status'] != 0, function ($q) use ($search) {
+                return $q->where('item_status_id', $search['item_status']);
+            });
+            $purchaseOrders->when($search['payment_status'] != 0, function ($q) use ($search) {
+                return $q->where('payment_status_id', $search['payment_status']);
+            });
+            $purchaseOrders->when($search['transaction_status'] != 0, function ($q) use ($search) {
+                return $q->where('transaction_status_id', $search['transaction_status']);
+            });
+            $purchaseOrders->whereBetween('total_price', [$search['total_price'][0], $search['total_price'][1]]);
+        }
 
         $purchaseOrders = $purchaseOrders->latest()->paginate(10);
 

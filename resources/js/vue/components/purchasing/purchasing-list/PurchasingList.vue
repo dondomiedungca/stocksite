@@ -19,11 +19,13 @@
                                         <small># {{ index + 1 }}</small>
                                     </td>
                                     <td align="center">
-                                        <small
-                                            ><v-btn @click="removePurchasing(item.id)" icon>
-                                                <v-icon>mdi-trash-can</v-icon>
-                                            </v-btn></small
-                                        >
+                                        <asker icon_header_color="red" icon_header="mdi-alert" :icon="true" tooltip_message="Remove" :fab="false" title="Remove this Purchase Order?" color="secondary" @proceed="removePurchasing(item.id)">
+                                            <template v-slot:togglerIcon>
+                                                <v-icon>
+                                                    mdi-trash-can
+                                                </v-icon>
+                                            </template>
+                                        </asker>
                                     </td>
                                     <td align="center">
                                         <small>
@@ -107,30 +109,27 @@ export default {
                 {
                     text: "#",
                     align: "center",
-                    sortable: false,
-                    class: "primary white--text"
+                    sortable: false
                 },
                 {
                     text: "Trash",
                     align: "center",
-                    sortable: false,
-                    class: "primary white--text"
+                    sortable: false
                 },
                 {
                     text: "Purchase Order #",
                     align: "center",
-                    sortable: false,
-                    class: "primary white--text"
+                    sortable: false
                 },
-                { text: "Transaction Status", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Delivery Status", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Item(s) Status", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Supplier", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Receiver", align: "center", sortable: false, class: "primary white--text" },
-                { text: "No. of Inventory", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Total Cost", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Created By", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Date Created", align: "center", sortable: false, class: "primary white--text" }
+                { text: "Transaction Status", align: "center", sortable: false },
+                { text: "Delivery Status", align: "center", sortable: false },
+                { text: "Item(s) Status", align: "center", sortable: false },
+                { text: "Supplier", align: "center", sortable: false },
+                { text: "Receiver", align: "center", sortable: false },
+                { text: "No. of Inventory", align: "center", sortable: false },
+                { text: "Total Cost", align: "center", sortable: false },
+                { text: "Created By", align: "center", sortable: false },
+                { text: "Date Created", align: "center", sortable: false }
             ],
             delivery_statuses: [],
             item_statuses: [],
@@ -173,7 +172,7 @@ export default {
 
             var url = "/admin/purchasing/purchasing-all-list"
             axios
-                .get(url, {
+                .post(url, {
                     page: typeof page_continue == "undefined" ? page : 1,
                     search: this.searchFields
                 })
@@ -189,29 +188,14 @@ export default {
         },
         removePurchasing: function(transaction_id) {
             var self = this
-            swal.queue([
-                {
-                    title: "Remove Purchasing",
-                    text: "All inventories under this purchasing will remove, proceed?",
-                    icon: "info",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonColor: "#42d1f5",
-                    confirmButtonText: "Yes, remove now",
-                    showLoaderOnConfirm: true,
-                    preConfirm: () => {
-                        return axios.get("/admin/purchasing/remove-purchasing/" + transaction_id).then(response => {
-                            swal.fire({
-                                title: response.data.heading,
-                                text: response.data.message,
-                                icon: response.data.isSuccess ? "success" : "error"
-                            })
-                            self.getList(self.purchaseOrders.current_page)
-                        })
-                    }
-                }
-            ])
+            axios.get("/admin/purchasing/remove-purchasing/" + transaction_id).then(response => {
+                swal.fire({
+                    title: response.data.heading,
+                    text: response.data.message,
+                    icon: response.data.isSuccess ? "success" : "error"
+                })
+                self.getList(self.purchaseOrders.current_page)
+            })
         },
         getDeliveryStatuses() {
             axios.get("/admin/delivery/get-delivery-statuses").then(res => {

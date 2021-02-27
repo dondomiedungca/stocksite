@@ -12,6 +12,7 @@ Vue.component("menucard-vue", require("./../components/reusable/MenuCard.vue").d
 Vue.component("stepper-vue", require("./../components/reusable/Stepper.vue").default)
 Vue.component("snackbar-vue", require("./../components/reusable/Snackbar.vue").default)
 Vue.component("address-details", require("./../components/reusable/AddressDetails.vue").default)
+Vue.component("asker", require("./../components/reusable/Asker.vue").default)
 
 import ProductIndex from "./../components/product/Index.vue"
 import AddProduct from "./../components/product/add-product/Index.vue"

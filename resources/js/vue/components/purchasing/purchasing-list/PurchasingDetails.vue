@@ -98,6 +98,20 @@
                                 </tbody>
                             </table>
                         </div>
+                        <asker icon_header="mdi-checkbox-multiple-marked" tooltip_message="Mark As Paid" title="Mark this Purchase Order as Paid?" color="teal accent-2" classes="mt-2 ml-3">
+                            <template v-slot:togglerIcon>
+                                <v-icon color="#404040">
+                                    mdi-checkbox-multiple-marked
+                                </v-icon>
+                            </template>
+                        </asker>
+                        <asker icon_header="mdi-information" tooltip_message="Mark As Cancelled" title="Mark this Purchase Order as Cancelled?" color="orange lighten-2" classes="mt-2 ml-3">
+                            <template v-slot:togglerIcon>
+                                <v-icon color="#404040">
+                                    mdi-file-cancel
+                                </v-icon>
+                            </template>
+                        </asker>
                     </v-col>
                     <v-col v-else lg="12" md="12" sm="12" xs="12">
                         <v-btn class="mb-4" @click="willReceive = false" small color="primary"> <v-icon>mdi-arrow-left-thick</v-icon> Back </v-btn>

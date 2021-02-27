@@ -71,26 +71,23 @@ export default {
                     text: "#",
                     align: "center",
                     sortable: false,
-                    value: "index",
-                    class: "primary white--text"
+                    value: "index"
                 },
                 {
                     text: "Actions",
                     align: "center",
                     sortable: false,
-                    value: "actions",
-                    class: "primary white--text"
+                    value: "actions"
                 },
                 {
                     text: "Receiver Name",
                     align: "center",
                     sortable: false,
-                    value: "receiver_name",
-                    class: "primary white--text"
+                    value: "receiver_name"
                 },
-                { text: "Receiver Phone", value: "receiver_phone", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Receiver Email", value: "receiver_email", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Address Details", value: "address", align: "center", sortable: false, class: "primary white--text" }
+                { text: "Receiver Phone", value: "receiver_phone", align: "center", sortable: false },
+                { text: "Receiver Email", value: "receiver_email", align: "center", sortable: false },
+                { text: "Address Details", value: "address", align: "center", sortable: false }
             ],
             receivers: {},
             address_types: [],

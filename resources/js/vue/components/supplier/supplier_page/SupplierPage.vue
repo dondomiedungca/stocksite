@@ -73,27 +73,24 @@ export default {
                     text: "#",
                     align: "center",
                     sortable: false,
-                    value: "index",
-                    class: "primary white--text"
+                    value: "index"
                 },
                 {
                     text: "Actions",
                     align: "center",
                     sortable: false,
-                    value: "actions",
-                    class: "primary white--text"
+                    value: "actions"
                 },
                 {
                     text: "Supplier Name",
                     align: "center",
                     sortable: false,
-                    value: "supplier_name",
-                    class: "primary white--text"
+                    value: "supplier_name"
                 },
-                { text: "Supplier Email", value: "supplier_email", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Supplier Phone", value: "supplier_phone_number", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Manufacturer Type", value: "manufacturer", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Address Details", value: "address", align: "center", sortable: false, class: "primary white--text" }
+                { text: "Supplier Email", value: "supplier_email", align: "center", sortable: false },
+                { text: "Supplier Phone", value: "supplier_phone_number", align: "center", sortable: false },
+                { text: "Manufacturer Type", value: "manufacturer", align: "center", sortable: false },
+                { text: "Address Details", value: "address", align: "center", sortable: false }
             ],
             suppliers: {},
             manufacturer_types: [],

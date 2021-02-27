@@ -158,32 +158,29 @@ export default {
                     text: "#",
                     align: "center",
                     sortable: false,
-                    value: "index",
-                    class: "primary white--text"
+                    value: "index"
                 },
                 {
                     text: "Actions",
                     align: "center",
                     sortable: false,
-                    value: "actions",
-                    class: "primary white--text"
+                    value: "actions"
                 },
                 {
                     text: "Stock No.",
                     align: "center",
                     sortable: false,
-                    value: "stock_number",
-                    class: "primary white--text"
+                    value: "stock_number"
                 },
-                { text: "Product Type", value: "product_type", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Inventory Status", value: "status", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Cosmetic", value: "cosmetic", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Cosmetic Description", value: "item_cosmetic_description", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Description", value: "item_description", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Origin Price", value: "origin_price", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Selling Price", value: "selling_price", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Discout Percentage", value: "discount_percentage", align: "center", sortable: false, class: "primary white--text" },
-                { text: "Date Added", value: "date_created", align: "center", sortable: false, class: "primary white--text" }
+                { text: "Product Type", value: "product_type", align: "center", sortable: false },
+                { text: "Inventory Status", value: "status", align: "center", sortable: false },
+                { text: "Cosmetic", value: "cosmetic", align: "center", sortable: false },
+                { text: "Cosmetic Description", value: "item_cosmetic_description", align: "center", sortable: false },
+                { text: "Description", value: "item_description", align: "center", sortable: false },
+                { text: "Origin Price", value: "origin_price", align: "center", sortable: false },
+                { text: "Selling Price", value: "selling_price", align: "center", sortable: false },
+                { text: "Discout Percentage", value: "discount_percentage", align: "center", sortable: false },
+                { text: "Date Added", value: "date_created", align: "center", sortable: false }
             ],
             itemsPerPage: 10,
             page: 1,
