@@ -1,14 +1,21 @@
 <template>
     <v-menu v-model="menu" nudge-bottom="10" nudge-right="50" :close-on-content-click="false" transition="slide-x-transition" bottom right>
-        <template v-slot:activator="{ on: menu, attrs: attr1 }">
+        <!-- with tooltip -->
+        <template v-if="tooltip_show" v-slot:activator="{ on: menu, attrs: attr1 }">
             <v-tooltip bottom>
                 <template v-slot:activator="{ on: tooltip, attr2 }">
-                    <v-btn :class="classes" :color="color" :small="small" :icon="icon" :fab="fab" v-bind="{ ...attr1, attr2 }" v-on="{ ...menu, ...tooltip }">
+                    <v-btn :disabled="disabled" :class="classes" :color="color" :small="small" :icon="icon" :fab="fab" v-bind="{ ...attr1, attr2 }" v-on="{ ...menu, ...tooltip }">
                         <slot name="togglerIcon"></slot>
                     </v-btn>
                 </template>
                 <span>{{ tooltip_message }}</span>
             </v-tooltip>
+        </template>
+        <!-- for without tooltip -->
+        <template v-else v-slot:activator="{ on: menu, attrs: attr1 }">
+            <v-btn :disabled="disabled" :class="classes" :color="color" :small="small" :icon="icon" :fab="fab" v-bind="{ ...attr1 }" v-on="{ ...menu }">
+                <slot name="togglerIcon"></slot>
+            </v-btn>
         </template>
 
         <v-card>
@@ -61,10 +68,18 @@ export default {
             default: null
         },
         tooltip_message: {
-            required: true,
+            required: false,
             default: null
         },
         icon: {
+            required: false,
+            default: false
+        },
+        tooltip_show: {
+            required: false,
+            default: true
+        },
+        disabled: {
             required: false,
             default: false
         }
@@ -77,6 +92,7 @@ export default {
     methods: {
         proceed() {
             this.$emit("proceed")
+            this.menu = false
         }
     }
 }

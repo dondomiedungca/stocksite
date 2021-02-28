@@ -1,11 +1,25 @@
 <template>
-    <v-snackbar :color="getSnackbar.color" v-model="getSnackbar.isVisible" bottom :timeout="getSnackbar.timeout">
-        {{ getSnackbar.text }}
+    <v-snackbar transition="fab-transition" color="dark" vertical v-model="getSnackbar.isVisible" bottom :timeout="getSnackbar.timeout" multi-line>
+        <v-layout align-center pr-4>
+            <v-icon v-if="getSnackbar.type == 'success'" class="pr-3" large color="success">mdi-check</v-icon>
+            <v-icon v-if="getSnackbar.type == 'warning'" class="pr-3" large color="orange">mdi-alert-circle-outline</v-icon>
+            <v-icon v-if="getSnackbar.type == 'info'" class="pr-3" large color="primary">mdi-information</v-icon>
+            <v-icon v-if="getSnackbar.type == 'danger'" class="pr-3" large color="red">mdi-alert</v-icon>
+            <v-layout column>
+                <div>
+                    <strong v-if="getSnackbar.type == 'success'">Well Done!</strong>
+                    <strong v-else-if="getSnackbar.type == 'warning'">Warning Alert</strong>
+                    <strong v-if="getSnackbar.type == 'info'">information Alert</strong>
+                    <strong v-else>Something Went Wrong</strong>
+                </div>
+                <div>
+                    <i>{{ getSnackbar.text }}</i>
+                </div>
+            </v-layout>
+        </v-layout>
 
         <template v-slot:action="{ attrs }">
-            <v-btn color="white" text v-bind="attrs" @click="close">
-                Close
-            </v-btn>
+            <v-btn small color="white" text v-bind="attrs" @click="close"> <v-icon>mdi-close</v-icon>Close </v-btn>
         </template>
     </v-snackbar>
 </template>

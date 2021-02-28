@@ -1,14 +1,19 @@
 <template>
     <div>
         <v-main id="v-main">
-            <breadcrumbs-vue :items="items"></breadcrumbs-vue>
+            <div class="custom-top-navigation">
+                <v-container fluid>
+                    <div class="nav-title font-weight-thin"><v-icon class="nav-icon mr-5">mdi-view-list</v-icon>PRODUCT LISTS</div>
+                </v-container>
+                <breadcrumbs-vue :items="items"></breadcrumbs-vue>
+            </div>
             <v-container fluid>
                 <v-row>
                     <v-col lg="3">
                         <v-select outlined :items="product_type_selections" v-model="selected_product_type_id" label="Inventory Type" dense></v-select>
                     </v-col>
                     <v-col lg="3">
-                        <v-btn color="primary" @click="isSearchOpen = true"> <v-icon>mdi-feature-search-outline</v-icon> Advance Search </v-btn>
+                        <v-btn small class="mt-1" color="dark" @click="isSearchOpen = true"> <v-icon>mdi-feature-search-outline</v-icon> Advance Search </v-btn>
                         <search-dialog @search="search" :currency="currency" :inventory_status_selections="inventory_status_selections" :inventory_cosmetic_selections="inventory_cosmetic_selections" :product_type="product_type" :isOpen="isSearchOpen" @close="isSearchOpen = false"></search-dialog>
                     </v-col>
                 </v-row>

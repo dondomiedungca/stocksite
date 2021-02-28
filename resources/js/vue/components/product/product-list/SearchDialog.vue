@@ -55,11 +55,9 @@
             </div>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn small color="secondary" @click="close">
-                    close
-                </v-btn>
-                <v-btn small color="primary" @click="reset">Reset</v-btn>
-                <v-btn small color="primary" @click="search">Search</v-btn>
+                <v-btn small color="dark" @click="close"> <v-icon>mdi-close</v-icon>close </v-btn>
+                <v-btn small color="dark" @click="reset"><v-icon>mdi-eraser</v-icon>Reset</v-btn>
+                <v-btn small color="dark" @click="search"><v-icon>mdi-layers-search</v-icon>Search</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
@@ -102,12 +100,14 @@ export default {
         },
         reset() {
             var reset_details = {}
-            this.product_type.product_attributes.map(column => {
-                reset_details = {
-                    ...reset_details,
-                    [column.product_column_name]: ""
-                }
-            })
+            if (Object.keys(this.product_type).length) {
+                this.product_type.product_attributes.map(column => {
+                    reset_details = {
+                        ...reset_details,
+                        [column.product_column_name]: ""
+                    }
+                })
+            }
             this.search_fields = {
                 stock_number: "",
                 inventory_status_id: 0,

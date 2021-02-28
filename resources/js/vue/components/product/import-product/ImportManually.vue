@@ -70,7 +70,7 @@
         </v-row>
         <v-row>
             <v-col lg="3" md="3" sm="6" xs="12">
-                <v-btn color="primary" @click="saveItem"> <v-icon>mdi-check</v-icon>Save Item </v-btn>
+                <v-btn small color="dark" @click="saveItem"> <v-icon>mdi-check</v-icon>Save Item </v-btn>
             </v-col>
         </v-row>
     </v-container>

@@ -1,11 +1,16 @@
 <template>
     <div>
         <v-main id="v-main">
-            <breadcrumbs-vue :items="items"></breadcrumbs-vue>
+            <div class="custom-top-navigation">
+                <v-container fluid>
+                    <div class="nav-title font-weight-thin"><v-icon class="nav-icon mr-5">mdi-file-import</v-icon>IMPORT PRODUCT</div>
+                </v-container>
+                <breadcrumbs-vue :items="items"></breadcrumbs-vue>
+            </div>
             <v-container fluid>
                 <v-row>
                     <v-col lg="12">
-                        <v-tabs color="#000" slider-size="4" align-with-title fixed-tabs slider-color="blue accent-3">
+                        <v-tabs color="#000" slider-size="2" align-with-title fixed-tabs slider-color="blue accent-3">
                             <v-tab href="#hello">
                                 Import Manually
                             </v-tab>

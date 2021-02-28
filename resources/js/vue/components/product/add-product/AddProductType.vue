@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <v-col lg="6" md="6">
+        <v-col lg="3" md="3">
             <v-form v-model="valid">
                 <v-text-field dense class="mt-3 mb-3" :rules="productNameRules" @blur="setProductname" :hint="'Kind of product that you want to create (ex: Clothing, Computers, Mobile, Laptops, etc.)'" :label="'Product Type Name'" outlined v-model="product_name" type="text"></v-text-field>
             </v-form>
@@ -15,23 +15,23 @@ import { mapActions } from "vuex"
 
 export default {
     computed: {
-        ...mapGetters(["getProductName"])
+        ...mapGetters("add_product", ["getProductName"])
     },
     methods: {
-        ...mapMutations(["setProductName", "setStepper"]),
+        ...mapMutations(["add_product/setProductName", "setStepper"]),
         testProductName(val) {
             if (val) {
-                this.setStepper({
+                this.$store.commit("setStepper", {
                     canContinue: true
                 })
             } else {
-                this.setStepper({
+                this.$store.commit("setStepper", {
                     canContinue: false
                 })
             }
         },
         setProductname: function() {
-            this.setProductName(this.product_name)
+            this.$store.commit("add_product/setProductName", this.product_name)
         }
     },
     created() {

@@ -19,9 +19,7 @@
                         </v-list-item-icon>
 
                         <v-list-item-content>
-                            <v-list-item-title
-                                ><strong>{{ item.title }}</strong></v-list-item-title
-                            >
+                            <v-list-item-title>{{ item.title }}</v-list-item-title>
                         </v-list-item-content>
                     </template>
                 </v-list-item>

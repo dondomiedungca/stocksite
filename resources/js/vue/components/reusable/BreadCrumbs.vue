@@ -5,8 +5,8 @@
         </template>
         <template v-slot:item="{ item }">
             <v-breadcrumbs-item :href="item.to" :disabled="item.disabled">
-                <v-icon style="margin-right: 10px; margin-top: -3px;">{{ item.icon }}</v-icon
-                >{{ item.text.toUpperCase() }}
+                <v-icon :color="!item.disabled ? 'primary' : 'secondary'" style="margin-right: 10px; margin-top: -3px;">{{ item.icon }}</v-icon
+                >{{ item.text }}
             </v-breadcrumbs-item>
         </template>
     </v-breadcrumbs>

@@ -1,3 +1,5 @@
+const namespaced = true
+
 const state = {
     product_name: "",
     columns: []
@@ -30,12 +32,16 @@ const actions = {
         let i = state.columns.findIndex(v => v.column_name == candidate.column_name)
         commit("setColumns", i)
         if (!state.columns.length) {
-            commit("setStepper", {
-                canFinish: false
-            })
+            commit(
+                "setStepper",
+                {
+                    canFinish: false
+                },
+                { root: true }
+            )
         }
     },
     saveNewProductType({ commit, state }) {}
 }
 
-export { state, getters, mutations, actions }
+export { namespaced, state, getters, mutations, actions }

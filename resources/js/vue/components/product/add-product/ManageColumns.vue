@@ -3,7 +3,7 @@
         <v-form ref="form" v-model="valid">
             <v-dialog v-model="dialog" persistent max-width="600px">
                 <template v-slot:activator="{ on, attrs }">
-                    <v-btn color="primary" dark v-bind="attrs" v-on="on">
+                    <v-btn small color="dark" v-bind="attrs" v-on="on">
                         <v-icon left>
                             mdi-pencil
                         </v-icon>
@@ -11,16 +11,16 @@
                     </v-btn>
                 </template>
                 <v-card style="width: 100%;">
-                    <v-card-title>New Column</v-card-title>
+                    <v-card-title class="ml-2">CREATE NEW COLUMN</v-card-title>
                     <v-container class="card-container">
-                        <v-row>
-                            <v-col lg="12" md="12" sm="12">
-                                <v-text-field dense class="mt-3" :rules="columnNameRules" :hint="'Specification of your product type (ex: serial_number, model_number, warranty_days, etc.)'" :label="'Column Name'" outlined v-model="columnName" type="text"></v-text-field>
+                        <v-row class="form-row">
+                            <v-col cols="6">
+                                <v-text-field dense :rules="columnNameRules" :hint="'Specification of your product type (ex: serial_number, model_number, warranty_days, etc.)'" :label="'Column Name'" outlined v-model="columnName" type="text"></v-text-field>
                             </v-col>
-                            <v-col lg="12" md="12" sm="12">
+                            <v-col cols="6">
                                 <v-select :rules="columnNameRules" v-model="dataType" :items="data_types" label="Data Type" dense outlined></v-select>
                             </v-col>
-                            <v-col lg="12" md="12" sm="12">
+                            <v-col class="custom-no-padding-bt" cols="12">
                                 <v-radio-group row v-model="isRequired" mandatory>
                                     <template v-slot:label>
                                         <div><strong>Required</strong></div>
@@ -29,7 +29,7 @@
                                     <v-radio label="No" :value="0"></v-radio>
                                 </v-radio-group>
                             </v-col>
-                            <v-col lg="12" md="12" sm="12" v-if="dataType != 'DATE'">
+                            <v-col class="custom-no-padding-bt" cols="12" v-if="dataType != 'DATE'">
                                 <v-radio-group row v-model="inputType" mandatory>
                                     <template v-slot:label>
                                         <div><strong>Input Value Type</strong></div>
@@ -56,12 +56,8 @@
                     </v-container>
                     <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn color="secondary" text @click="dialog = false">
-                            close
-                        </v-btn>
-                        <v-btn :disabled="!valid" color="primary" text @click="importToColums">
-                            Save
-                        </v-btn>
+                        <v-btn small color="dark" @click="dialog = false"> <v-icon>mdi-close</v-icon>Close </v-btn>
+                        <v-btn small :disabled="!valid" color="dark" @click="importToColums"> <v-icon>mdi-check</v-icon>Save </v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -71,25 +67,13 @@
             <v-col class="" lg="12" md="12" sm="12">
                 <v-data-table :loading="loading" :no-data-text="'No Columns Found'" :headers="headers" :items="getColumns" :items-per-page="5" class="elevation-1">
                     <template v-slot:item.actions="{ item }">
-                        <v-btn @click="dialogDelete(item)" icon>
-                            <v-icon small>
-                                mdi-delete
-                            </v-icon>
-                        </v-btn>
-                        <v-dialog v-model="deleteDialogIsOpen" persistent max-width="350px">
-                            <v-card style="width: 100%;">
-                                <v-card-title>Do you want to remove {{ candidateItem.column_name }}?</v-card-title>
-                                <v-card-actions>
-                                    <v-spacer></v-spacer>
-                                    <v-btn color="secondary" small @click="deleteDialogIsOpen = false">
-                                        close
-                                    </v-btn>
-                                    <v-btn color="primary" small @click="removeColumn">
-                                        Remove
-                                    </v-btn>
-                                </v-card-actions>
-                            </v-card>
-                        </v-dialog>
+                        <asker icon_header="mdi-alert" :icon="true" :fab="false" icon_header_color="red" :tooltip_show="false" title="Remove this column from your product type?" @proceed="removeColumn(item)" color="secondary">
+                            <template v-slot:togglerIcon>
+                                <v-icon color="#404040">
+                                    mdi-delete
+                                </v-icon>
+                            </template>
+                        </asker>
                     </template>
                 </v-data-table>
             </v-col>
@@ -100,34 +84,30 @@
 <script>
 import { mapGetters } from "vuex"
 import { mapMutations } from "vuex"
-import { mapActions } from "vuex"
+import { mapActions, mapState } from "vuex"
 
 export default {
     data() {
         return {
             loading: false,
             dialog: false,
-            deleteDialogIsOpen: false,
-            candidateItem: {},
             headers: [
                 {
                     text: "Remove",
                     align: "start",
                     sortable: false,
-                    value: "actions",
-                    class: "primary white--text"
+                    value: "actions"
                 },
                 {
                     text: "Column Name",
                     align: "start",
                     sortable: false,
-                    value: "column_name",
-                    class: "primary white--text"
+                    value: "column_name"
                 },
-                { text: "Data Type", value: "data_type", align: "start", sortable: false, class: "primary white--text" },
-                { text: "Is Required", value: "is_required", align: "start", sortable: false, class: "primary white--text" },
-                { text: "Value Type", value: "value_type", align: "start", sortable: false, class: "primary white--text" },
-                { text: "Selections", value: "selections", align: "start", sortable: false, class: "primary white--text" }
+                { text: "Data Type", value: "data_type", align: "start", sortable: false },
+                { text: "Is Required", value: "is_required", align: "start", sortable: false },
+                { text: "Value Type", value: "value_type", align: "start", sortable: false },
+                { text: "Selections", value: "selections", align: "start", sortable: false }
             ],
             items: this.getColumns,
             valid: false,
@@ -143,45 +123,42 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(["getColumns", "getColumnNames"])
+        ...mapGetters("add_product", ["getColumns", "getColumnNames"]),
+        ...mapState("add_product", ["columns"])
     },
     methods: {
-        ...mapMutations(["setStepper", "setSnackbar", "addToColumns"]),
-        ...mapActions(["updateColumns"]),
+        ...mapMutations("add_product", ["addToColumns"]),
+        ...mapMutations(["setStepper", "setSnackbar"]),
+        ...mapActions("add_product", ["updateColumns"]),
         testProductName(val) {
             if (val) {
-                this.setStepper({
+                this.$store.commit("setStepper", {
                     canFinish: true
                 })
             } else if (this.getColumns.length) {
-                this.setStepper({
+                this.$store.commit("setStepper", {
                     canFinish: true
                 })
             } else {
-                this.setStepper({
+                this.$store.commit("setStepper", {
                     canFinish: false
                 })
             }
         },
         addToSelections: function() {
-            if (this.selection != "") {
+            if (this.selection != "" && this.columnName != null && this.dataType != null) {
                 this.selections.push(this.selection)
                 this.selection = ""
                 this.setSnackbar({
                     isVisible: true,
-                    color: "#404040",
-                    text: "New selection added!"
+                    type: "info",
+                    text: "New selection was added!"
                 })
             }
         },
-        dialogDelete: function(item) {
-            this.candidateItem = item
-            this.deleteDialogIsOpen = true
-        },
-        removeColumn: async function() {
-            this.deleteDialogIsOpen = false
+        removeColumn: async function(item) {
             this.loading = true
-            var setting = this.updateColumns(this.candidateItem)
+            var setting = this.updateColumns(item)
             await setting
             this.loading = false
         },
@@ -195,18 +172,21 @@ export default {
                 selections: this.selections
             }
 
-            this.addToColumns(new_column)
+            this.$store.commit("add_product/addToColumns", new_column)
             this.setSnackbar({
                 isVisible: true,
-                color: "#5cb85c",
+                type: "success",
                 text: "New column was added!"
             })
+            this.columnName = ""
+            this.dataType = ""
+            this.selections = []
             this.$refs.form.reset()
         }
     },
     watch: {
         valid: function(newVal, oldVal) {
-            if (this.$store.state.columns.length) {
+            if (this.columns.length) {
                 this.testProductName(newVal)
             }
         },
@@ -217,4 +197,8 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+.form-row {
+    margin: 7px 1%;
+}
+</style>

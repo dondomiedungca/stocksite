@@ -12,10 +12,11 @@ const state = {
         isFinal: false
     },
     snackbar: {
-        timeout: 2500,
+        timeout: 3500,
         isVisible: false,
         text: "",
-        color: "#5cb85c"
+        type: "success",
+        color: "success"
     }
 }
 const mutations = {

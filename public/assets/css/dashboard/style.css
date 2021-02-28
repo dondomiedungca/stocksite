@@ -83,3 +83,22 @@ a.v-tab {
 .active-site {
     background: #e0e0e0;
 }
+
+.custom-top-navigation {
+    margin-bottom: 30px;
+}
+
+.nav-title {
+    font-size: 20px;
+    color: #404040;
+}
+
+.nav-icon {
+    margin-top: -3px;
+    color: #404040;
+}
+
+.custom-no-padding-bt {
+    padding-top: 0;
+    padding-bottom: 0;
+}
