@@ -29,17 +29,24 @@
                                         <small># {{ index + 1 }}</small>
                                     </td>
                                     <td align="center">
-                                        <small
-                                            ><v-btn @click="removeAttempt(item)" icon>
+                                        <small>
+                                            <!-- <v-btn @click="removeAttempt(item)" icon>
                                                 <v-icon>mdi-trash-can</v-icon>
-                                            </v-btn>
+                                            </v-btn> -->
+                                            <asker icon_header="mdi-alert" :icon="true" :fab="false" icon_header_color="red" :tooltip_show="false" title="Are you sure? you want to delete this item?" @proceed="remove(item)">
+                                                <template v-slot:togglerIcon>
+                                                    <v-icon>
+                                                        mdi-delete
+                                                    </v-icon>
+                                                </template>
+                                            </asker>
                                             <v-btn @click="editProduct(item)" icon>
                                                 <v-icon>mdi-pencil</v-icon>
                                             </v-btn>
                                             <v-btn @click="renderDetails(item.details)" icon>
                                                 <v-icon>mdi-eye</v-icon>
-                                            </v-btn></small
-                                        >
+                                            </v-btn>
+                                        </small>
                                     </td>
                                     <td align="center">
                                         <small>{{ item.stock_number }}</small>
@@ -220,7 +227,7 @@ export default {
         }
     },
     methods: {
-        ...mapMutations(["setEditOpen"]),
+        ...mapMutations(["setEditOpen", "setSnackbar"]),
         numberWithCommas: function(x) {
             if (x == "" || x == null) {
                 return 0
@@ -303,35 +310,20 @@ export default {
             this.details = details
             this.isViewOpen = !this.isViewOpen
         },
-        removeAttempt: function(product) {
+        remove: function(product) {
             var self = this
-            swal.queue([
-                {
-                    title: "Remove " + product.stock_number,
-                    text: "This will permanently remove, proceed?",
-                    icon: "info",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonColor: "#42d1f5",
-                    confirmButtonText: "Yes, remove now",
-                    showLoaderOnConfirm: true,
-                    preConfirm: () => {
-                        return axios
-                            .post("/admin/products/remove-product", {
-                                inventory: product
-                            })
-                            .then(response => {
-                                swal.fire({
-                                    title: response.data.heading,
-                                    text: response.data.message,
-                                    icon: response.data.isSuccess ? "success" : "error"
-                                })
-                                self.getProducts(self.products.current_page)
-                            })
-                    }
-                }
-            ])
+            axios
+                .post("/admin/products/remove-product", {
+                    inventory: product
+                })
+                .then(response => {
+                    this.$store.commit("setSnackbar", {
+                        isVisible: true,
+                        type: response.data.success ? "success" : "error",
+                        text: response.data.message
+                    })
+                    self.getProducts(self.products.current_page)
+                })
         }
     }
 }

@@ -4,7 +4,7 @@
         <template v-if="tooltip_show" v-slot:activator="{ on: menu, attrs: attr1 }">
             <v-tooltip bottom>
                 <template v-slot:activator="{ on: tooltip, attr2 }">
-                    <v-btn :disabled="disabled" :class="classes" :color="color" :small="small" :icon="icon" :fab="fab" v-bind="{ ...attr1, attr2 }" v-on="{ ...menu, ...tooltip }">
+                    <v-btn :disabled="disabled" :class="classes" :color="color ? color : ''" :small="small" :icon="icon" :fab="fab" v-bind="{ ...attr1, attr2 }" v-on="{ ...menu, ...tooltip }">
                         <slot name="togglerIcon"></slot>
                     </v-btn>
                 </template>
@@ -13,7 +13,7 @@
         </template>
         <!-- for without tooltip -->
         <template v-else v-slot:activator="{ on: menu, attrs: attr1 }">
-            <v-btn :disabled="disabled" :class="classes" :color="color" :small="small" :icon="icon" :fab="fab" v-bind="{ ...attr1 }" v-on="{ ...menu }">
+            <v-btn :disabled="disabled" :class="classes" :color="color ? color : ''" :small="small" :icon="icon" :fab="fab" v-bind="{ ...attr1 }" v-on="{ ...menu }">
                 <slot name="togglerIcon"></slot>
             </v-btn>
         </template>
@@ -49,7 +49,7 @@ export default {
         },
         color: {
             required: false,
-            default: "primary"
+            default: ""
         },
         classes: {
             required: false,

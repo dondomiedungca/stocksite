@@ -28,7 +28,7 @@
         </v-row>
         <v-row>
             <v-col lg="3" md="3" sm="6" xs="12">
-                <v-btn @click="dialog = true" color="primary"><v-icon>mdi-file-upload</v-icon> Upload File</v-btn>
+                <v-btn @click="dialog = true" small color="dark"><v-icon>mdi-file-upload</v-icon> Upload File</v-btn>
             </v-col>
             <v-dialog v-model="dialog" width="600">
                 <v-card>
@@ -52,8 +52,8 @@
 
                     <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn small color="secondary" @click="dialog = false">Close</v-btn>
-                        <v-btn small color="primary" class="ma-2 white--text" @click="uploadItems" fab>
+                        <v-btn small color="dark" @click="dialog = false"><v-icon>mdi-close</v-icon>Close</v-btn>
+                        <v-btn small color="dark" class="ma-2" @click="uploadItems" fab>
                             <v-icon dark>
                                 mdi-cloud-upload
                             </v-icon>
@@ -68,6 +68,7 @@
 <script>
 import { validationMixin } from "vuelidate"
 import { required, numeric } from "vuelidate/lib/validators"
+import { mapMutations } from "vuex"
 export default {
     mixins: [validationMixin],
     props: {
@@ -138,6 +139,7 @@ export default {
         }
     },
     methods: {
+        ...mapMutations(["setSnackbar"]),
         willShow: function() {
             if (this.basis != "purchasing") {
                 return true
@@ -210,13 +212,23 @@ export default {
                         }
                         setTimeout(() => {
                             this.saving = false
-                            swal.fire({ title: response.data.heading, icon: response.data.success ? "success" : "error", html: response.data.message })
+                            // swal.fire({ title: response.data.heading, icon: response.data.success ? "success" : "error", html: response.data.message })
+                            this.$store.commit("setSnackbar", {
+                                isVisible: true,
+                                type: response.data.success ? "success" : "error",
+                                text: response.data.message
+                            })
                             document.getElementById("upload-file").value = ""
                             vm.loaded = 0
                         }, 1500)
                     })
                     .catch(error => {
-                        swal.fire("Something went wrong", "Something error occured while uploading", "error")
+                        // swal.fire("Something went wrong", "Something error occured while uploading", "error")
+                        this.$store.commit("setSnackbar", {
+                            isVisible: true,
+                            type: "error",
+                            text: "Something error occured while uploading"
+                        })
                     })
             }
         },

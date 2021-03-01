@@ -70,13 +70,22 @@
         </v-row>
         <v-row>
             <v-col lg="3" md="3" sm="6" xs="12">
-                <v-btn small color="dark" @click="saveItem"> <v-icon>mdi-check</v-icon>Save Item </v-btn>
+                <!-- <v-btn small color="dark" @click="saveItem"> <v-icon>mdi-check</v-icon>Save Item </v-btn> -->
+                <asker icon_header="mdi-information" :icon="false" :fab="false" icon_header_color="primary" :tooltip_show="false" title="This will be add to database and add to your purchasing, Do you want to proceed?" @proceed="saveItem">
+                    <template v-slot:togglerIcon>
+                        <v-icon>
+                            mdi-check
+                        </v-icon>
+                        Save Item
+                    </template>
+                </asker>
             </v-col>
         </v-row>
     </v-container>
 </template>
 
 <script>
+import { mapMutations } from "vuex"
 import { Fragment } from "vue-fragment"
 import { validationMixin } from "vuelidate"
 import { required, numeric } from "vuelidate/lib/validators"
@@ -192,6 +201,7 @@ export default {
         this.getPurchasing()
     },
     methods: {
+        ...mapMutations(["setSnackbar"]),
         willShow: function() {
             if (this.basis != "purchasing") {
                 return true
@@ -321,30 +331,20 @@ export default {
                 formData.append("basis", self.basis)
                 formData.append("transaction_id", self.transaction_id)
                 formData.append("product_type_id", self.base_product_type.id)
-                swal.queue([
-                    {
-                        title: "Save Item",
-                        text: self.basis != "purchasing" ? "This will be add to database and add to your purchasing, Do you want to proceed?" : "This will be add to database, Do you want to proceed?",
-                        icon: "info",
-                        showCancelButton: true,
-                        confirmButtonColor: "#3085d6",
-                        cancelButtonColor: "#d33",
-                        confirmButtonText: "Yes, save it",
-                        showLoaderOnConfirm: true,
-                        preConfirm: () => {
-                            return axios
-                                .post(`/admin/products/save-manual-item`, formData, {
-                                    headers: { "Content-Type": "multipart/form-data" }
-                                })
-                                .then(result => {
-                                    swal.fire(result.data.heading, result.data.message, result.data.success ? "success" : "error")
-                                    if (this.basis == "purchasing") {
-                                        this.$emit("update_purchasing")
-                                    }
-                                })
+                axios
+                    .post(`/admin/products/save-manual-item`, formData, {
+                        headers: { "Content-Type": "multipart/form-data" }
+                    })
+                    .then(result => {
+                        this.$store.commit("setSnackbar", {
+                            isVisible: true,
+                            type: result.data.success ? "success" : "error",
+                            text: result.data.message
+                        })
+                        if (this.basis == "purchasing") {
+                            this.$emit("update_purchasing")
                         }
-                    }
-                ])
+                    })
             }
         }
     },

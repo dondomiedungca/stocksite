@@ -61,7 +61,6 @@
                     </v-card-actions>
                 </v-card>
             </v-dialog>
-            <snackbar-vue></snackbar-vue>
         </v-form>
         <v-row class="mt-3 mb-3">
             <v-col class="" lg="12" md="12" sm="12">

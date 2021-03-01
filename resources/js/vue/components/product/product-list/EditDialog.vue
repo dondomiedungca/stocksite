@@ -61,12 +61,16 @@
             </div>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="secondary" small @click="close">
-                    close
-                </v-btn>
-                <v-btn color="primary" small @click="updateItem">
-                    Save
-                </v-btn>
+                <v-btn color="dark" small @click="close"> <v-icon>mdi-close</v-icon>close </v-btn>
+                <!-- <v-btn color="dark" small @click="updateItem"> <v-icon>mdi-check</v-icon>Save </v-btn> -->
+                <asker icon_header="mdi-information" :icon="false" :fab="false" icon_header_color="primary" :tooltip_show="false" title="Save changes in this item now?" @proceed="updateItem">
+                    <template v-slot:togglerIcon>
+                        <v-icon>
+                            mdi-check
+                        </v-icon>
+                        Save
+                    </template>
+                </asker>
             </v-card-actions>
         </v-card>
     </v-dialog>
@@ -74,6 +78,7 @@
 
 <script>
 import { validationMixin } from "vuelidate"
+import { mapMutations } from "vuex"
 import { required, numeric } from "vuelidate/lib/validators"
 export default {
     mixins: [validationMixin],
@@ -110,35 +115,22 @@ export default {
         }
     },
     methods: {
+        ...mapMutations(["setSnackbar"]),
         updateItem: function() {
             this.$v.$touch()
             if (!this.$v.$invalid) {
                 var self = this
-                swal.queue([
-                    {
-                        title: "Update This Product",
-                        text: "Save changes in this item now?",
-                        icon: "info",
-                        showCancelButton: true,
-                        cancelButtonColor: "#d33",
-                        confirmButtonColor: "#42d1f5",
-                        confirmButtonText: "Yes, update now",
-                        showLoaderOnConfirm: true,
-                        preConfirm: () => {
-                            return axios
-                                .post("/admin/products/update-product", {
-                                    inventory: self.forEdit
-                                })
-                                .then(response => {
-                                    swal.fire({
-                                        title: response.data.heading,
-                                        text: response.data.message,
-                                        icon: response.data.isSuccess ? "success" : "error"
-                                    })
-                                })
-                        }
-                    }
-                ])
+                axios
+                    .post("/admin/products/update-product", {
+                        inventory: self.forEdit
+                    })
+                    .then(response => {
+                        this.$store.commit("setSnackbar", {
+                            isVisible: true,
+                            type: response.data.success ? "success" : "error",
+                            text: response.data.message
+                        })
+                    })
             }
         },
         setPropertyNameForDate: function(name) {

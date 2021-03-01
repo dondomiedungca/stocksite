@@ -381,7 +381,7 @@ class ProductsController extends Controller
         $inv->save();
 
         $data['heading'] = 'Product Updated';
-        $data['isSuccess'] = true;
+        $data['success'] = true;
         $data['message'] = $inventory['stock_number']." was successfully updated";
 
         return response()->json($data);
@@ -425,7 +425,7 @@ class ProductsController extends Controller
 
         $inv->delete();
 
-        $data['isSuccess'] = true;
+        $data['success'] = true;
         $data['message'] = 'Product has been removed successfuly';
         $data['heading'] = "Product Removed";
 

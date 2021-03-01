@@ -6,6 +6,7 @@
         <appbar-vue></appbar-vue>
         <sidebar-vue height="100"></sidebar-vue>
         @yield('body')
+        <snackbar-vue></snackbar-vue>
       </v-app>
     </div>
 @endsection

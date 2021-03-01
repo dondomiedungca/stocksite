@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex"
+import { mapGetters, mapMutations } from "vuex"
 import AddProductName from "./AddProductType.vue"
 import ManageColumns from "./ManageColumns.vue"
 
@@ -45,11 +45,17 @@ export default {
         ...mapGetters(["getStepper"])
     },
     methods: {
+        ...mapMutations(["setSnackbar"]),
         save: function() {
             var self = this
             var params = { columns: self.getColumns, product_name: self.getProductName }
             axios.post("/admin/products/add-product-type", params).then(result => {
-                swal.fire(result.data.heading, result.data.message, result.data.success ? "success" : "error")
+                // swal.fire(result.data.heading, result.data.message, result.data.success ? "success" : "error")
+                this.$store.commit("setSnackbar", {
+                    isVisible: true,
+                    type: result.data.success ? "success" : "error",
+                    text: result.data.message
+                })
             })
         }
     },

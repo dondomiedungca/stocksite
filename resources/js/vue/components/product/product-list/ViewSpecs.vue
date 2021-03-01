@@ -23,9 +23,7 @@
             </div>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="secondary" small @click="close">
-                    close
-                </v-btn>
+                <v-btn color="dark" small @click="close"> <v-icon>mdi-close</v-icon>close </v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
