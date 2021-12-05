@@ -1,2 +1,0 @@
-[2021-01-14 20:59:27.399] [sharedprocess] [info] main {"machineId":"6bd97f250758e641c99c0327ec32441272f66e7256c08d8ea90487d4ce8fdfb1","windowId":2}
-[2021-01-14 20:59:27.655] [sharedprocess] [error] [File Watcher (node.js)] Error: ENOENT: no such file or directory, stat '/var/www/ppe/~/root/User/snippets'
