@@ -29,6 +29,15 @@
             <template v-slot:[`item.cosmetic`]="{ item }">
                 {{ item.cosmetic.name }}
             </template>
+            <template v-slot:[`item.origin_price`]="{ item }">
+                {{ item.cosmetic.origin_price | emptyFormatter }}
+            </template>
+            <template v-slot:[`item.selling_price`]="{ item }">
+                {{ item.cosmetic.selling_price | emptyFormatter }}
+            </template>
+            <template v-slot:[`item.discount_percentage`]="{ item }">
+                {{ item.cosmetic.discount_percentage | emptyFormatter }}
+            </template>
         </Table>
         <!-- <edit-dialog :product_type="product_type" :cosmetics="cosmetics" :statuses="statuses" :forEdit="forEdit" @close="isEditOpen = !isEditOpen" :isEditOpen="isEditOpen"></edit-dialog>
         <view-specs :details="details" @close="isViewOpen = !isViewOpen" :isViewOpen="isViewOpen"></view-specs>

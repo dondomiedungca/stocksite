@@ -14,7 +14,7 @@
         </div>
 
         <v-card flat style="border: 1px solid #D0D0D0;">
-            <v-data-table :loading="table.loading" :fixed-header="true" :items="table.data" :items-per-page="table.limit" :height="height" :disable-pagination="true" :hide-default-footer="true" :disable-sort="!enableDefaultSort" :item-key="itemKey">
+            <v-data-table :headers="headersLocal" :loading="table.loading" :items="table.data" :items-per-page="table.limit" height="70vh" hide-default-header disable-pagination hide-default-footer disable-sort>
                 <template v-slot:header="{}">
                     <thead class="v-data-table-header">
                         <tr v-for="(header, i) in headersIterator" :key="i">
@@ -26,7 +26,7 @@
                                     width: col.width ? `${col.width}px` : undefined,
                                     minWidth: col.width ? `${col.width}px` : undefined,
                                     position: 'sticky',
-                                    top: `${i * 48}px`
+                                    top: `${i * 48}${i * 48 ? 'px' : ''}`
                                 }"
                                 class="text-center"
                                 :rowspan="col.rowspan"
@@ -38,12 +38,11 @@
                         </tr>
                     </thead>
                 </template>
-
-                <template v-slot:item="{ prop }">
+                <template #item="prop">
                     <tr>
-                        <td v-for="(header, i) in flattenHeaders" :key="i">
-                            <slot :name="`item.${header.value}`">
-                                <span>{{ prop.item[header.value] }}</span>
+                        <td v-for="(c, ci) in flattenHeaders" :key="ci" :class="'text-center'">
+                            <slot :name="`item.${c.value}`" :item="prop.item">
+                                <span>{{ prop.item[c.value] }}</span>
                             </slot>
                         </td>
                     </tr>
@@ -144,7 +143,7 @@ export default {
         },
         height: {
             type: String,
-            default: "60vh"
+            default: "70vh"
         },
         disableCustomPagination: {
             type: Boolean,
@@ -300,7 +299,39 @@ export default {
 
             return rowSpan
         },
-        flattenHeaders() {}
+        flattenHeaders() {
+            let res = []
+
+            this.headers.map(header => {
+                if (!header.hasChild) {
+                    res.push({
+                        ...header
+                    })
+                } else {
+                    deepSearch(header)
+                }
+            })
+
+            function deepSearch(header) {
+                if (!header.hasChild) {
+                    res.push({
+                        ...header
+                    })
+                } else {
+                    header.children.map(h => {
+                        if (!h.hasChild) {
+                            res.push({
+                                ...h
+                            })
+                        } else {
+                            deepSearch(h)
+                        }
+                    })
+                }
+            }
+
+            return res
+        }
     },
     methods: {
         ...mapMutations("table", ["SET_PAGE", "SET_ROWS_PER_PAGE"]),
@@ -485,7 +516,6 @@ export default {
     }
     td {
         border-color: rgba(0, 0, 0, 0.12);
-        border-style: solid;
         border-left-width: 0px;
         border-right-width: 1px;
         border-top-width: 0px;
