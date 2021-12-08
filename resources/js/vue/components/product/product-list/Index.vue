@@ -60,7 +60,7 @@ import SearchDialog from "./SearchDialog"
 import ViewSpecs from "./ViewSpecs"
 import { mapMutations, mapActions, mapGetters, mapState } from "vuex"
 
-import Table from "./../../reusable/Table"
+import Table from "./../../reusable/Table/complexHeaders"
 import BreadCrumbs from "../../reusable/BreadCrumbs"
 import Container from "../../reusable/Container"
 import Asker from "./../../reusable/Asker"

@@ -18,22 +18,34 @@ const headers = [
         width: 200
     },
     {
-        text: "Inventory Status",
-        value: "status",
-        align: "center",
-        width: 200
-    },
-    {
-        text: "Cosmetic",
-        value: "cosmetic",
-        align: "center",
-        width: 200
-    },
-    {
-        text: "Cosmetic Description",
-        value: "item_cosmetic_description",
-        align: "center",
-        width: 200
+        text: "ITEM STABLITITY DETAILS",
+        hasChild: true,
+        width: 600,
+        children: [
+            {
+                text: "Cosmetic Details",
+                value: "cosmetic",
+                hasChild: true,
+                width: 400,
+                children: [
+                    {
+                        text: "Cosmetic Type",
+                        value: "cosmetic",
+                        width: 200
+                    },
+                    {
+                        text: "Cosmetic Description",
+                        value: "item_cosmetic_description",
+                        width: 200
+                    }
+                ]
+            },
+            {
+                text: "Inventory Status",
+                value: "item_description",
+                width: 200
+            }
+        ]
     },
     {
         text: "Description",
