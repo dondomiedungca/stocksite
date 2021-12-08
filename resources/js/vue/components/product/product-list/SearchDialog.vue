@@ -32,6 +32,9 @@
                             <div v-if="column.product_column_data_type == 'STRING'">
                                 <v-text-field type="text" outlined v-model="search_fields.details[column.product_column_name]" :label="column.product_column_name" dense></v-text-field>
                             </div>
+                            <div v-else-if="column.product_column_data_type == 'INTEGER'">
+                                <v-text-field type="number" outlined v-model="search_fields.details[column.product_column_name]" :label="column.product_column_name" dense></v-text-field>
+                            </div>
                             <div v-else>
                                 <v-text-field style="cursor: pointer;" @click="setPropertyNameForDate(column.product_column_name)" v-model="search_fields.details[column.product_column_name]" :label="column.product_column_name" prepend-icon="mdi-calendar" outlined dense readonly></v-text-field>
                             </div>

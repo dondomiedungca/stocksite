@@ -12,9 +12,9 @@
 @endsection
 
 @section('js')
-    <script src="{{ url('js/vue/components/product/src/index.js') }}"></script>      
+    <script src="{{ url('js/app.js') }}"></script>      
 @endsection
 
 @section('style')
-    <link rel="stylesheet" href="{{ url('assets/css/dashboard/style.css') }}">
+    <link rel="stylesheet" href="{{ url('css/app.css') }}">
 @endsection

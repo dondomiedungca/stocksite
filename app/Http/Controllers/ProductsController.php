@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Bus;
 use Throwable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 use App\Http\helpers\TransactionHelpers;
 use App\Http\helpers\FileUpload;
@@ -41,7 +42,22 @@ class ProductsController extends Controller
     }
 
     public function productList() {
-        return view('admin.products.product_list');
+        $product_types = ProductTypes::with('user', 'product_attributes', 'product_attributes.column_selections')
+                                     ->orderBy("created_at", "ASC")
+                                     ->get();
+
+        $currency = getCurrency();
+        $cosmetics = InventoryCosmetic::all();
+        $statuses = InventoryStatus::all();
+
+        $data = [
+            "product_types" => $product_types,
+            "currency" => $currency,
+            "cosmetics" => $cosmetics,
+            "statuses" => $statuses,
+        ];
+
+        return view('admin.products.product_list')->with($data);
     }
 
     public function productImport() {
@@ -201,101 +217,114 @@ class ProductsController extends Controller
     }
 
     public function saveFile(Request $request) {
-        $filename = $request['file_name'];
-        $file = $request['file'];
-        $extension = $file->getClientOriginalExtension();
-        $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        try {
+            $filename = $request['file_name'];
+            $file = $request['file'];
+            $extension = $file->getClientOriginalExtension();
+            $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
-        if($request->hasFile('photo')) {
-            $photo = $request['photo'];
-            $photo_extension = $photo->getClientOriginalExtension();
-            $photo_name = pathinfo($photo->getClientOriginalName(), PATHINFO_FILENAME);
-            $photo_file_name = $photo_name.".".$photo_extension;
-        } else {
-            $photo_file_name = NULL;
-            $photo_path = NULL;
-        }
+            if($request->hasFile('photo')) {
+                $photo = $request['photo'];
+                $photo_extension = $photo->getClientOriginalExtension();
+                $photo_name = pathinfo($photo->getClientOriginalName(), PATHINFO_FILENAME);
+                $photo_file_name = $photo_name.".".$photo_extension;
+            } else {
+                $photo_file_name = NULL;
+                $photo_path = NULL;
+            }
 
-        $basis = $request['basis'];
-        $transaction_id = $request['basis'] == 'purchasing' ? $request['transaction_id'] : NULL;
-        $purchasing_type_id = $request['basis'] == 'purchasing' ? $request['purchasing_type_id'] : NULL;
+            $basis = $request['basis'];
+            $transaction_id = $request['basis'] == 'purchasing' ? $request['transaction_id'] : NULL;
+            $purchasing_type_id = $request['basis'] == 'purchasing' ? $request['purchasing_type_id'] : NULL;
 
-        $chunk_count = 1000;
+            $chunk_count = 500;
 
-        $product_type = $this->getProductType($request['product_type_id']);
-        $check_header = FileUpload::isValidHeader($file, $extension, $product_type);
-        
-        if(!$check_header['isValid']) {
-            $data['heading'] = "Header(s) Incorrect";
-            $data['message'] = "The ff. headers are not found on your file </br></br> \"<b>".implode($check_header['difference'], ",")."</b>\"";
-            $data['success'] = false;
+            $product_type = $this->getProductType($request['product_type_id']);
 
-            return $data;
-        }
-        $header = $check_header['header'];
+            if($extension == 'csv') {
+                $check_header = FileUpload::isValidHeader($file, $extension, $product_type);
+                if(!$check_header['isValid']) {
+                    throw new \Exception("The ff. headers are not found on your file </br></br> \"<b>".implode($check_header['difference'], ",")."</b>\"");
+                }
+                $header = $check_header['header'];
+            } else {
+                $res = FileUpload::excelForDevelopers($file, "Sheet1");
+                $check_header = FileUpload::isValidHeader($res["headers"], $extension, $product_type);
+                if(!$check_header['isValid']) {
+                    throw new \Exception("The ff. headers are not found on your file </br></br> \"<b>".implode($check_header['difference'], ",")."</b>\"");
+                }
+                $header = $res["headers"];
+                $file = FileUpload::excelFileContentFormatToCSV($res["data"]);
+            }
+            
+            // create directory
+            $path = "product/temp/$filename";
+            $directory = FileUpload::createFileDirectory($path);
 
-        // create directory
-        $path = "product/temp/$filename";
-        $directory = FileUpload::createFileDirectory($path);
-
-        if($request->hasFile('photo')) {
-            if($purchasing_type_id != NULL) {
-                $purchasing_type = PurchasingTypes::find($purchasing_type_id);
-                if(!$purchasing_type->photo()->exists()) {
-                    $photo_path = "product/Purchase_Order_Type_$purchasing_type_id";
+            if($request->hasFile('photo')) {
+                if($purchasing_type_id != NULL) {
+                    $purchasing_type = PurchasingTypes::find($purchasing_type_id);
+                    if(!$purchasing_type->photo()->exists()) {
+                        $photo_path = "product/Purchase_Order_Type_$purchasing_type_id";
+                        PhotoHelpers::savePhoto($photo_path, $photo, $photo_file_name);
+                    }
+                } else {
+                    $photo_path = "product/Product_Image_".time();
                     PhotoHelpers::savePhoto($photo_path, $photo, $photo_file_name);
                 }
-            } else {
-                $photo_path = "product/Product_Image_".time();
-                PhotoHelpers::savePhoto($photo_path, $photo, $photo_file_name);
             }
+
+            // create chunk
+            $chunks = FileUpload::chunkFile($directory, $name, $file, $chunk_count, $extension);
+
+            // run queue on every chunk of file
+            $chunk_files = glob(storage_path("app/$directory/*.csv"));
+            $jobs = [];
+
+            foreach ($chunk_files as $key => $chunk_file) {
+                $jobs[] = new ImportItemFile($header, $photo_file_name, $photo_path, $key, $chunk_count, $filename, $name."-".time(), $chunk_file, $request['product_type_id'], Auth::user()->id, $transaction_id, $purchasing_type_id, $request['basis'], $extension);
+            }
+
+            $counter = Counter::find(7);
+            $counter->increment('counter');
+            $queue_no = $counter->prefix . str_pad($counter->counter, 6,'0',STR_PAD_LEFT);
+
+            $batch = Bus::batch($jobs)->then(function (Batch $batch){
+                // All jobs completed successfully...
+            })->catch(function (Batch $batch, Throwable $e) {
+                // Only First batch job failure detected...
+                $batch->cancel();
+            })->finally(function (Batch $batch) use ($directory) {
+                // The batch has finished executing...
+                // I putted here the event calling as failed because the error message will only get if the batch was cancelled,
+                // the batch will continue to finish other jobs even the previous jobs are failed
+                if($batch->cancelled()) {
+                    broadcast(new QueueProcessing("failed", BatchHelpers::getBatch($batch->id)));
+                }
+                // This only run at fresh batch, not when retry
+                if((int) $batch->progress() == 100) {
+                    BatchHelpers::generateDuration($batch->id);
+                    BatchHelpers::importMessage($batch->id, "File content was successfully inserted to database.");
+                    broadcast(new QueueProcessing("complete", BatchHelpers::getBatch($batch->id)));
+                    FileUpload::removePath($directory);
+                }
+                BatchHelpers::removeFromProcessing($batch->id);
+            })->name($name.' - Product File Uploading*_*'.$queue_no)->onQueue('product_imports')->dispatch();
+
+            broadcast(new QueueProcessing("create", BatchHelpers::getBatch($batch->id)));
+
+            $data['success'] = true;
+            $data['heading'] = "Added To Queue";
+            $data['message'] = "File upload process was added to system queue with no. <b>".$queue_no."</b>, we will notify you once it is done";
+            $data['uuid'] = $batch->id;
+
+            return $data;
+        } catch (\Exception $e) {
+            return response()->json([
+                "message" => $e->getMessage(),
+                "success" => false
+            ], 403);
         }
-
-        // create chunk
-        $chunks = FileUpload::chunkFile($directory, $name, $file, $chunk_count);
-
-        // run queue on every chunk of file
-        $chunk_files = glob(storage_path("app/$directory/*.csv"));
-        $jobs = [];
-
-        foreach ($chunk_files as $key => $chunk_file) {
-            $jobs[] = new ImportItemFile($header, $photo_file_name, $photo_path, $key, $chunk_count, $filename, $name."-".time(), $chunk_file, $request['product_type_id'], Auth::user()->id, $transaction_id, $purchasing_type_id, $request['basis']);
-        }
-
-        $counter = Counter::find(7);
-		$counter->increment('counter');
-        $queue_no = $counter->prefix . str_pad($counter->counter, 6,'0',STR_PAD_LEFT);
-
-        $batch = Bus::batch($jobs)->then(function (Batch $batch){
-            // All jobs completed successfully...
-        })->catch(function (Batch $batch, Throwable $e) {
-            // Only First batch job failure detected...
-            $batch->cancel();
-        })->finally(function (Batch $batch) use ($directory) {
-            // The batch has finished executing...
-            // I putted here the event calling as failed because the error message will only get if the batch was cancelled,
-            // the batch will continue to finish other jobs even the previous jobs are failed
-            if($batch->cancelled()) {
-                broadcast(new QueueProcessing("failed", BatchHelpers::getBatch($batch->id)));
-            }
-            // This only run at fresh batch, not when retry
-            if((int) $batch->progress() == 100) {
-                BatchHelpers::generateDuration($batch->id);
-                BatchHelpers::importMessage($batch->id, "File content was successfully inserted to database.");
-                broadcast(new QueueProcessing("complete", BatchHelpers::getBatch($batch->id)));
-                FileUpload::removePath($directory);
-            }
-            BatchHelpers::removeFromProcessing($batch->id);
-        })->name($name.' - Product File Uploading*_*'.$queue_no)->onQueue('product_imports')->dispatch();
-
-        broadcast(new QueueProcessing("create", BatchHelpers::getBatch($batch->id)));
-
-        $data['success'] = true;
-        $data['heading'] = "Added To Queue";
-        $data['message'] = "File upload process was added to system queue with no. <b>".$queue_no."</b>, we will notify you once it is done";
-        $data['uuid'] = $batch->id;
-
-        return $data;
 
     }
 
@@ -323,25 +352,6 @@ class ProductsController extends Controller
         $products->where('product_type_id', $product_type_id);
 
         if(!empty($search)) {
-            // $products->where(function ($query) use ($search){
-            //     $query->when($search['stock_number'] != "", function ($q) use ($search) {
-            //         return $q->orWhere('stock_number', 'like', '%'.$search['stock_number'].'%');
-            //     });
-            //     $query->when($search['inventory_status_id'] != 0, function ($q) use ($search) {
-            //         return $q->orWhere('inventory_status_id', $search['inventory_status_id']);
-            //     });
-            //     $query->when($search['inventory_cosmetic_id'] != 0, function ($q) use ($search) {
-            //         return $q->orWhere('inventory_cosmetic_id', $search['inventory_cosmetic_id']);
-            //     });
-            //     $query->orWhereBetween('origin_price', [$search['origin_price'][0], $search['origin_price'][1]]);
-            //     $query->orWhereBetween('selling_price', [$search['selling_price'][0], $search['selling_price'][1]]);
-
-            //     foreach ($search['details'] as $key => $value) {
-            //         $query->when($search['details'][$key] != "", function ($q) use ($search, $key){
-            //             return $q->orWhere("details->$key", "like", "%".$search['details'][$key]."%");
-            //         });
-            //     }
-            // });
             $products->when($search['stock_number'] != "", function ($q) use ($search) {
                 return $q->where('stock_number', 'like', '%'.$search['stock_number'].'%');
             });
@@ -361,7 +371,7 @@ class ProductsController extends Controller
             }
         }
 
-        $products = $products->paginate(10);
+        $products = $products->paginate($request->page_limit);
 
         return response()->json($products);
     }

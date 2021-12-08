@@ -21,6 +21,7 @@ use App\Http\helpers\BatchHelpers;
 use App\Http\helpers\Products;
 use App\Http\helpers\PhotoHelpers;
 use App\Http\helpers\TransactionHelpers;
+use App\Http\helpers\FileUpload;
 
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -42,6 +43,7 @@ class ImportItemFile implements ShouldQueue
     public $transaction_id;
     public $purchasing_type_id;
     public $basis;
+    public $ext;
 
     public $timeout = 3600;
     /**
@@ -49,7 +51,7 @@ class ImportItemFile implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($header, $photo_name, $photo_path, $chunk_position, $chunk_count, $filename, $filename_time, $chunk_directory, $product_type_id = NULL, $user_id = NULL, $transaction_id = NULL, $purchasing_type_id = NULL, $basis = NULL)
+    public function __construct($header, $photo_name, $photo_path, $chunk_position, $chunk_count, $filename, $filename_time, $chunk_directory, $product_type_id = NULL, $user_id = NULL, $transaction_id = NULL, $purchasing_type_id = NULL, $basis = NULL, $ext)
     {
         $this->header = $header;
         $this->photo_name = $photo_name;
@@ -64,6 +66,7 @@ class ImportItemFile implements ShouldQueue
         $this->transaction_id = $transaction_id;
         $this->purchasing_type_id = $purchasing_type_id;
         $this->basis = $basis;
+        $this->ext = $ext;
     }
 
     /**
@@ -73,43 +76,43 @@ class ImportItemFile implements ShouldQueue
      */
     public function handle()
     {
-        if ($this->batch()->cancelled()) {
-            return;
-        }
-        
-        $csv_data = array_map('str_getcsv', file($this->chunk_directory));
-        if($this->chunk_position == 0) {
-           unset($csv_data[0]);
-        }
-        // if this kind of importing is related on purchasing type
-        if($this->purchasing_type_id != NULL) {
-            $purchasing_type = PurchasingTypes::find($this->purchasing_type_id);
-            if(!$purchasing_type->photo()->exists()) {
-                $photable = PhotoHelpers::saveThroughFileName($this->photo_path, $this->photo_name, $this->purchasing_type_id, NULL);
+            sleep(5);
+            if ($this->batch()->cancelled()) {
+                return;
             }
-        }
-
-        foreach ($csv_data as $key => $row) {
-            $data = array_combine($this->header, $row);
-            $checked_data = isNotEmpty($this->product_type_id, $data);
-
-            if($checked_data['isValid']) {
-                Products::importItems($this->photo_path, $this->photo_name, $this->product_type_id, $this->purchasing_type_id, $data);
-                if($this->transaction_id != "" && $this->transaction_id != NULL) {
-                    try {
-                        TransactionHelpers::manageStatus($this->transaction_id);
-                    } catch (Exception $e) {
-                        $this->batch()->cancel();
-                        throw new Exception($e->getMessage()." |");
-                    }
+            
+            $csv_data = file($this->chunk_directory);
+            if($this->chunk_position == 0 && $this->ext == 'csv') {
+                unset($csv_data[0]);
+            }
+            // if this kind of importing is related on purchasing type
+            if($this->purchasing_type_id != NULL) {
+                $purchasing_type = PurchasingTypes::find($this->purchasing_type_id);
+                if(!$purchasing_type->photo()->exists()) {
+                    $photable = PhotoHelpers::saveThroughFileName($this->photo_path, $this->photo_name, $this->purchasing_type_id, NULL);
                 }
-            } else {
-                $this->batch()->cancel();
-                $line = (((int) $this->chunk_position) * (int) $this->chunk_count) + ($key + 1);
-                // this is important to indicate the reason of failing jobs when showing queuing reports
-                throw new Exception($this->filename." file has a row that don't have a required fields, first appearance at row ".$line.". </br></br> fields that no data are \"<b>".implode($checked_data['no_data'], ",")."</b>\". </br></br> Try to upload again with a correct file. |");
             }
-        }
+            $csv_data = FileUpload::parsedCSVToArrayWithColumns($csv_data, $this->header);
+            foreach ($csv_data['collection'] as $key => $data) {
+                $checked_data = isNotEmpty($this->product_type_id, $data);
+
+                if($checked_data['isValid']) {
+                    Products::importItems($this->photo_path, $this->photo_name, $this->product_type_id, $this->purchasing_type_id, $data);
+                    if($this->transaction_id != "" && $this->transaction_id != NULL) {
+                        try {
+                            TransactionHelpers::manageStatus($this->transaction_id);
+                        } catch (Exception $e) {
+                            $this->batch()->cancel();
+                            throw new Exception($e->getMessage()." |");
+                        }
+                    }
+                } else {
+                    $this->batch()->cancel();
+                    $line = (((int) $this->chunk_position) * (int) $this->chunk_count) + ($key + 1);
+                    // this is important to indicate the reason of failing jobs when showing queuing reports
+                    throw new Exception($this->filename." file has a row that don't have a required fields, first appearance at row ".$line.". </br></br> fields that no data are \"<b>".implode($checked_data['no_data'], ",")."</b>\". </br></br> Try to upload again with a correct file. |");
+                }
+            }
 
     }
 
@@ -121,5 +124,19 @@ class ImportItemFile implements ShouldQueue
             broadcast(new QueueProcessing("failed", $batch));
             BatchHelpers::removeFromProcessing($this->batch()->id);
         }
+    }
+
+    public function removeExcessColumn($reports, $columns) {
+        $until = count($columns);
+        $offset = 0;
+
+        return array_map(function($item) use ($offset, $until) {
+            $item = str_replace("\n", "", $item);
+            $item = explode(",", $item);
+            $item = array_slice($item, $offset, $until);
+            $item = implode(",", $item);
+
+            return $item;
+        }, $reports);
     }
 }

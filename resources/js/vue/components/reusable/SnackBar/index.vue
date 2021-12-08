@@ -33,7 +33,7 @@ export default {
         }
     },
     watch: {
-        "$store.state.snackbar.isVisible": function(newVal) {
+        getVisibility(newVal) {
             if (!newVal) {
                 this.setSnackbar({
                     text: "",
@@ -43,10 +43,10 @@ export default {
         }
     },
     computed: {
-        ...mapGetters(["getSnackbar"])
+        ...mapGetters("snackBar", ["getSnackbar", "getVisibility"])
     },
     methods: {
-        ...mapMutations(["setSnackbar"]),
+        ...mapMutations("snackBar", ["setSnackbar"]),
         close: function() {
             this.setSnackbar({
                 text: "",

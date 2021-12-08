@@ -20,13 +20,13 @@
                 </template>
 
                 <v-list>
-                    <v-list-item v-for="(navigation, i) in navs" :key="i" :to="navigation.url">
+                    <v-list-item v-for="(navigation, i) in navs" :key="i">
                         <v-list-item-icon>
                             <v-icon size="20">{{ navigation.icon }}</v-icon>
                         </v-list-item-icon>
                         <v-list-item-title>{{ navigation.title }}</v-list-item-title>
                     </v-list-item>
-                    <v-list-item class="tile" style="cursor: pointer;">
+                    <v-list-item class="tile" style="cursor: pointer">
                         <v-list-item-icon>
                             <v-icon size="20">mdi-logout</v-icon>
                         </v-list-item-icon>
@@ -40,9 +40,7 @@
         <v-navigation-drawer v-model="drawer" fixed temporary>
             <v-list-item>
                 <v-list-item-content>
-                    <v-list-item-title class="title">
-                        Company Name
-                    </v-list-item-title>
+                    <v-list-item-title class="title"> Stock Site </v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
 
@@ -68,11 +66,6 @@
 
 <script>
 export default {
-    watch: {
-        $route(to, from) {
-            this.checkIfToggled()
-        }
-    },
     data: () => {
         return {
             drawer: false,

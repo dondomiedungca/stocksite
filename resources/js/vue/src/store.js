@@ -1,54 +1,26 @@
 import Vuex from "vuex"
 
+// pages
 import * as add_product from "./../components/product/add-product/store"
+import * as product_list from "./../components/product/product-list/assets/store"
+
+// reusable
+import * as table from "./../components/reusable/Table/store"
+import * as snackBar from "./../components/reusable/SnackBar/store"
+import * as stepper from "./../components/reusable/Stepper/store"
 
 const modules = {
-    add_product
+    // pages
+    add_product,
+    product_list,
+    // reusable
+    table,
+    snackBar,
+    stepper
 }
-const state = {
-    stepper: {
-        canContinue: false,
-        canFinish: false,
-        isFinal: false
-    },
-    snackbar: {
-        timeout: 3500,
-        isVisible: false,
-        text: "",
-        type: "success",
-        color: "success"
-    }
-}
-const mutations = {
-    setStepper(state, payload) {
-        state.stepper = {
-            ...state.stepper,
-            ...payload
-        }
-    },
-    setSnackbar(state, payload) {
-        state.snackbar = {
-            ...state.snackbar,
-            ...payload
-        }
-    }
-}
-const getters = {
-    getStepper: state => {
-        return state.stepper
-    },
-    getSnackbar: state => {
-        return state.snackbar
-    }
-}
-const actions = {}
 
 // export default store
 
 export default new Vuex.Store({
-    modules,
-    state,
-    getters,
-    actions,
-    mutations
+    modules
 })

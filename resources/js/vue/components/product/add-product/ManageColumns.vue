@@ -65,7 +65,7 @@
         <v-row class="mt-3 mb-3">
             <v-col class="" lg="12" md="12" sm="12">
                 <v-data-table :loading="loading" :no-data-text="'No Columns Found'" :headers="headers" :items="getColumns" :items-per-page="5" class="elevation-1">
-                    <template v-slot:item.actions="{ item }">
+                    <template v-slot:[`item.actions`]="{ item }">
                         <asker icon_header="mdi-alert" :icon="true" :fab="false" icon_header_color="red" :tooltip_show="false" title="Remove this column from your product type?" @proceed="removeColumn(item)" color="secondary">
                             <template v-slot:togglerIcon>
                                 <v-icon color="#404040">

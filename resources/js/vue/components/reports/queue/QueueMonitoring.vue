@@ -308,14 +308,17 @@ export default {
     mounted() {
         window.Echo.channel("queueprocess").listen(".queueprocess.create", e => {
             this.onProcess.push(e.queue_payload)
+            console.log("1")
         })
 
         window.Echo.channel("queueprocess").listen(".queueprocess.processing", e => {
             this.fromQueueToCurrent(e.queue_payload)
+            console.log("2")
         })
 
         window.Echo.channel("queueprocess").listen(".queueprocess.complete", e => {
             this.fromCurrentToComplete(e.queue_payload)
+            console.log("3")
         })
 
         window.Echo.channel("queueprocess").listen(".queueprocess.failed", e => {

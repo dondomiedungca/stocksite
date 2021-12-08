@@ -11,5 +11,4 @@ const mix = require("laravel-mix")
  |
  */
 
-mix.js("resources/js/app.js", "public/js")
-mix.js("resources/js/vue/src/index.js", "public/js/vue/components/product/src/")
+mix.js("resources/js/vue/src/app.js", "public/js/").postCss("resources/css/app.css", "public/css/")
