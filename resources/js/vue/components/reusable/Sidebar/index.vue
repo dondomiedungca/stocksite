@@ -1,10 +1,11 @@
 <template>
     <v-card id="sidebar" class="sidebar-container">
         <v-navigation-drawer absolute permanent left>
-            <v-list-item>
-                <v-list-item-content>
+            <v-list-item class="logo-main-container">
+                <v-list-item-content class="logo-semi-container">
                     <v-list-item-title class="title">
-                        Stock Site
+                        <span class="capitalize">{{ capitalize }}</span>
+                        <span class="words">{{ words }}</span>
                     </v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
@@ -32,6 +33,7 @@
 export default {
     data: () => {
         return {
+            logoName: process.env.MIX_APP_NAME || "My company name",
             items: [
                 { title: "Dashboard", icon: "mdi-chart-bar", url: "/admin/dashboard" },
                 { title: "Purchase Order", icon: "mdi-receipt", url: "/admin/purchasing" },
@@ -52,6 +54,14 @@ export default {
                 return true
             }
             return false
+        }
+    },
+    computed: {
+        capitalize() {
+            return this.logoName[0].toUpperCase()
+        },
+        words() {
+            return this.logoName.substring(1).toUpperCase()
         }
     }
 }

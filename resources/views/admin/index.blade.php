@@ -1,13 +1,10 @@
-@extends('admin-layouts.app')
+@extends('layouts.app')
 
 @section('content')
     <div id="app">
-      <v-app>
-        <appbar-vue></appbar-vue>
-        <sidebar-vue height="100"></sidebar-vue>
+      <app>
         @yield('body')
-        <snackbar-vue></snackbar-vue>
-      </v-app>
+      </app>
     </div>
 @endsection
 

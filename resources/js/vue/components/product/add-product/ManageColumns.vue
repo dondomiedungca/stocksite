@@ -37,20 +37,7 @@
                                     <v-radio label="INPUT" :value="1"></v-radio>
                                     <v-radio label="SELECTION" :value="0"></v-radio>
                                 </v-radio-group>
-                                <v-text-field validate-on-blur @keyup.enter="addToSelections" @click:append="addToSelections" :append-icon="'mdi-plus-box-multiple'" v-if="inputType == 0" dense class="mt-3 mb-3" :rules="selectionRules" :hint="'Add a selection (ex: Selections for Mobile are \' Android, IOS \')'" :label="'Enter Selection'" outlined v-model="selection" type="text">
-                                    <template v-if="selections.length" v-slot:append-outer>
-                                        <v-tooltip bottom>
-                                            <template v-slot:activator="{ on }">
-                                                <v-btn icon>
-                                                    <v-icon v-on="on">
-                                                        mdi-format-list-bulleted
-                                                    </v-icon>
-                                                </v-btn>
-                                            </template>
-                                            Show Selection
-                                        </v-tooltip>
-                                    </template>
-                                </v-text-field>
+                                <v-text-field validate-on-blur @keyup.enter="addToSelections" @click:append="addToSelections" :append-icon="'mdi-plus-box-multiple'" v-if="inputType == 0" dense class="mt-3 mb-3" :rules="selectionRules" :hint="'Add a selection (ex: Selections for Mobile are \' Android, IOS \')'" :label="'Enter Selection'" outlined v-model="selection" type="text"></v-text-field>
                             </v-col>
                         </v-row>
                     </v-container>
@@ -64,17 +51,23 @@
         </v-form>
         <v-row class="mt-3 mb-3">
             <v-col class="" lg="12" md="12" sm="12">
-                <v-data-table :loading="loading" :no-data-text="'No Columns Found'" :headers="headers" :items="getColumns" :items-per-page="5" class="elevation-1">
+                <Table :headers="headers" height="40vh">
                     <template v-slot:[`item.actions`]="{ item }">
-                        <asker icon_header="mdi-alert" :icon="true" :fab="false" icon_header_color="red" :tooltip_show="false" title="Remove this column from your product type?" @proceed="removeColumn(item)" color="secondary">
+                        <Asker icon_header="mdi-alert" :icon="true" :fab="false" icon_header_color="red" :tooltip_show="false" title="Remove this column from your product type?" @proceed="removeColumn(item)" color="secondary">
                             <template v-slot:togglerIcon>
                                 <v-icon color="#404040">
                                     mdi-delete
                                 </v-icon>
                             </template>
-                        </asker>
+                        </Asker>
                     </template>
-                </v-data-table>
+                    <template v-slot:[`item.is_required`]="{ item }">
+                        <span>{{ item.is_required == 1 ? "REQUIRED" : "NOT REQUIRED" }}</span>
+                    </template>
+                    <template v-slot:[`item.value_type`]="{ item }">
+                        <span>{{ item.value_type == 1 ? "INPUT" : "SELECTION" }}</span>
+                    </template>
+                </Table>
             </v-col>
         </v-row>
     </div>
@@ -85,33 +78,26 @@ import { mapGetters } from "vuex"
 import { mapMutations } from "vuex"
 import { mapActions, mapState } from "vuex"
 
+import Asker from "./../../reusable/Asker"
+import Table from "./../../reusable/Table"
+
+import headers from "./assets/headers"
+
 export default {
+    components: {
+        Asker,
+        Table
+    },
     data() {
         return {
             loading: false,
             dialog: false,
-            headers: [
-                {
-                    text: "Remove",
-                    align: "start",
-                    sortable: false,
-                    value: "actions"
-                },
-                {
-                    text: "Column Name",
-                    align: "start",
-                    sortable: false,
-                    value: "column_name"
-                },
-                { text: "Data Type", value: "data_type", align: "start", sortable: false },
-                { text: "Is Required", value: "is_required", align: "start", sortable: false },
-                { text: "Value Type", value: "value_type", align: "start", sortable: false },
-                { text: "Selections", value: "selections", align: "start", sortable: false }
-            ],
-            items: this.getColumns,
+            headers: [],
+
             valid: false,
             columnNameRules: [value => !!value || "This is required", value => this.getColumnNames.indexOf(value) == -1 || "Column name is already exists", value => /^[a-zA-Z][A-Za-z0-9_]*$/im.test(value) || "Only alphanumeric and underscore is allowed"],
             selectionRules: [value => !!this.selections.length || "This is required, add a selection(s) and click the plus button or press enter"],
+
             columnName: "",
             dataType: "",
             isRequired: 1,
@@ -125,21 +111,25 @@ export default {
         ...mapGetters("add_product", ["getColumns", "getColumnNames"]),
         ...mapState("add_product", ["columns"])
     },
+    created() {
+        this.headers = headers
+    },
     methods: {
-        ...mapMutations("add_product", ["addToColumns"]),
-        ...mapMutations(["setStepper", "setSnackbar"]),
-        ...mapActions("add_product", ["updateColumns"]),
+        ...mapMutations("add_product", ["ADD_TO_COLUMNS"]),
+        ...mapMutations("snackBar", ["SET_SNACKBAR"]),
+        ...mapMutations("stepper", ["SET_STEPPER"]),
+        ...mapActions("add_product", ["updateColumns", "setContentTable"]),
         testProductName(val) {
             if (val) {
-                this.$store.commit("setStepper", {
+                this.SET_STEPPER({
                     canFinish: true
                 })
             } else if (this.getColumns.length) {
-                this.$store.commit("setStepper", {
+                this.SET_STEPPER({
                     canFinish: true
                 })
             } else {
-                this.$store.commit("setStepper", {
+                this.SET_STEPPER({
                     canFinish: false
                 })
             }
@@ -148,7 +138,7 @@ export default {
             if (this.selection != "" && this.columnName != null && this.dataType != null) {
                 this.selections.push(this.selection)
                 this.selection = ""
-                this.setSnackbar({
+                this.SET_SNACKBAR({
                     isVisible: true,
                     type: "info",
                     text: "New selection was added!"
@@ -171,8 +161,9 @@ export default {
                 selections: this.selections
             }
 
-            this.$store.commit("add_product/addToColumns", new_column)
-            this.setSnackbar({
+            this.ADD_TO_COLUMNS(new_column)
+            this.setContentTable()
+            this.SET_SNACKBAR({
                 isVisible: true,
                 type: "success",
                 text: "New column was added!"

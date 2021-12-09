@@ -6,21 +6,21 @@
 
             <v-spacer></v-spacer>
 
-            <v-btn icon>
-                <v-badge left color="primary" content="6">
+            <v-btn icon class="mr-5">
+                <v-badge left content="6">
                     <v-icon>mdi-bell</v-icon>
                 </v-badge>
             </v-btn>
 
-            <v-menu left bottom>
+            <v-menu nudge-bottom="50" left bottom>
                 <template v-slot:activator="{ on, attrs }">
-                    <v-btn icon v-bind="attrs" v-on="on">
-                        <v-icon>mdi-account-details</v-icon>
+                    <v-btn class="mr-1" fab small depressed color="light-blue lighten-4" v-bind="attrs" v-on="on">
+                        <span class="account-letter">D</span>
                     </v-btn>
                 </template>
 
                 <v-list>
-                    <v-list-item v-for="(navigation, i) in navs" :key="i">
+                    <v-list-item v-for="(navigation, i) in navs" :key="i" style="cursor: pointer" :href="navigation.url">
                         <v-list-item-icon>
                             <v-icon size="20">{{ navigation.icon }}</v-icon>
                         </v-list-item-icon>
@@ -38,9 +38,12 @@
             </v-menu>
         </v-app-bar>
         <v-navigation-drawer v-model="drawer" fixed temporary>
-            <v-list-item>
-                <v-list-item-content>
-                    <v-list-item-title class="title"> Stock Site </v-list-item-title>
+            <v-list-item class="logo-main-container">
+                <v-list-item-content class="logo-semi-container">
+                    <v-list-item-title class="title">
+                        <span class="capitalize">{{ capitalize }}</span>
+                        <span class="words">{{ words }}</span>
+                    </v-list-item-title>
                 </v-list-item-content>
             </v-list-item>
 
@@ -68,6 +71,7 @@
 export default {
     data: () => {
         return {
+            logoName: process.env.MIX_APP_NAME || "My company name",
             drawer: false,
             group: null,
             navs: [
@@ -104,6 +108,14 @@ export default {
                 var v_main = document.getElementById("v-main")
                 v_main.classList.toggle("v_main-sidebar-close-default")
             }
+        }
+    },
+    computed: {
+        capitalize() {
+            return this.logoName[0].toUpperCase()
+        },
+        words() {
+            return this.logoName.substring(1).toUpperCase()
         }
     }
 }

@@ -2,7 +2,7 @@
     <v-row>
         <v-col lg="3" md="3">
             <v-form v-model="valid">
-                <v-text-field dense class="mt-3 mb-3" :rules="productNameRules" @blur="setProductname" :hint="'Kind of product that you want to create (ex: Clothing, Computers, Mobile, Laptops, etc.)'" :label="'Product Type Name'" outlined v-model="product_name" type="text"></v-text-field>
+                <TextField class="mt-3 mb-3" :rules="productNameRules" @blur="setProductname" :hint="'Kind of product that you want to create (ex: Clothing, Computers, Mobile, Laptops, etc.)'" label="Product Type Name" v-model="product_name" />
             </v-form>
         </v-col>
     </v-row>
@@ -11,27 +11,32 @@
 <script>
 import { mapGetters } from "vuex"
 import { mapMutations } from "vuex"
-import { mapActions } from "vuex"
+
+import TextField from "./../../reusable/TextField"
 
 export default {
+    components: {
+        TextField
+    },
     computed: {
         ...mapGetters("add_product", ["getProductName"])
     },
     methods: {
-        ...mapMutations(["add_product/setProductName", "setStepper"]),
+        ...mapMutations("add_product", ["SET_PRODUCT_NAME"]),
+        ...mapMutations("stepper", ["SET_STEPPER"]),
         testProductName(val) {
             if (val) {
-                this.$store.commit("setStepper", {
+                this.SET_STEPPER({
                     canContinue: true
                 })
             } else {
-                this.$store.commit("setStepper", {
+                this.SET_STEPPER({
                     canContinue: false
                 })
             }
         },
         setProductname: function() {
-            this.$store.commit("add_product/setProductName", this.product_name)
+            this.SET_PRODUCT_NAME(this.product_name)
         }
     },
     created() {

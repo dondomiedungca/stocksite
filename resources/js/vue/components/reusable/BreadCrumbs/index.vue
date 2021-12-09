@@ -6,17 +6,22 @@
                 >{{ title }}
             </div>
         </v-container>
-        <v-breadcrumbs :items="items">
-            <template v-slot:divider>
-                <v-icon>mdi-chevron-right</v-icon>
-            </template>
-            <template v-slot:item="{ item }">
-                <v-breadcrumbs-item class="br-item" :href="item.to" :disabled="item.disabled">
-                    <v-icon class="br-icon">{{ item.icon }}</v-icon
-                    >{{ item.text }}
-                </v-breadcrumbs-item>
-            </template>
-        </v-breadcrumbs>
+        <v-container class="breadCrumbs-container">
+            <v-breadcrumbs :items="items">
+                <template v-slot:divider>
+                    <v-icon>mdi-chevron-right</v-icon>
+                </template>
+                <template v-slot:item="{ item }">
+                    <v-breadcrumbs-item class="br-item" :href="item.to" :disabled="item.disabled">
+                        <v-icon class="br-icon">{{ item.icon }}</v-icon
+                        >{{ item.text }}
+                    </v-breadcrumbs-item>
+                </template>
+            </v-breadcrumbs>
+            <div>
+                <slot name="custom-nav"></slot>
+            </div>
+        </v-container>
     </div>
 </template>
 

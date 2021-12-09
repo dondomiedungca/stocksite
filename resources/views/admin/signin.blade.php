@@ -1,4 +1,4 @@
-@extends('admin-layouts.app')
+@extends('layouts.app')
 
 @section('content')
     <form class="form-signin" action="/admin/signin" method="POST">

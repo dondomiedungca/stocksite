@@ -498,21 +498,6 @@ export default {
         border-bottom-width: 1px;
         z-index: 2;
         font-family: "Work Sans", sans-serif !important;
-
-        &.first-row {
-            position: sticky;
-            top: 0;
-        }
-
-        &.second-row {
-            position: sticky;
-            top: 48px;
-        }
-
-        &.third-row {
-            position: sticky;
-            top: 96px;
-        }
     }
     td {
         border-color: rgba(0, 0, 0, 0.12);

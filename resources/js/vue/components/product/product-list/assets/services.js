@@ -7,3 +7,7 @@ export const getProducts = async payload => {
 export const updateData = async payload => {
     return axios.post("/admin/products/update-product", payload)
 }
+
+export const doDelete = async payload => {
+    return axios.post("/admin/products/remove-product", payload)
+}

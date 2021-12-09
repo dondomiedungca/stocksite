@@ -1,48 +1,28 @@
 <template>
-    <v-main id="v-main">
-        <breadcrumbs-vue :items="items"></breadcrumbs-vue>
-        <v-container fluid>
-            <v-row>
-                <v-col v-for="(menu, i) in menus" :key="i" lg="3" md="4" sm="12" xs="12">
-                    <menucard-vue :url="menu.url" :icon="menu.icon" :title="menu.title" :description="menu.description"></menucard-vue>
-                </v-col>
-            </v-row>
-        </v-container>
-    </v-main>
+    <Container title="Inventory Management" icon="mdi-view-list" :breadCrumbs="breadCrumbs">
+        <ModulesIterator :modules="modules" />
+    </Container>
 </template>
 
 <script>
+import { modules, breadCrumbs } from "./assets/constant"
+import ModulesIterator from "./../reusable/ModulesIterator"
+import Container from "./../reusable/Container"
+
 export default {
+    components: {
+        ModulesIterator,
+        Container
+    },
     data() {
         return {
-            items: [
-                {
-                    text: "Product",
-                    disabled: true,
-                    icon: "mdi-warehouse"
-                }
-            ],
-            menus: [
-                {
-                    url: "/admin/products/add-product-type",
-                    icon: "mdi-pencil",
-                    title: "Create New Product Type",
-                    description: "Add new product types including the important columns that will hold the attributes/specifications of the product."
-                },
-                {
-                    url: "/admin/products/product-list",
-                    icon: "mdi-format-list-text",
-                    title: "Product List",
-                    description: "Show the entire inventories, managed by the product types."
-                },
-                {
-                    url: "/admin/products/product-import",
-                    icon: "mdi-application-import",
-                    title: "Import Product",
-                    description: "Import item(s) base on their product type, import the items via CSV, XLSX or manually."
-                }
-            ]
+            breadCrumbs: [],
+            modules: []
         }
+    },
+    created() {
+        this.breadCrumbs = breadCrumbs
+        this.modules = modules
     }
 }
 </script>

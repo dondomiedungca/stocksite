@@ -35,7 +35,7 @@ export default {
     watch: {
         getVisibility(newVal) {
             if (!newVal) {
-                this.setSnackbar({
+                this.SET_SNACKBAR({
                     text: "",
                     isVisible: false
                 })
@@ -46,9 +46,9 @@ export default {
         ...mapGetters("snackBar", ["getSnackbar", "getVisibility"])
     },
     methods: {
-        ...mapMutations("snackBar", ["setSnackbar"]),
+        ...mapMutations("snackBar", ["SET_SNACKBAR"]),
         close: function() {
-            this.setSnackbar({
+            this.SET_SNACKBAR({
                 text: "",
                 isVisible: false,
                 color: "#5cb85c"

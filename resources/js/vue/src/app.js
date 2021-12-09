@@ -10,14 +10,9 @@ Vue.filter("emptyFormatter", data => {
 })
 
 // Reusable
-Vue.component("sidebar-vue", require("./../components/reusable/SideBar.vue").default)
-Vue.component("appbar-vue", require("./../components/reusable/AppBar.vue").default)
-Vue.component("menucard-vue", require("./../components/reusable/MenuCard.vue").default)
-Vue.component("stepper-vue", require("./../components/reusable/Stepper.vue").default)
-Vue.component("snackbar-vue", require("./../components/reusable/Snackbar").default)
 Vue.component("address-details", require("./../components/reusable/AddressDetails.vue").default)
-Vue.component("asker", require("./../components/reusable/Asker.vue").default)
 
+import App from "./../components/App"
 import ProductIndex from "./../components/product/Index.vue"
 import AddProduct from "./../components/product/add-product/Index.vue"
 import ProductLists from "./../components/product/product-list"
@@ -38,6 +33,7 @@ const app = new Vue({
     vuetify,
     store,
     components: {
+        App, // main
         ProductIndex,
         AddProduct,
         ProductLists,

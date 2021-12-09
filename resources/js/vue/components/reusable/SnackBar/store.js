@@ -10,7 +10,7 @@ export const state = {
     }
 }
 export const mutations = {
-    setSnackbar(state, payload) {
+    SET_SNACKBAR(state, payload) {
         state.snackbar = {
             ...state.snackbar,
             ...payload
@@ -26,6 +26,6 @@ export const getters = {
 
 export const actions = {
     add({ commit }, payload) {
-        commit("setSnackbar", payload)
+        commit("SET_SNACKBAR", payload)
     }
 }

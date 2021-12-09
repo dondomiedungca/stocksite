@@ -58,19 +58,19 @@ export default {
         ...mapGetters("stepper", ["getStepper"])
     },
     methods: {
-        ...mapMutations("stepper", ["setStepper"]),
+        ...mapMutations("stepper", ["SET_STEPPER"]),
         nextStep(n) {
             if (n === this.step_count) {
                 this.e1 = 1
             } else if (n < this.e1 && n != 0) {
                 this.e1 = n
-                this.setStepper({
+                this.SET_STEPPER({
                     canContinue: true,
                     canFinish: false
                 })
             } else {
                 this.e1 = n + 1
-                this.setStepper({
+                this.SET_STEPPER({
                     canContinue: false,
                     canFinish: false
                 })

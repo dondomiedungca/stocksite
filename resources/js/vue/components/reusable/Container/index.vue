@@ -1,6 +1,10 @@
 <template>
     <v-main id="v-main">
-        <BreadCrumbs :title="title" :icon="icon" :items="breadCrumbs" />
+        <BreadCrumbs :title="title" :icon="icon" :items="breadCrumbs">
+            <template v-slot:custom-nav>
+                <slot name="custom-nav"></slot>
+            </template>
+        </BreadCrumbs>
         <v-container fluid>
             <slot></slot>
         </v-container>

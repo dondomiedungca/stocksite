@@ -8,7 +8,7 @@ export const state = {
     }
 }
 export const mutations = {
-    setStepper(state, payload) {
+    SET_STEPPER(state, payload) {
         state.stepper = {
             ...state.stepper,
             ...payload
