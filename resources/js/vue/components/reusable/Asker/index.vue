@@ -13,7 +13,7 @@
         </template>
         <!-- for without tooltip -->
         <template v-else v-slot:activator="{ on: menu, attrs: attr1 }">
-            <v-btn :disabled="disabled" :class="classes" :color="color ? color : ''" :small="small" :icon="icon" :fab="fab" v-bind="{ ...attr1 }" v-on="{ ...menu }">
+            <v-btn :disabled="disabled" :loading="loading" :class="classes" :color="color ? color : ''" :small="small" :icon="icon" :fab="fab" v-bind="{ ...attr1 }" v-on="{ ...menu }">
                 <slot name="togglerIcon"></slot>
             </v-btn>
         </template>
@@ -80,6 +80,10 @@ export default {
             default: true
         },
         disabled: {
+            required: false,
+            default: false
+        },
+        loading: {
             required: false,
             default: false
         }

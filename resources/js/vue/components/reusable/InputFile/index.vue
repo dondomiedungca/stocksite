@@ -1,16 +1,12 @@
 <template>
-    <v-text-field v-on="$listeners" v-bind="$attrs" dense placeholder=" " outlined v-model="val" type="text"></v-text-field>
+    <v-file-input v-on="$listeners" v-bind="$attrs" dense counter show-size="" outlined v-model="val"></v-file-input>
 </template>
 
 <script>
 export default {
-    name: "custom-textfield",
+    name: "custom-inputfile",
     inheritAttrs: true,
-    props: {
-        value: {
-            type: [String, Number]
-        }
-    },
+    props: ["value"],
     computed: {
         val: {
             get() {

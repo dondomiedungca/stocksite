@@ -61,7 +61,21 @@ class ProductsController extends Controller
     }
 
     public function productImport() {
-        return view('admin.products.product_import');
+        $stock_number = $this->getStockNumber()["stock_number"];
+        $product_types = $this->getProductTypesData();
+        $cosmetics = $this->getCosmetics()["cosmetics"];
+        $statuses = $this->getItemStatuses()["statuses"];
+
+        $data = [
+            "stock_number" => $stock_number,
+            "product_types" => $product_types,
+            "cosmetics" => $cosmetics,
+            "statuses" => $statuses
+        ];
+
+        Log::info($data);
+
+        return view('admin.products.product_import')->with($data);
     }
 
     public function addProductTypes(Request $request) {
@@ -104,10 +118,14 @@ class ProductsController extends Controller
         return response()->json($product_types);
     }
 
-    public function getAllProductTypes() {
-        $product_types = ProductTypes::with('user', 'product_attributes', 'product_attributes.column_selections')
+    public function getProductTypesData() {
+        return ProductTypes::with('user', 'product_attributes', 'product_attributes.column_selections')
                                         ->orderBy("created_at", "ASC")
                                         ->get();
+    }
+
+    public function getAllProductTypes() {
+        $product_types = $this->getProductTypesData();
         $data['product_types'] = $product_types;
         
         return response()->json($data);

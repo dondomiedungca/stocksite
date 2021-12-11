@@ -8,7 +8,6 @@ export default {
     name: "custom-select",
     props: {
         value: {
-            required: true,
             type: [Object, String, Number]
         }
     },

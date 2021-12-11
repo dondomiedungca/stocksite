@@ -1,10 +1,10 @@
 <template>
-    <v-text-field v-on="$listeners" v-bind="$attrs" dense placeholder=" " outlined v-model="val" type="text"></v-text-field>
+    <v-textarea v-on="$listeners" v-bind="$attrs" placeholder=" " rows="2" dense outlined v-model="val" type="text"></v-textarea>
 </template>
 
 <script>
 export default {
-    name: "custom-textfield",
+    name: "custom-textarea",
     inheritAttrs: true,
     props: {
         value: {

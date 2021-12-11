@@ -1,8 +1,8 @@
 <template>
     <v-container style="margin-left: 0;">
-        <v-row v-if="basis != 'purchasing' && product_types_selection.length" class="mt-5">
-            <v-col lg="3" md="3" sm="12" xs="12">
-                <v-select outlined dense :items="product_types_selection" v-model="selected_product_type" label="Inventory Type"></v-select>
+        <v-row v-if="basis != 'purchasing' && product_types.length" class="mt-5">
+            <v-col lg="6" md="6" sm="12" xs="12">
+                <Select :items="product_types" v-model="selected_product_type_id_local" label="Inventory Type" />
             </v-col>
         </v-row>
         <v-row>
@@ -13,11 +13,11 @@
         </v-row>
         <v-row>
             <v-col lg="12" md="12" sm="12" xs="12">
-                <v-simple-table v-if="Object.keys(base_product_type).length">
+                <v-simple-table v-if="Object.keys(selected_product_type).length">
                     <template v-slot:default>
                         <thead>
                             <tr>
-                                <th v-for="(productType, i) in base_product_type.product_attributes" v-bind:key="i" class="text-left">
+                                <th v-for="(productType, i) in selected_product_type.product_attributes" v-bind:key="i" class="text-left">
                                     {{ productType.product_column_name }}
                                 </th>
                             </tr>
@@ -31,46 +31,52 @@
                 <v-btn @click="dialog = true" small color="dark"><v-icon>mdi-file-upload</v-icon> Upload File</v-btn>
             </v-col>
             <v-dialog v-model="dialog" width="600">
-                <v-card>
-                    <v-card-title>
-                        Upload File
-                    </v-card-title>
+                <v-form v-model="valid" ref="form" @submit.prevent>
+                    <v-card>
+                        <v-card-title>
+                            Upload File
+                        </v-card-title>
 
-                    <div>
-                        <v-row class="form-row">
-                            <v-col v-if="willShow()" lg="12" md="12" sm="12" xs="12">
-                                <v-file-input :error-messages="photoErrors" id="upload-photo" ref="uploadPhoto" small-chips accept="image/*" v-model="photo" show-size counter label="Product Photo" outlined dense></v-file-input>
-                            </v-col>
-                            <v-col lg="12" md="12" sm="12" xs="12">
-                                <v-file-input :error-messages="fileErrors" id="upload-file" ref="uploadFile" small-chips accept=".csv, .xlsx" v-model="file" show-size counter label="File To Upload" outlined dense></v-file-input>
-                                <v-progress-linear v-if="loaded" v-model="loaded" height="25">
-                                    <strong>{{ loaded }}%</strong>
-                                </v-progress-linear>
-                            </v-col>
-                        </v-row>
-                    </div>
+                        <div>
+                            <v-row class="form-row">
+                                <v-col v-if="photoVisibility" lg="12" md="12" sm="12" xs="12">
+                                    <InputFile :rules="requiredFile" id="upload-photo" ref="uploadPhoto" accept="image/*" v-model="photo" label="Product Photo" />
+                                </v-col>
+                                <v-col lg="12" md="12" sm="12" xs="12">
+                                    <InputFile :rules="requiredFile" id="upload-file" ref="uploadFile" accept=".csv, .xlsx" v-model="file" label="File To Upload" />
+                                    <v-progress-linear v-if="loaded" v-model="loaded" height="25">
+                                        <strong>{{ loaded }}%</strong>
+                                    </v-progress-linear>
+                                </v-col>
+                            </v-row>
+                        </div>
 
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn small color="dark" @click="dialog = false"><v-icon>mdi-close</v-icon>Close</v-btn>
-                        <v-btn small color="dark" class="ma-2" @click="uploadItems" fab>
-                            <v-icon dark>
-                                mdi-cloud-upload
-                            </v-icon>
-                        </v-btn>
-                    </v-card-actions>
-                </v-card>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn small color="dark" @click="dialog = false"><v-icon>mdi-close</v-icon>Close</v-btn>
+                            <v-btn :loading="isLoading" small color="dark" class="ma-2" @click="uploadItems" fab>
+                                <v-icon dark>
+                                    mdi-cloud-upload
+                                </v-icon>
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-form>
             </v-dialog>
         </v-row>
     </v-container>
 </template>
 
 <script>
-import { validationMixin } from "vuelidate"
-import { required, numeric } from "vuelidate/lib/validators"
-import { mapMutations } from "vuex"
+import { mapState, mapMutations, mapActions } from "vuex"
+import InputFile from "./../../reusable/InputFile"
+import Select from "./../../reusable/Select"
+
 export default {
-    mixins: [validationMixin],
+    components: {
+        InputFile,
+        Select
+    },
     props: {
         basis: {
             type: String,
@@ -89,33 +95,17 @@ export default {
             default: null
         }
     },
-    created() {
-        this.initialize()
-        this.getPurchasing()
-    },
     data() {
         return {
-            date: "",
             dialog: false,
-            saving: false,
-            loaded: 0,
+            valid: false,
             file: [],
             fileName: "",
-            base_product_type: {},
-            purchasing_type: {},
             photo: [],
-            product_types: [],
-            selected_product_type: "",
-            product_types_selection: []
+            requiredFile: [v => !!v || "File is required", v => (v && v.size > 0) || "File is required"]
         }
     },
     watch: {
-        product_types: function() {
-            this.selected_product_type = 1
-        },
-        selected_product_type: function(newVal, oldVal) {
-            this.base_product_type = this.product_types.find(pt => newVal == pt.id)
-        },
         file(data) {
             if (data) {
                 let last_dot = data.name.lastIndexOf(".")
@@ -125,56 +115,30 @@ export default {
         }
     },
     computed: {
-        photoErrors() {
-            const errors = []
-            if (!this.$v.photo.$dirty) return errors
-            !this.$v.photo.required && errors.push("Product Photo is required")
-            return errors
-        },
-        fileErrors() {
-            const errors = []
-            if (!this.$v.file.$dirty) return errors
-            !this.$v.file.required && errors.push("File to upload field is required")
-            return errors
+        ...mapState("product_import", ["loaded", "selected_product_type_id", "isLoading", "product_types", "photoVisibility", "selected_product_type"]),
+        selected_product_type_id_local: {
+            get() {
+                return this.selected_product_type_id
+            },
+            set(v) {
+                this.SET_PRODUCT_TYPE_ID(v)
+            }
         }
     },
+    mounted() {
+        this.doManipulate()
+    },
     methods: {
-        ...mapMutations(["setSnackbar"]),
-        willShow: function() {
-            if (this.basis != "purchasing") {
-                return true
-            } else {
-                if (Object.keys(this.purchasing_type).length) {
-                    if (this.purchasing_type.photo == null) {
-                        return true
-                    } else {
-                        return false
-                    }
-                }
-            }
-        },
-        initialize: function() {
+        ...mapActions("product_import", ["setForPurchasing", "saveFile"]),
+        ...mapMutations("product_import", ["SET_PRODUCT_TYPE_ID"]),
+        doManipulate() {
             if (this.basis == "purchasing") {
-                this.base_product_type = this.product_type
-            } else {
-                this.getProductTypes()
+                const data = {
+                    product_type: this.product_type,
+                    purchasing_type_id: this.purchasing_type_id
+                }
+                this.setForPurchasing(data)
             }
-        },
-        getProductTypes: function() {
-            axios.get("/admin/products/get-all-product-types").then(res => {
-                this.product_types = res.data.product_types
-                this.product_types_selection = res.data.product_types.map((product_type, i) => {
-                    return {
-                        text: product_type.product_name,
-                        value: product_type.id
-                    }
-                })
-            })
-        },
-        getPurchasing: function() {
-            axios.get("/admin/purchasing/get-purchasing-type/" + this.purchasing_type_id).then(res => {
-                this.purchasing_type = res.data.purchasing
-            })
         },
         parseFile: function() {
             let uploadFiles = document.getElementById("upload-file")
@@ -183,79 +147,64 @@ export default {
             this.file = this.$refs.uploadFile.files[0]
         },
         uploadItems: function() {
-            this.$v.$touch()
-            if (!this.$v.$invalid) {
-                let formData = new FormData()
-                formData.append("photo", this.photo)
-                formData.append("file", this.file)
-                formData.append("file_name", this.fileName)
-                formData.append("product_type_id", this.base_product_type.id)
-                formData.append("basis", this.basis)
-                formData.append("purchasing_type_id", this.purchasing_type_id)
-                formData.append("transaction_id", this.transaction_id)
-
-                var vm = this
-                this.saving = true
-                axios
-                    .post("/admin/products/save-file", formData, {
-                        headers: { "Content-Type": "multipart/form-data" },
-                        onUploadProgress: progressEvent => {
-                            let newLoad = parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total)) - (Math.floor(Math.random() * 50) + 1)
-                            if (newLoad > vm.loaded) {
-                                vm.loaded = newLoad
-                            }
-                        }
-                    })
-                    .then(response => {
-                        if (response.data.success) {
-                            vm.loaded = 100
-                        }
-                        setTimeout(() => {
-                            this.saving = false
-                            // swal.fire({ title: response.data.heading, icon: response.data.success ? "success" : "error", html: response.data.message })
-                            this.$store.commit("setSnackbar", {
-                                isVisible: true,
-                                type: response.data.success ? "success" : "error",
-                                text: response.data.message
-                            })
-                            document.getElementById("upload-file").value = ""
-                            vm.loaded = 0
-                        }, 1500)
-                    })
-                    .catch(error => {
-                        // swal.fire("Something went wrong", "Something error occured while uploading", "error")
-                        this.$store.commit("setSnackbar", {
-                            isVisible: true,
-                            type: "error",
-                            text: "Something error occured while uploading"
-                        })
-                    })
-            }
-        },
-        createValidationPhoto: function() {
-            var validations = {}
-
-            if (this.basis == "purchasing") {
-                if (this.purchasing_type.photo == null) {
-                    validations = {
-                        required
-                    }
+            this.$refs.form.validate()
+            if (this.valid) {
+                const data = {
+                    photo: this.photo,
+                    file: this.file,
+                    file_name: this.file_name,
+                    basis: this.basis
                 }
-            } else {
-                validations = {
-                    required
-                }
-            }
 
-            return validations
-        }
-    },
-    validations() {
-        return {
-            photo: this.createValidationPhoto(),
-            file: {
-                required
+                this.saveFile(data)
             }
+            // this.$v.$touch()
+            // if (!this.$v.$invalid) {
+            //     let formData = new FormData()
+            //     formData.append("photo", this.photo)
+            //     formData.append("file", this.file)
+            //     formData.append("file_name", this.fileName)
+            //     formData.append("product_type_id", this.base_product_type.id)
+            //     formData.append("basis", this.basis)
+            //     formData.append("purchasing_type_id", this.purchasing_type_id)
+            //     formData.append("transaction_id", this.transaction_id)
+            //     var vm = this
+            //     this.saving = true
+            //     axios
+            //         .post("/admin/products/save-file", formData, {
+            //             headers: { "Content-Type": "multipart/form-data" },
+            //             onUploadProgress: progressEvent => {
+            //                 let newLoad = parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total)) - (Math.floor(Math.random() * 50) + 1)
+            //                 if (newLoad > vm.loaded) {
+            //                     vm.loaded = newLoad
+            //                 }
+            //             }
+            //         })
+            //         .then(response => {
+            //             if (response.data.success) {
+            //                 vm.loaded = 100
+            //             }
+            //             setTimeout(() => {
+            //                 this.saving = false
+            //                 // swal.fire({ title: response.data.heading, icon: response.data.success ? "success" : "error", html: response.data.message })
+            //                 this.$store.commit("setSnackbar", {
+            //                     isVisible: true,
+            //                     type: response.data.success ? "success" : "error",
+            //                     text: response.data.message
+            //                 })
+            //                 document.getElementById("upload-file").value = ""
+            //                 vm.loaded = 0
+            //             }, 1500)
+            //         })
+            //         .catch(error => {
+            //             // swal.fire("Something went wrong", "Something error occured while uploading", "error")
+            //             this.$store.commit("setSnackbar", {
+            //                 isVisible: true,
+            //                 type: "error",
+            //                 text: "Something error occured while uploading"
+            //             })
+            //         })
+            // }
         }
     }
 }

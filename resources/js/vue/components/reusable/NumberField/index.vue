@@ -8,7 +8,6 @@ export default {
     inheritAttrs: true,
     props: {
         value: {
-            required: true,
             type: String
         }
     },

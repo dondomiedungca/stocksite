@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col lg="3" md="3">
-            <v-form v-model="valid">
+            <v-form v-model="valid" @submit.prevent>
                 <TextField class="mt-3 mb-3" :rules="productNameRules" @blur="setProductname" :hint="'Kind of product that you want to create (ex: Clothing, Computers, Mobile, Laptops, etc.)'" label="Product Type Name" v-model="product_name" />
             </v-form>
         </v-col>

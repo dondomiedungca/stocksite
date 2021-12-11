@@ -15,29 +15,17 @@
                     <v-container class="card-container">
                         <v-row class="form-row">
                             <v-col cols="6">
-                                <v-text-field dense :rules="columnNameRules" :hint="'Specification of your product type (ex: serial_number, model_number, warranty_days, etc.)'" :label="'Column Name'" outlined v-model="columnName" type="text"></v-text-field>
+                                <TextField :rules="columnNameRules" :hint="'Specification of your product type (ex: serial_number, model_number, warranty_days, etc.)'" :label="'Column Name'" v-model="columnName" />
                             </v-col>
                             <v-col cols="6">
-                                <v-select :rules="columnNameRules" v-model="dataType" :items="data_types" label="Data Type" dense outlined></v-select>
+                                <Select :rules="columnNameRules" v-model="dataType" :items="data_types" label="Data Type" />
                             </v-col>
                             <v-col class="custom-no-padding-bt" cols="12">
-                                <v-radio-group row v-model="isRequired" mandatory>
-                                    <template v-slot:label>
-                                        <div><strong>Required</strong></div>
-                                    </template>
-                                    <v-radio label="Yes" :value="1"></v-radio>
-                                    <v-radio label="No" :value="0"></v-radio>
-                                </v-radio-group>
+                                <RadioButton :items="required_selections" label="Is Required" v-model="isRequired" />
                             </v-col>
                             <v-col class="custom-no-padding-bt" cols="12" v-if="dataType != 'DATE'">
-                                <v-radio-group row v-model="inputType" mandatory>
-                                    <template v-slot:label>
-                                        <div><strong>Input Value Type</strong></div>
-                                    </template>
-                                    <v-radio label="INPUT" :value="1"></v-radio>
-                                    <v-radio label="SELECTION" :value="0"></v-radio>
-                                </v-radio-group>
-                                <v-text-field validate-on-blur @keyup.enter="addToSelections" @click:append="addToSelections" :append-icon="'mdi-plus-box-multiple'" v-if="inputType == 0" dense class="mt-3 mb-3" :rules="selectionRules" :hint="'Add a selection (ex: Selections for Mobile are \' Android, IOS \')'" :label="'Enter Selection'" outlined v-model="selection" type="text"></v-text-field>
+                                <RadioButton :items="type_selections" label="Input Value Type" v-model="inputType" />
+                                <TextField validate-on-blur @keyup.enter="addToSelections" @click:append="addToSelections" :append-icon="'mdi-plus-box-multiple'" v-if="inputType == 0" class="mt-3 mb-3" :rules="selectionRules" :hint="'Add a selection (ex: Selections for Mobile are \' Android, IOS \')'" :label="'Enter Selection'" v-model="selection" />
                             </v-col>
                         </v-row>
                     </v-container>
@@ -80,13 +68,19 @@ import { mapActions, mapState } from "vuex"
 
 import Asker from "./../../reusable/Asker"
 import Table from "./../../reusable/Table"
+import TextField from "./../../reusable/TextField"
+import Select from "./../../reusable/Select"
+import RadioButton from "./../../reusable/RadioButton"
 
 import headers from "./assets/headers"
 
 export default {
     components: {
         Asker,
-        Table
+        Table,
+        TextField,
+        Select,
+        RadioButton
     },
     data() {
         return {
@@ -98,13 +92,34 @@ export default {
             columnNameRules: [value => !!value || "This is required", value => this.getColumnNames.indexOf(value) == -1 || "Column name is already exists", value => /^[a-zA-Z][A-Za-z0-9_]*$/im.test(value) || "Only alphanumeric and underscore is allowed"],
             selectionRules: [value => !!this.selections.length || "This is required, add a selection(s) and click the plus button or press enter"],
 
-            columnName: "",
-            dataType: "",
+            columnName: null,
+            dataType: null,
             isRequired: 1,
             inputType: 1,
-            selection: "",
+            selection: null,
             selections: [],
-            data_types: ["STRING", "INTEGER", "DATE"]
+            data_types: ["STRING", "INTEGER", "DATE"],
+
+            required_selections: [
+                {
+                    text: "YES",
+                    value: 1
+                },
+                {
+                    text: "NO",
+                    value: 0
+                }
+            ],
+            type_selections: [
+                {
+                    text: "INPUT",
+                    value: 1
+                },
+                {
+                    text: "SELECTIONS",
+                    value: 0
+                }
+            ]
         }
     },
     computed: {
@@ -135,7 +150,8 @@ export default {
             }
         },
         addToSelections: function() {
-            if (this.selection != "" && this.columnName != null && this.dataType != null) {
+            this.doValidate()
+            if (this.selection && this.columnName && this.dataType) {
                 this.selections.push(this.selection)
                 this.selection = ""
                 this.SET_SNACKBAR({
@@ -172,6 +188,9 @@ export default {
             this.dataType = ""
             this.selections = []
             this.$refs.form.reset()
+        },
+        doValidate() {
+            this.$refs.form.validate()
         }
     },
     watch: {
@@ -181,7 +200,7 @@ export default {
             }
         },
         selections: function() {
-            this.$refs.form.validate()
+            this.doValidate()
         }
     }
 }

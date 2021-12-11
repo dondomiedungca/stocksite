@@ -40,10 +40,10 @@ window.axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest"
 //     disableStats: true
 // })
 
-import Echo from "laravel-echo"
-window.io = require("socket.io-client")
+// import Echo from "laravel-echo"
+// window.io = require("socket.io-client")
 
-window.Echo = new Echo({
-    broadcaster: "socket.io",
-    host: window.location.hostname + ":6001" // this is laravel-echo-server host
-})
+// window.Echo = new Echo({
+//     broadcaster: "socket.io",
+//     host: window.location.hostname + ":6001" // this is laravel-echo-server host
+// })

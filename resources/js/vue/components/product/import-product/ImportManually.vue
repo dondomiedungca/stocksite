@@ -1,101 +1,102 @@
 <template>
     <v-container fluid style="margin-left: 0;">
-        <v-row v-if="basis != 'purchasing' && product_types_selection.length" class="mt-5">
-            <v-col lg="6" md="6" sm="6" xs="12">
-                <v-select outlined :items="product_types_selection" v-model="selected_product_type" label="Inventory Type" dense></v-select>
-            </v-col>
-        </v-row>
-        <v-row>
-            <v-col lg="3" md="3" sm="6" xs="12" v-if="willShow()">
-                <v-file-input :error-messages="photoErrors" id="upload-photo" ref="uploadPhoto" small-chips accept="image/*" v-model="photo" show-size counter label="Product Photo" outlined dense></v-file-input>
-            </v-col>
-            <v-col lg="12" md="12" sm="12" xs="12">
-                <h4>Primary Fields</h4>
-            </v-col>
-            <v-col lg="3" md="3" sm="6" xs="12">
-                <v-text-field disabled outlined :value="item_data.stock_number" label="Stock Number" dense></v-text-field>
-            </v-col>
-            <v-col lg="3" md="3" sm="6" xs="12">
-                <v-select outlined :items="statuses" v-model="item_data.item_status_id" label="Inventory Status" dense></v-select>
-            </v-col>
-            <v-col lg="3" md="3" sm="6" xs="12">
-                <v-select outlined :items="cosmetics" v-model="item_data.item_cosmetic_id" label="Inventory Cosmetic" dense></v-select>
-            </v-col>
-            <v-col lg="3" md="3" sm="6" xs="12">
-                <v-text-field :error-messages="originPriceErrors" @blur="$v.item_data.origin_price.$touch()" outlined v-model="item_data.origin_price" label="Origin Price" dense></v-text-field>
-            </v-col>
-            <v-col lg="3" md="3" sm="6" xs="12">
-                <v-text-field :error-messages="sellingPriceErrors" @blur="$v.item_data.selling_price.$touch()" outlined v-model="item_data.selling_price" label="Selling Price" dense></v-text-field>
-            </v-col>
-            <v-col lg="3" md="3" sm="6" xs="12">
-                <v-text-field :error-messages="discountPercentageErrors" @blur="$v.item_data.discount_percentage.$touch()" outlined v-model="item_data.discount_percentage" label="Discount Percentage" dense></v-text-field>
-            </v-col>
-            <v-col lg="3" md="3" sm="6" xs="12">
-                <v-textarea rows="2" dense label="Inventory Cosmetic Description" outlined v-model="item_data.item_cosmetic_description" type="text"></v-textarea>
-            </v-col>
-            <v-col lg="3" md="3" sm="6" xs="12">
-                <v-textarea rows="2" dense label="Inventory Description" outlined v-model="item_data.item_description" type="text"></v-textarea>
-            </v-col>
-        </v-row>
-        <v-row>
-            <v-col lg="12">
-                <h4>Specification Fields</h4>
-            </v-col>
-        </v-row>
-        <v-row v-if="Object.keys(base_product_type).length && item_data.stock_number != ''">
-            <v-col v-for="(column, i) in base_product_type.product_attributes" v-bind:key="i" lg="3" md="3" sm="6" xs="12">
-                <div v-if="column.product_column_input_type == 'INPUT'">
-                    <div v-if="column.product_column_data_type == 'STRING'">
-                        <v-text-field :error-messages="customErrors[column.product_column_name]" type="text" @blur="$v.item_data.details[column.product_column_name].$touch()" outlined v-model="item_data.details[column.product_column_name]" :label="column.product_column_name" dense></v-text-field>
-                    </div>
-                    <div v-else-if="column.product_column_data_type == 'INTEGER'">
-                        <v-text-field :error-messages="customErrors[column.product_column_name]" type="number" @blur="$v.item_data.details[column.product_column_name].$touch()" outlined v-model="item_data.details[column.product_column_name]" :label="column.product_column_name" dense></v-text-field>
+        <v-form v-model="valid" ref="form" @submit.prevent>
+            <v-row v-if="basis != 'purchasing' && product_types.length" class="mt-5">
+                <v-col lg="6" md="6" sm="6" xs="12">
+                    <Select :items="product_types" v-model="selected_product_type_id_local" label="Inventory Type" />
+                </v-col>
+            </v-row>
+            <v-row>
+                <v-col lg="6" md="12" sm="6" xs="12" v-if="photoVisibility">
+                    <InputFile :rules="requiredFile" id="upload-photo" ref="uploadPhoto" accept="image/*" v-model="photo" label="Product Photo" />
+                </v-col>
+                <v-col lg="12" md="12" sm="12" xs="12">
+                    <h4>Primary Fields</h4>
+                </v-col>
+                <v-col lg="3" md="3" sm="6" xs="12">
+                    <TextField disabled :value="stock_number" label="Stock Number" />
+                </v-col>
+                <v-col lg="3" md="3" sm="6" xs="12">
+                    <Select :items="statuses" v-model="item_data.item_status_id" label="Inventory Status" />
+                </v-col>
+                <v-col lg="3" md="3" sm="6" xs="12">
+                    <Select :items="cosmetics" v-model="item_data.item_cosmetic_id" label="Inventory Cosmetic" />
+                </v-col>
+                <v-col lg="3" md="3" sm="6" xs="12">
+                    <TextField :rules="requiredAndDigitRule" v-model="item_data.origin_price" label="Origin Price" />
+                </v-col>
+                <v-col lg="3" md="3" sm="6" xs="12">
+                    <TextField :rules="requiredAndDigitRule" v-model="item_data.selling_price" label="Selling Price" />
+                </v-col>
+                <v-col lg="3" md="3" sm="6" xs="12">
+                    <TextField :rules="requiredAndDigitMaxRule" v-model="item_data.discount_percentage" label="Discount Percentage" />
+                </v-col>
+                <v-col lg="3" md="3" sm="6" xs="12">
+                    <TextArea label="Inventory Cosmetic Description" v-model="item_data.item_cosmetic_description" />
+                </v-col>
+                <v-col lg="3" md="3" sm="6" xs="12">
+                    <TextArea label="Inventory Description" v-model="item_data.item_description" />
+                </v-col>
+            </v-row>
+            <v-row>
+                <v-col lg="12">
+                    <h4>Specification Fields</h4>
+                </v-col>
+            </v-row>
+            <v-row v-if="Object.keys(selected_product_type).length && stock_number != ''">
+                <v-col v-for="(column, i) in selected_product_type.product_attributes" v-bind:key="i" lg="3" md="3" sm="6" xs="12">
+                    <div v-if="column.product_column_input_type == 'INPUT'">
+                        <div v-if="column.product_column_data_type == 'STRING'">
+                            <TextField v-model="item_data.details[column.product_column_name]" :rules="column.product_column_is_required ? required : null" :label="column.product_column_name" />
+                        </div>
+                        <div v-else-if="column.product_column_data_type == 'INTEGER'">
+                            <NumberField v-model="item_data.details[column.product_column_name]" :rules="column.product_column_is_required ? required : null" :label="column.product_column_name" />
+                        </div>
+                        <div v-else>
+                            <DatePicker v-model="item_data.details[column.product_column_name]" :rules="column.product_column_is_required ? required : null" :label="column.product_column_name" />
+                        </div>
                     </div>
                     <div v-else>
-                        <v-text-field style="cursor: pointer;" @click="setPropertyNameForDate(column.product_column_name)" :error-messages="customErrors[column.product_column_name]" @blur="$v.item_data.details[column.product_column_name].$touch()" v-model="item_data.details[column.product_column_name]" :label="column.product_column_name" prepend-icon="mdi-calendar" outlined dense readonly></v-text-field>
+                        <Select :items="customSelections(column.column_selections)" :rules="column.product_column_is_required ? required : null" v-model="item_data.details[column.product_column_name]" :label="column.product_column_name" />
                     </div>
-                </div>
-                <div v-else>
-                    <v-select outlined :error-messages="customErrors[column.product_column_name]" :items="customSelections(column.column_selections)" v-model="item_data.details[column.product_column_name]" :label="column.product_column_name" dense></v-select>
-                </div>
-            </v-col>
-            <v-dialog v-model="dateDialog" ref="dialog" :return-value.sync="item_data.details[date_modal_property_name]" persistent width="290px">
-                <v-date-picker v-model="item_data.details[date_modal_property_name]" scrollable>
-                    <v-spacer></v-spacer>
-                    <v-btn text @click="dateDialog = false" color="secondary">
-                        Cancel
-                    </v-btn>
-                    <v-btn text color="primary" @click="$refs.dialog.save(item_data.details[date_modal_property_name])">
-                        OK
-                    </v-btn>
-                </v-date-picker>
-            </v-dialog>
-        </v-row>
-        <v-row>
-            <v-col lg="3" md="3" sm="6" xs="12">
-                <!-- <v-btn small color="dark" @click="saveItem"> <v-icon>mdi-check</v-icon>Save Item </v-btn> -->
-                <asker icon_header="mdi-information" :icon="false" :fab="false" icon_header_color="primary" :tooltip_show="false" title="This will be add to database and add to your purchasing, Do you want to proceed?" @proceed="saveItem">
-                    <template v-slot:togglerIcon>
-                        <v-icon>
-                            mdi-check
-                        </v-icon>
-                        Save Item
-                    </template>
-                </asker>
-            </v-col>
-        </v-row>
+                </v-col>
+            </v-row>
+            <v-row>
+                <v-col lg="3" md="3" sm="6" xs="12">
+                    <Asker icon_header="mdi-information" :loading="isLoading" :icon="false" :fab="false" icon_header_color="primary" :tooltip_show="false" title="This will be add to database and add to your purchasing, Do you want to proceed?" @proceed="saveItem">
+                        <template v-slot:togglerIcon>
+                            <v-icon>
+                                mdi-check
+                            </v-icon>
+                            Save item
+                        </template>
+                    </Asker>
+                </v-col>
+            </v-row>
+        </v-form>
     </v-container>
 </template>
 
 <script>
-import { mapMutations } from "vuex"
-import { Fragment } from "vue-fragment"
-import { validationMixin } from "vuelidate"
-import { required, numeric } from "vuelidate/lib/validators"
+import { mapState, mapActions, mapMutations } from "vuex"
+
+import Select from "./../../reusable/Select"
+import TextField from "./../../reusable/TextField"
+import NumberField from "./../../reusable/NumberField"
+import DatePicker from "./../../reusable/DatePicker"
+import InputFile from "./../../reusable/InputFile"
+import TextArea from "./../../reusable/TextArea"
+import Asker from "./../../reusable/Asker"
+
 export default {
-    mixins: [validationMixin],
     components: {
-        Fragment
+        Select,
+        TextField,
+        NumberField,
+        DatePicker,
+        InputFile,
+        TextArea,
+        Asker
     },
     props: {
         basis: {
@@ -115,258 +116,67 @@ export default {
             default: null
         }
     },
-    computed: {
-        sellingPriceErrors() {
-            const errors = []
-            if (!this.$v.item_data.selling_price.$dirty) return errors
-            !this.$v.item_data.selling_price.required && errors.push("Selling Price is required")
-            !this.$v.item_data.selling_price.numeric && errors.push("Only digit is allowed")
-            return errors
-        },
-        originPriceErrors() {
-            const errors = []
-            if (!this.$v.item_data.origin_price.$dirty) return errors
-            !this.$v.item_data.origin_price.required && errors.push("Origin Price is required")
-            !this.$v.item_data.origin_price.numeric && errors.push("Only digit is allowed")
-            return errors
-        },
-        discountPercentageErrors() {
-            const errors = []
-            if (!this.$v.item_data.discount_percentage.$dirty) return errors
-            !this.$v.item_data.discount_percentage.numeric && errors.push("Only digit is allowed")
-            return errors
-        },
-        photoErrors() {
-            const errors = []
-            if (!this.$v.photo.$dirty) return errors
-            !this.$v.photo.required && errors.push("Product Photo is required")
-            return errors
-        },
-        customErrors() {
-            var error_by_property_name = {}
-            this.base_product_type.product_attributes.map(property_name => {
-                var errors = []
-                if (!this.$v.item_data.details[property_name.product_column_name].$dirty) return (errors = [])
-                !this.$v.item_data.details[property_name.product_column_name].required && errors.push(`${property_name.product_column_name} field is required`)
-                if (Object.prototype.hasOwnProperty.call(this.$v.item_data.details[property_name.product_column_name], "numeric")) {
-                    !this.$v.item_data.details[property_name.product_column_name].numeric && errors.push("Only digit is allowed")
-                }
-                error_by_property_name = {
-                    ...error_by_property_name,
-                    [property_name.product_column_name]: errors
-                }
-            })
-
-            return error_by_property_name
-        }
-    },
     data() {
         return {
             photo: [],
-            purchasing_type: {},
-            selected_product_type: null,
-            product_types_selection: [],
-            base_product_type: {},
+            valid: false,
+
             item_data: {
-                stock_number: "",
                 item_status_id: 1,
                 item_cosmetic_id: 1,
                 item_cosmetic_description: "",
                 item_description: "",
                 origin_price: "",
                 selling_price: "",
-                discount_percentage: "",
+                discount_percentage: 0,
                 details: {}
             },
-            statuses: [],
-            cosmetics: [],
-            product_types: [],
-            dateDialog: false,
-            date_modal_property_name: ""
+
+            requiredFile: [v => !!v || "File is required", v => (v && v.size > 0) || "File is required"],
+            required: [value => !!value || "This field is required"],
+            requiredAndDigitRule: [value => !!value || "This field is required", value => /^[\d\,\.]+$/.test(value) || "Price format (eg. 100,000)"],
+            requiredAndDigitMaxRule: [value => /^[\d]+$/.test(value) || "Discount format (eg. 10, 50, 75)", value => value <= 100 || "Discount not exceed to 100"]
         }
     },
-    watch: {
-        product_types: function() {
-            this.selected_product_type = 0
-        },
-        selected_product_type: function(newVal, oldVal) {
-            this.base_product_type = this.product_types[newVal]
-            this.createValidation()
-        }
+    mounted() {
+        this.doManipulate()
     },
-    created() {
-        this.initialize()
-        this.createValidation()
-        this.createValidationPhoto()
-        this.getStockNumber()
-        this.getCosmetics()
-        this.getStatuses()
-        this.getPurchasing()
+    computed: {
+        ...mapState("product_import", ["selected_product_type_id", "isLoading", "stock_number", "product_types", "photoVisibility", "cosmetics", "statuses", "selected_product_type"]),
+        selected_product_type_id_local: {
+            get() {
+                return this.selected_product_type_id
+            },
+            set(v) {
+                this.SET_PRODUCT_TYPE_ID(v)
+            }
+        }
     },
     methods: {
-        ...mapMutations(["setSnackbar"]),
-        willShow: function() {
-            if (this.basis != "purchasing") {
-                return true
-            } else {
-                if (Object.keys(this.purchasing_type).length) {
-                    if (this.purchasing_type.photo == null) {
-                        return true
-                    } else {
-                        return false
-                    }
+        ...mapActions("product_import", ["setForPurchasing", "saveManually"]),
+        ...mapMutations("product_import", ["SET_PRODUCT_TYPE_ID"]),
+        doManipulate() {
+            if (this.basis == "purchasing") {
+                const data = {
+                    product_type: this.product_type,
+                    purchasing_type_id: this.purchasing_type_id
                 }
+                this.setForPurchasing(data)
             }
-        },
-        initialize: function() {
-            if (this.basis != "purchasing") {
-                this.getProductTypes()
-            } else {
-                this.base_product_type = this.product_type
-            }
-        },
-        setPropertyNameForDate: function(name) {
-            this.date_modal_property_name = name
-            this.dateDialog = true
-        },
-        getProductTypes: function() {
-            axios.get("/admin/products/get-all-product-types").then(res => {
-                this.product_types = res.data.product_types
-                this.product_types_selection = res.data.product_types.map((product_type, i) => {
-                    return {
-                        text: product_type.product_name,
-                        value: i
-                    }
-                })
-            })
-        },
-        getPurchasing: function() {
-            axios.get("/admin/purchasing/get-purchasing-type/" + this.purchasing_type_id).then(res => {
-                this.purchasing_type = res.data.purchasing
-            })
-        },
-        getStockNumber: function() {
-            axios.get("/admin/products/get-stock-number").then(res => {
-                this.item_data.stock_number = res.data.stock_number
-            })
-        },
-        getCosmetics: function() {
-            axios.get("/admin/products/get-cosmetics").then(res => {
-                this.cosmetics = res.data.cosmetics.map(cosmetic => {
-                    return {
-                        text: cosmetic.name,
-                        value: cosmetic.id
-                    }
-                })
-            })
-        },
-        getStatuses: function() {
-            axios.get("/admin/products/get-item-statuses").then(res => {
-                this.statuses = res.data.statuses.map(status => {
-                    return {
-                        text: status.name,
-                        value: status.id
-                    }
-                })
-            })
         },
         customSelections(data) {
             return data.map(selection => selection.selection_name)
         },
-        createValidationPhoto: function() {
-            var validations = {}
-
-            if (this.basis == "purchasing") {
-                if (this.purchasing_type.photo == null) {
-                    validations = {
-                        required
-                    }
-                }
-            } else {
-                validations = {
-                    required
-                }
-            }
-
-            return validations
-        },
-        createValidation: function() {
-            var validations = {}
-            this.item_data.details = {}
-            if (Object.keys(this.base_product_type).length) {
-                this.base_product_type.product_attributes.map(column => {
-                    this.item_data.details = {
-                        ...this.item_data.details,
-                        [column.product_column_name]: ""
-                    }
-                    if (column.product_column_is_required) {
-                        validations = {
-                            ...validations,
-                            [column.product_column_name]: {
-                                required
-                            }
-                        }
-                    }
-                    if (column.product_column_data_type == "INTEGER") {
-                        validations = {
-                            ...validations,
-                            [column.product_column_name]: {
-                                ...validations[column.product_column_name],
-                                numeric
-                            }
-                        }
-                    }
-                })
-            }
-            return validations
-        },
-        parseFilePhoto: function() {
-            this.photo = this.$refs.uploadPhoto.files
-        },
         saveItem: function() {
-            this.$v.$touch()
-            if (!this.$v.$invalid) {
+            this.$refs.form.validate()
+            if (this.valid) {
                 var self = this
-                let formData = new FormData()
-                formData.append("photo", self.photo)
-                formData.append("inventory", JSON.stringify(self.item_data))
-                formData.append("purchasing_type_id", self.purchasing_type_id)
-                formData.append("basis", self.basis)
-                formData.append("transaction_id", self.transaction_id)
-                formData.append("product_type_id", self.base_product_type.id)
-                axios
-                    .post(`/admin/products/save-manual-item`, formData, {
-                        headers: { "Content-Type": "multipart/form-data" }
-                    })
-                    .then(result => {
-                        this.$store.commit("setSnackbar", {
-                            isVisible: true,
-                            type: result.data.success ? "success" : "error",
-                            text: result.data.message
-                        })
-                        if (this.basis == "purchasing") {
-                            this.$emit("update_purchasing")
-                        }
-                    })
-            }
-        }
-    },
-    validations() {
-        return {
-            photo: this.createValidationPhoto(),
-            item_data: {
-                origin_price: {
-                    required,
-                    numeric
-                },
-                selling_price: {
-                    required,
-                    numeric
-                },
-                discount_percentage: {
-                    numeric
-                },
-                details: this.createValidation()
+                let data = {
+                    item_data: self.item_data,
+                    photo: self.photo,
+                    basis: self.basis
+                }
+                this.saveManually(data)
             }
         }
     }

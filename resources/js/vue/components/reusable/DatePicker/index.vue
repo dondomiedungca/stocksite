@@ -26,7 +26,6 @@ export default {
     }),
     props: {
         value: {
-            required: true,
             type: [Array, String, Date]
         },
         displayFormat: {
