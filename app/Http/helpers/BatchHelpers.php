@@ -10,6 +10,9 @@ use App\Events\QueueProcessing;
 use Carbon\Carbon;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Bus\Batch;
+use Illuminate\Support\Facades\Bus;
+use Throwable;
 
 class BatchHelpers {
 
@@ -83,6 +86,33 @@ class BatchHelpers {
         $mess->save();
 
         return true;
+    }
+
+    public static function processJobs($jobs, $filename, $queue_no, $title) {
+        $batch = Bus::batch($jobs)->then(function (Batch $batch){
+            // All jobs completed successfully...
+        })->catch(function (Batch $batch, Throwable $e) {
+            // Only First batch job failure detected...
+            $batch->cancel();
+        })->finally(function (Batch $batch) {
+            // The batch has finished executing...
+            // I putted here the event calling as failed because the error message will only get if the batch was cancelled,
+            // the batch will continue to finish other jobs even the previous jobs are failed
+            if($batch->cancelled()) {
+                broadcast(new QueueProcessing("failed", self::getBatch($batch->id)));
+            }
+            // This only run at fresh batch, not when retry
+            if((int) $batch->progress() == 100) {
+                self::generateDuration($batch->id);
+                self::importMessage($batch->id, "File content was successfully inserted to database.");
+                broadcast(new QueueProcessing("complete", self::getBatch($batch->id)));
+            }
+            self::removeFromProcessing($batch->id);
+        })->name($filename.' - '.$title.'*_*'.$queue_no)->onQueue('product_imports')->dispatch();
+
+        broadcast(new QueueProcessing("create", self::getBatch($batch->id)));
+
+        return $batch;
     }
 
 }

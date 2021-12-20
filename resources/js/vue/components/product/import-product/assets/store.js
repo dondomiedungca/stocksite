@@ -97,34 +97,33 @@ export const actions = {
             formData.append("purchasing_type_id", state.purchasing.id)
             formData.append("transaction_id", state.transaction_id)
 
-            axios
-                .post("/admin/products/save-file", formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                    onUploadProgress: progressEvent => {
-                        let newLoad = parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total)) - (Math.floor(Math.random() * 50) + 1)
-                        if (newLoad > state.loaded) {
-                            commit("SET_LOADED", newLoad)
-                        }
+            let response = await axios.post("/admin/products/save-file", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+                onUploadProgress: progressEvent => {
+                    let newLoad = parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total)) - (Math.floor(Math.random() * 50) + 1)
+                    if (newLoad > state.loaded) {
+                        commit("SET_LOADED", newLoad)
                     }
-                })
-                .then(response => {
-                    if (response.data.success) {
-                        commit("SET_LOADED", 100)
-                        const notification = {
-                            isVisible: true,
-                            type: "success",
-                            text: response.data.message
-                        }
+                }
+            })
 
-                        dispatch("snackBar/add", notification, { root: true })
-                    } else {
-                        throw { message: response.data.message }
-                    }
-                    setTimeout(() => {
-                        commit("SET_LOADING", false)
-                        commit("SET_LOADED", 0)
-                    }, 1500)
-                })
+            setTimeout(() => {
+                commit("SET_LOADING", false)
+                commit("SET_LOADED", 0)
+            }, 1500)
+
+            if (response.data.success) {
+                commit("SET_LOADED", 100)
+                const notification = {
+                    isVisible: true,
+                    type: "success",
+                    text: response.data.message
+                }
+
+                dispatch("snackBar/add", notification, { root: true })
+            } else {
+                throw { message: response.data.message }
+            }
         } catch (error) {
             commit("SET_LOADING", false)
 

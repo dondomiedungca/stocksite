@@ -234,114 +234,48 @@ class ProductsController extends Controller
         return $inventory;
     }
 
-    public function saveFile(Request $request) {
+    public function saveFile(Request $request, PhotoHelpers $photo, FileUpload $docs) {
         try {
-            $filename = $request['file_name'];
-            $file = $request['file'];
-            $extension = $file->getClientOriginalExtension();
-            $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-
-            if($request->hasFile('photo')) {
-                $photo = $request['photo'];
-                $photo_extension = $photo->getClientOriginalExtension();
-                $photo_name = pathinfo($photo->getClientOriginalName(), PATHINFO_FILENAME);
-                $photo_file_name = $photo_name.".".$photo_extension;
-            } else {
-                $photo_file_name = NULL;
-                $photo_path = NULL;
-            }
+            $photo->initialize();
 
             $basis = $request['basis'];
             $transaction_id = $request['basis'] == 'purchasing' ? $request['transaction_id'] : NULL;
             $purchasing_type_id = $request['basis'] == 'purchasing' ? $request['purchasing_type_id'] : NULL;
-
-            $chunk_count = 500;
-
-            $product_type = $this->getProductType($request['product_type_id']);
-
-            if($extension == 'csv') {
-                $check_header = FileUpload::isValidHeader($file, $extension, $product_type);
-                if(!$check_header['isValid']) {
-                    throw new \Exception("The ff. headers are not found on your file </br></br> \"<b>".implode($check_header['difference'], ",")."</b>\"");
-                }
-                $header = $check_header['header'];
-            } else {
-                $res = FileUpload::excelForDevelopers($file, "Sheet1");
-                $check_header = FileUpload::isValidHeader($res["headers"], $extension, $product_type);
-                if(!$check_header['isValid']) {
-                    throw new \Exception("The ff. headers are not found on your file </br></br> \"<b>".implode($check_header['difference'], ",")."</b>\"");
-                }
-                $header = $res["headers"];
-                $file = FileUpload::excelFileContentFormatToCSV($res["data"]);
-            }
             
-            // create directory
-            $path = "product/temp/$filename";
-            $directory = FileUpload::createFileDirectory($path);
+            $docs->initialize();
 
-            if($request->hasFile('photo')) {
-                if($purchasing_type_id != NULL) {
-                    $purchasing_type = PurchasingTypes::find($purchasing_type_id);
-                    if(!$purchasing_type->photo()->exists()) {
-                        $photo_path = "product/Purchase_Order_Type_$purchasing_type_id";
-                        PhotoHelpers::savePhoto($photo_path, $photo, $photo_file_name);
-                    }
-                } else {
-                    $photo_path = "product/Product_Image_".time();
-                    PhotoHelpers::savePhoto($photo_path, $photo, $photo_file_name);
-                }
+            $columns = $product_type = $this->getProductType($request['product_type_id'])["product_type"]->show_columns();
+
+            $headerValidation = $docs->headerValidation($columns);
+
+            if(!$headerValidation["isValid"]) {
+                throw new \Exception("The ff. headers are not found on your file </br></br> \"<b>".implode($headerValidation['difference'], ",")."</b>\"");
             }
 
-            // create chunk
-            $chunks = FileUpload::chunkFile($directory, $name, $file, $chunk_count, $extension);
-
-            // run queue on every chunk of file
-            $chunk_files = glob(storage_path("app/$directory/*.csv"));
-            $jobs = [];
-
-            foreach ($chunk_files as $key => $chunk_file) {
-                $jobs[] = new ImportItemFile($header, $photo_file_name, $photo_path, $key, $chunk_count, $filename, $name."-".time(), $chunk_file, $request['product_type_id'], Auth::user()->id, $transaction_id, $purchasing_type_id, $request['basis'], $extension);
+            if($docs->total == 0) {
+                throw new \Exception("No data found in your file");
             }
 
-            $counter = Counter::find(7);
-            $counter->increment('counter');
-            $queue_no = $counter->prefix . str_pad($counter->counter, 6,'0',STR_PAD_LEFT);
+            $chunks = $docs->chunkFile(200);
 
-            $batch = Bus::batch($jobs)->then(function (Batch $batch){
-                // All jobs completed successfully...
-            })->catch(function (Batch $batch, Throwable $e) {
-                // Only First batch job failure detected...
-                $batch->cancel();
-            })->finally(function (Batch $batch) use ($directory) {
-                // The batch has finished executing...
-                // I putted here the event calling as failed because the error message will only get if the batch was cancelled,
-                // the batch will continue to finish other jobs even the previous jobs are failed
-                if($batch->cancelled()) {
-                    broadcast(new QueueProcessing("failed", BatchHelpers::getBatch($batch->id)));
-                }
-                // This only run at fresh batch, not when retry
-                if((int) $batch->progress() == 100) {
-                    BatchHelpers::generateDuration($batch->id);
-                    BatchHelpers::importMessage($batch->id, "File content was successfully inserted to database.");
-                    broadcast(new QueueProcessing("complete", BatchHelpers::getBatch($batch->id)));
-                    FileUpload::removePath($directory);
-                }
-                BatchHelpers::removeFromProcessing($batch->id);
-            })->name($name.' - Product File Uploading*_*'.$queue_no)->onQueue('product_imports')->dispatch();
+            foreach ($chunks as $key => $chunk_file) {
+                $jobs[] = new ImportItemFile($photo, $docs, $chunk_file, $request['product_type_id'], $transaction_id, $purchasing_type_id);
+            }
 
-            broadcast(new QueueProcessing("create", BatchHelpers::getBatch($batch->id)));
+            $queue_no = getCounterNumber(7);
 
-            $data['success'] = true;
-            $data['heading'] = "Added To Queue";
-            $data['message'] = "File upload process was added to system queue with no. <b>".$queue_no."</b>, we will notify you once it is done";
-            $data['uuid'] = $batch->id;
+            $batch = BatchHelpers::processJobs($jobs, $docs->file_filename, $queue_no, "Product File Uploading");
 
-            return $data;
+            return response()->json([
+                "message" => "File upload process was added to system queue with no. <b>".$queue_no."</b>, we will notify you once it is done",
+                "success" => true
+            ]);
+
         } catch (\Exception $e) {
             return response()->json([
                 "message" => $e->getMessage(),
                 "success" => false
-            ], 403);
+            ]);
         }
 
     }

@@ -158,53 +158,6 @@ export default {
 
                 this.saveFile(data)
             }
-            // this.$v.$touch()
-            // if (!this.$v.$invalid) {
-            //     let formData = new FormData()
-            //     formData.append("photo", this.photo)
-            //     formData.append("file", this.file)
-            //     formData.append("file_name", this.fileName)
-            //     formData.append("product_type_id", this.base_product_type.id)
-            //     formData.append("basis", this.basis)
-            //     formData.append("purchasing_type_id", this.purchasing_type_id)
-            //     formData.append("transaction_id", this.transaction_id)
-            //     var vm = this
-            //     this.saving = true
-            //     axios
-            //         .post("/admin/products/save-file", formData, {
-            //             headers: { "Content-Type": "multipart/form-data" },
-            //             onUploadProgress: progressEvent => {
-            //                 let newLoad = parseInt(Math.round((progressEvent.loaded * 100) / progressEvent.total)) - (Math.floor(Math.random() * 50) + 1)
-            //                 if (newLoad > vm.loaded) {
-            //                     vm.loaded = newLoad
-            //                 }
-            //             }
-            //         })
-            //         .then(response => {
-            //             if (response.data.success) {
-            //                 vm.loaded = 100
-            //             }
-            //             setTimeout(() => {
-            //                 this.saving = false
-            //                 // swal.fire({ title: response.data.heading, icon: response.data.success ? "success" : "error", html: response.data.message })
-            //                 this.$store.commit("setSnackbar", {
-            //                     isVisible: true,
-            //                     type: response.data.success ? "success" : "error",
-            //                     text: response.data.message
-            //                 })
-            //                 document.getElementById("upload-file").value = ""
-            //                 vm.loaded = 0
-            //             }, 1500)
-            //         })
-            //         .catch(error => {
-            //             // swal.fire("Something went wrong", "Something error occured while uploading", "error")
-            //             this.$store.commit("setSnackbar", {
-            //                 isVisible: true,
-            //                 type: "error",
-            //                 text: "Something error occured while uploading"
-            //             })
-            //         })
-            // }
         }
     }
 }

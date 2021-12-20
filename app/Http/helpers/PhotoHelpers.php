@@ -9,28 +9,15 @@ use App\Models\Photable;
 use App\Http\helpers\FileUpload;
 
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PhotoHelpers {
-    public static function createPhotable($path = NULL, $request = NULL, $connect_to) {
-        if($request->hasFile('photo')) {
-            $file = $request['photo'];
-            $extension = $file->getClientOriginalExtension();
-            $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $exact_name = $name.".".$extension;
-
-            Storage::putFileAs($path, $request->file('photo'), $exact_name);
-
-            $photo = new Photable();
-            $photo->path = $path;
-            $photo->photo_name = $exact_name;
-
-            $connect_to->photo()->save($photo);
-
-            return true;
-        } else {
-            return false;
-        }
-    }
+    
+    protected $photo_temp_directory = "";
+    protected $photo_directory = "";
+    public $photo_eloquent = NULL;
+    public $photo_file = NULL;
+    public $photo_filename = "";
 
     public static function savePhoto($path, $file, $photo_name) {
         FileUpload::createFileDirectory($path);
@@ -55,6 +42,28 @@ class PhotoHelpers {
             $photo->photo_name = $photo_name;
 
             $inventory->photo()->save($photo);
+        }
+    }
+
+
+    public function initialize() {
+        if(request()->hasFile('photo')) {
+            $file = request()->file("photo");
+            $extension = $file->getClientOriginalExtension();
+            $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+            $this->photo_filename = $name.".".$extension;
+            $this->photo_temp_directory = "temp/photo_temp_directory/image_".Str::uuid();
+            $this->photo_directory = "product/images/product_".Str::uuid();
+
+            Storage::putFileAs($this->photo_temp_directory, request()->file('photo'), $this->photo_filename);
+
+            $photo = new Photable();
+            $photo->path = $this->photo_directory;
+            $photo->photo_name = $this->photo_filename;
+
+            $this->photo_eloquent = $photo;
+
         }
     }
 }

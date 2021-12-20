@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Company;
+use App\Models\Counter;
 use App\Models\Currency;
 use App\Models\PurchasingTypes;
 use App\Models\ProductTypes;
@@ -45,6 +46,14 @@ function isNotEmpty($product_type_id, $data) {
     }
 
     return $data;
+}
+
+function getCounterNumber($id) {
+    $counter = Counter::find($id);
+    $counter->increment('counter');
+    $no = $counter->prefix . str_pad($counter->counter, 6,'0',STR_PAD_LEFT);
+
+    return $no;
 }
 
 ?>

@@ -2,50 +2,40 @@
 
 namespace App\Http\helpers;
 
-use App\Models\Transactions;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+
+use App\Models\FileUploaded;
+use App\Models\Transactions;
 
 class FileUpload {
+    public $temp_directory = "";
+    public $directories = [];
+
+    public $file_eloquent = NULL;
+    public $file_filename = "";
+    public $headers = [];
+
+    public $contents = [];
+    public $valid = 0;
+    public $invalid = 0;
+    public $new = 0;
+    public $exist = 0;
+    public $total = 0;
+
     const EXCEPTIONS = ['""""""'];
 
-    public static function isValidHeader($file, $extension, $product_type) {
-        $product_header = $product_type['product_type']->show_columns();
-        if($extension == 'csv') {
-            $csv_as_array = array_map('str_getcsv', file($file));
-            $candidate_header = $csv_as_array[0];
+    public function headerValidation($columns) {
+        
+        $act_as_candidate_header = $this->headers;
+        $header_diff = array_diff($columns, $act_as_candidate_header);
 
-            $header_diff = array_diff($product_header, $candidate_header);
-
-            if(count($header_diff)) {
-                return [
-                    'isValid' => false,
-                    'difference' => $header_diff,
-                ];
-            } else {
-                return [
-                    'isValid' => true,
-                    'difference' => $header_diff,
-                    'header' => $product_header
-                ];
-            }
-        } else {
-            $act_as_candidate_header = $file;
-            $header_diff = array_diff($product_header, $act_as_candidate_header);
-
-            if(count($header_diff)) {
-                return [
-                    'isValid' => false,
-                    'difference' => $header_diff,
-                ];
-            } else {
-                return [
-                    'isValid' => true,
-                    'difference' => $header_diff,
-                    'header' => $product_header
-                ];
-            }
-        }
+        return [
+            'isValid' => count($header_diff) ? false : true,
+            'difference' => $header_diff
+        ];
     }
 
     public static function createFileDirectory($path) {
@@ -60,17 +50,17 @@ class FileUpload {
         return $path;
     }
 
-    public static function chunkFile($directory, $name, $file, $chunk_count, $ext) {
-        if($ext == 'csv') {
-            $file = file($file);
-        }
-        $chunks = array_chunk($file, $chunk_count);
+    public function chunkFile($chunk_count) {
+        self::createFileDirectory($this->temp_directory);
+        $chunks = array_chunk($this->contents, $chunk_count);
 
         foreach ($chunks as $key => $chunk_data) {
-            file_put_contents(storage_path("app/".$directory."/chunk-".$key.".csv"), $chunk_data);
+            file_put_contents(storage_path("app/".$this->temp_directory."/chunk-".$key.".csv"), $chunk_data);
         }
 
-        return true;
+        $this->directories = glob(storage_path("app/".$this->temp_directory."/*.csv"));
+
+        return $this->directories;
     }
     
     public static function checkIfDirectoryExist($path) {
@@ -87,7 +77,7 @@ class FileUpload {
         return true;
     }
 
-    public static function excelForDevelopers($fileToParse, $sheet) {
+    public static function excelForDevelopers($fileToParse) {
         $file = $fileToParse;
         $fileName = $file->getClientOriginalName();
     	$folderName = self::generateTempFolderName('default_excel_destination');
@@ -270,7 +260,7 @@ class FileUpload {
                 $item = array_combine($columns, $item);
                 $collection[$k] = $item;
             } else {
-                $collection[$k] = false;
+                $file_upload_invalids[] = $item;
             }
         };
 
@@ -279,6 +269,49 @@ class FileUpload {
         $data["collection"] = $collection;
 
         return $data;
+    }
+
+    public function initialize() {
+        if(request()->has("file")) {
+            $file = request()->file("file");
+            $extension = $file->getClientOriginalExtension();
+            $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+            $this->file_filename = $name.".".$extension;
+            
+            if($extension == 'xlsx') {
+                $xlsx = self::excelForDevelopers($file);
+                $this->headers = $xlsx["headers"];
+                $this->total = $xlsx["total_content"] - 1;
+                $this->contents = self::excelFileContentFormatToCSV($xlsx["data"]);
+            } else {
+                $csv = array_map('str_getcsv', file($file));
+                $this->headers = $csv[0];
+                $this->total = count(array_slice($csv, 1));
+                $this->contents = self::excelFileContentFormatToCSV(array_slice($csv, 1));
+            }
+
+            $this->temp_directory = "temp/chunks/chunk_".Str::uuid();
+
+            $this->file_eloquent = new FileUploaded;
+            $this->file_eloquent->file_name = $this->file_filename;
+            $this->file_eloquent->total_content = $this->total;
+            $this->file_eloquent->valid = $this->valid;
+            $this->file_eloquent->invalid = $this->invalid;
+            $this->file_eloquent->new = $this->new;
+            $this->file_eloquent->exist = $this->exist;
+            $this->file_eloquent->user_id = Auth::user()->id;
+            $this->file_eloquent->save();
+        }
+    }
+
+    public function updateFileEloquent($id, $valid, $invalid, $new, $exist) {
+        $file_eloquent = FileUploaded::find($id);
+        $file_eloquent->valid = $file_eloquent->valid + $valid;
+        $file_eloquent->invalid = $file_eloquent->invalid + $invalid;
+        $file_eloquent->new = $file_eloquent->new + $new;
+        $file_eloquent->exist = $file_eloquent->exist + $exist;
+        $file_eloquent->save();
     }
 }
 
