@@ -16,4 +16,9 @@ class FileUploaded extends Model
         'total_exist',
         'user_id',
     ];
+
+    public function photo()
+    {
+        return $this->morphOne(Photable::class, 'photable');
+    }
 }

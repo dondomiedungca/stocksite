@@ -65,13 +65,13 @@ class ImportItemFile implements ShouldQueue
 
             // // if this kind of importing is related on purchasing type
             // if($this->purchasing_type_id != NULL) {
-            //     $purchasing_type = PurchasingTypes::find($this->purchasing_type_id);
-            //     if(!$purchasing_type->photo()->exists()) {
-            //         $photable = PhotoHelpers::saveThroughFileName($this->photo_path, $this->photo_name, $this->purchasing_type_id, NULL);
-            //     }
+                // $purchasing_type = PurchasingTypes::find($this->purchasing_type_id);
+                // if(!$purchasing_type->photo()->exists()) {
+                //     $photable = PhotoHelpers::saveThroughFileName($this->photo_path, $this->photo_name, $this->purchasing_type_id, NULL);
+                // }
             // }
             $csv_data = FileUpload::parsedCSVToArrayWithColumns($csv_data, $this->docs->headers);
-            Log::info($csv_data["collection"]);
+
             $this->docs->updateFileEloquent(
                 $this->docs->file_eloquent->id,
                 count($csv_data["collection"]),
@@ -89,6 +89,18 @@ class ImportItemFile implements ShouldQueue
                 count($compiled_data["new"]),
                 count($compiled_data["exist"])
             );
+
+            if($this->docs->tryToRemove($this->chunk_directory)) {
+                $this->photo->movedFiles($this->photo->photo_directory, $this->photo->photo_temp_directory);
+                if($this->purchasing_type_id != NULL) {
+                    $purchasing_type = PurchasingTypes::find($this->purchasing_type_id);
+                    if(!$purchasing_type->photo()->exists()) {
+                        $this->photo->savePhotable($purchasing_type);
+                    }
+                } else {
+                    $this->photo->savePhotable($this->docs->getFileEloquent($this->docs->file_eloquent->id));
+                }
+            }
 
     }
 

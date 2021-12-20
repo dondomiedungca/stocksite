@@ -55,10 +55,10 @@ class FileUpload {
         $chunks = array_chunk($this->contents, $chunk_count);
 
         foreach ($chunks as $key => $chunk_data) {
-            file_put_contents(storage_path("app/".$this->temp_directory."/chunk-".$key.".csv"), $chunk_data);
+            file_put_contents(storage_path("app".DIRECTORY_SEPARATOR.$this->temp_directory.DIRECTORY_SEPARATOR."chunk-".$key.".csv"), $chunk_data);
         }
 
-        $this->directories = glob(storage_path("app/".$this->temp_directory."/*.csv"));
+        $this->directories = glob(storage_path("app".DIRECTORY_SEPARATOR.$this->temp_directory.DIRECTORY_SEPARATOR."*.csv"));
 
         return $this->directories;
     }
@@ -81,12 +81,12 @@ class FileUpload {
         $file = $fileToParse;
         $fileName = $file->getClientOriginalName();
     	$folderName = self::generateTempFolderName('default_excel_destination');
-        $temp = storage_path().'/app/temp/'.$folderName;
+        $temp = storage_path().DIRECTORY_SEPARATOR .'app'.DIRECTORY_SEPARATOR.'temp'.DIRECTORY_SEPARATOR.$folderName;
     	$zip = new \ZipArchive();
     	$zip->open($file);
     	$zip->extractTo($temp);
-    	$data = simplexml_load_file($temp."/xl/worksheets/sheet1.xml");
-    	$strings = simplexml_load_file($temp."/xl/sharedStrings.xml");
+    	$data = simplexml_load_file($temp.DIRECTORY_SEPARATOR."xl".DIRECTORY_SEPARATOR."worksheets".DIRECTORY_SEPARATOR."sheet1.xml");
+    	$strings = simplexml_load_file($temp.DIRECTORY_SEPARATOR."xl".DIRECTORY_SEPARATOR."sharedStrings.xml");
     	$rows = $data->sheetData->row;
 
         $headers = self::getExcelHeaderComplete($rows[0], $strings);
@@ -203,7 +203,7 @@ class FileUpload {
                 continue;
             }
     
-            if (!self::deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+            if (!self::deleteDirectory($dir.DIRECTORY_SEPARATOR.$item)) {
                 return false;
             }
     
@@ -292,7 +292,7 @@ class FileUpload {
                 $this->contents = self::excelFileContentFormatToCSV(array_slice($csv, 1));
             }
 
-            $this->temp_directory = "temp/chunks/chunk_".Str::uuid();
+            $this->temp_directory = "temp".DIRECTORY_SEPARATOR."chunks".DIRECTORY_SEPARATOR."chunk_".Str::uuid();
 
             $this->file_eloquent = new FileUploaded;
             $this->file_eloquent->file_name = $this->file_filename;
@@ -307,12 +307,38 @@ class FileUpload {
     }
 
     public function updateFileEloquent($id, $valid, $invalid, $new, $exist) {
-        $file_eloquent = FileUploaded::find($id);
+        $file_eloquent = $this->getFileEloquent($id);
         $file_eloquent->valid = $file_eloquent->valid + $valid;
         $file_eloquent->invalid = $file_eloquent->invalid + $invalid;
         $file_eloquent->new = $file_eloquent->new + $new;
         $file_eloquent->exist = $file_eloquent->exist + $exist;
         $file_eloquent->save();
+    }
+
+    public function tryToRemove($directory) {
+        self::deleteDirectory($directory);
+        if(self::isDirEmpty($this->temp_directory)) {
+            self::deleteDirectory(storage_path("app".DIRECTORY_SEPARATOR.$this->temp_directory));
+            return true;
+        }
+
+        return false;
+    }
+
+    public static function isDirEmpty($dir) {
+        $handle = opendir(storage_path("app".DIRECTORY_SEPARATOR.$dir));
+        while (false !== ($entry = readdir($handle))) {
+            if ($entry != "." && $entry != "..") {
+            closedir($handle);
+            return false;
+            }
+        }
+        closedir($handle);
+        return true;
+    }
+
+    public function getFileEloquent($id) {
+        return FileUploaded::find($id);
     }
 }
 

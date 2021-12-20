@@ -272,6 +272,7 @@ class ProductsController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::info($e);
             return response()->json([
                 "message" => $e->getMessage(),
                 "success" => false

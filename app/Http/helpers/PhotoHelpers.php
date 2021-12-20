@@ -13,38 +13,11 @@ use Illuminate\Support\Str;
 
 class PhotoHelpers {
     
-    protected $photo_temp_directory = "";
-    protected $photo_directory = "";
+    public $photo_temp_directory = "";
+    public $photo_directory = "";
     public $photo_eloquent = NULL;
     public $photo_file = NULL;
     public $photo_filename = "";
-
-    public static function savePhoto($path, $file, $photo_name) {
-        FileUpload::createFileDirectory($path);
-
-        Storage::putFileAs($path, $file, $photo_name);
-
-        return true;
-    }
-
-    public static function saveThroughFileName($photo_path, $photo_name, $purchasing_type_id, $inventory) {
-        if($purchasing_type_id != NULL) {
-            $purchasing_type = PurchasingTypes::find($purchasing_type_id);
-            
-            $photo = new Photable();
-            $photo->path = $photo_path;
-            $photo->photo_name = $photo_name;
-
-            $purchasing_type->photo()->save($photo);
-        } else {
-            $photo = new Photable();
-            $photo->path = $photo_path;
-            $photo->photo_name = $photo_name;
-
-            $inventory->photo()->save($photo);
-        }
-    }
-
 
     public function initialize() {
         if(request()->hasFile('photo')) {
@@ -53,8 +26,8 @@ class PhotoHelpers {
             $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
             $this->photo_filename = $name.".".$extension;
-            $this->photo_temp_directory = "temp/photo_temp_directory/image_".Str::uuid();
-            $this->photo_directory = "product/images/product_".Str::uuid();
+            $this->photo_temp_directory = "temp".DIRECTORY_SEPARATOR."photo_temp_directory".DIRECTORY_SEPARATOR."image_".Str::uuid();
+            $this->photo_directory = "product".DIRECTORY_SEPARATOR."images".DIRECTORY_SEPARATOR."product_".Str::uuid();
 
             Storage::putFileAs($this->photo_temp_directory, request()->file('photo'), $this->photo_filename);
 
@@ -65,6 +38,14 @@ class PhotoHelpers {
             $this->photo_eloquent = $photo;
 
         }
+    }
+
+    public function savePhotable($asPhotable) {
+        $asPhotable->photo()->save($this->photo_eloquent);
+    }
+
+    public function movedFiles($to, $from) {
+        Storage::move($from."/".$this->photo_filename, $to."/".$this->photo_filename);
     }
 }
 
