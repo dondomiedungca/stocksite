@@ -261,6 +261,7 @@ class FileUpload {
                 $collection[$k] = $item;
             } else {
                 $file_upload_invalids[] = $item;
+                $collection[$k] = false;
             }
         };
 
