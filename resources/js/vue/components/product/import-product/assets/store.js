@@ -85,13 +85,12 @@ export const actions = {
         try {
             commit("SET_LOADING", true)
 
-            const { photo, basis, file, file_name } = data
+            const { photo, basis, file } = data
 
             let formData = new FormData()
 
-            formData.append("photo", photo)
-            formData.append("file", file)
-            formData.append("file_name", file_name)
+            formData.append("photo", null)
+            formData.append("file", null)
             formData.append("product_type_id", state.selected_product_type.id)
             formData.append("basis", basis)
             formData.append("purchasing_type_id", state.purchasing.id)

@@ -10,6 +10,8 @@ use Throwable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 
 use App\Http\helpers\TransactionHelpers;
 use App\Http\helpers\FileUpload;
@@ -236,6 +238,24 @@ class ProductsController extends Controller
 
     public function saveFile(Request $request, PhotoHelpers $photo, FileUpload $docs) {
         try {
+
+            $validator = Validator::make($request->all(), [
+                'photo' => 'required',
+                'file' => 'required',
+                'product_type_id' => 'required',
+                'basis' => 'required',
+                'purchasing_type_id' => [
+                    'nullable',
+                    'integer',
+                    Rule::requiredIf($request->basis == 'purchasing')
+                ],
+                'transaction_id' => [
+                    'nullable',
+                    'integer',
+                    Rule::requiredIf($request->basis == 'purchasing')
+                ],
+            ])->validate();
+
             $photo->initialize();
 
             $basis = $request['basis'];

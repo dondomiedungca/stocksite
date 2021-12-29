@@ -43,7 +43,7 @@
                                     <InputFile :rules="requiredFile" id="upload-photo" ref="uploadPhoto" accept="image/*" v-model="photo" label="Product Photo" />
                                 </v-col>
                                 <v-col lg="12" md="12" sm="12" xs="12">
-                                    <InputFile :rules="requiredFile" id="upload-file" ref="uploadFile" accept=".csv, .xlsx" v-model="file" label="File To Upload" />
+                                    <InputFile id="upload-file" ref="uploadFile" accept=".csv, .xlsx" v-model="file" label="File To Upload" />
                                     <v-progress-linear v-if="loaded" v-model="loaded" height="25">
                                         <strong>{{ loaded }}%</strong>
                                     </v-progress-linear>

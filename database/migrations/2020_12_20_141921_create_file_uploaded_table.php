@@ -16,9 +16,11 @@ class CreateFileUploadedTable extends Migration
         Schema::create('file_uploaded', function (Blueprint $table) {
             $table->id();
             $table->string('file_name');
-            $table->integer('total_content');
-            $table->integer('total_uploaded');
-            $table->integer('total_exist');
+            $table->integer('total_content')->default(0);
+            $table->integer('new')->default(0);
+            $table->integer('exist')->default(0);
+            $table->integer('valid')->default(0);
+            $table->integer('invalid')->default(0);
             $table->integer('user_id');
             $table->timestamps();
         });
@@ -31,6 +33,7 @@ class CreateFileUploadedTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('inventories');
         Schema::dropIfExists('file_uploaded');
     }
 }
